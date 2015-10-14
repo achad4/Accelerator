@@ -29,6 +29,7 @@ void populate(float ** A, int cols, int rows){
     }
 }
 
+//Source: http://www.appentra.com/parallel-matrix-matrix-multiplication/
 int alg_matmul2D(int m, int n, int p, float** a, float** b, float** c)
 {
     int i,j,k;
