@@ -24,7 +24,8 @@ void fill(float ** cols){
 void populate(float ** A, int cols, int rows){
     for(int i = 0; i<cols; i++){
         for(int j = 0; j<rows; j++){
-            A[i][j] = 1;
+           float f = static_cast <float> (rand()) / static_cast <float> (RAND_MAX/10.0);
+           A[i][j] = floor(f);
         }
     }
 }
@@ -68,7 +69,12 @@ int main()
     populate(a, 4, 4);
     populate(b, 4, 4);
     populate(c, 4, 4);
+    print_matrix(a, 4, 4);
+    cout << endl << "x";
+    print_matrix(b, 4, 4);
+    cout <<endl <<"=";
     alg_matmul2D(4, 4, 4, a, b, c);
     print_matrix(c, 4, 4);
+    cout << endl;
     return 0;
 }
