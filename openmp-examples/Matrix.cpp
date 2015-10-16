@@ -68,12 +68,11 @@ int main()
     fill(c);
     populate(a, 4, 4);
     populate(b, 4, 4);
-    populate(c, 4, 4);
     print_matrix(a, 4, 4);
     cout << endl << "x";
     print_matrix(b, 4, 4);
     cout <<endl <<"=";
-    alg_matmul2D(4, 4, 4, a, b, c);
+    alg_matmul2D(4, 4, 4, c, a, b);
     print_matrix(c, 4, 4);
     cout << endl;
     return 0;
