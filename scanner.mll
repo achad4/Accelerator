@@ -1,19 +1,19 @@
 { 
-	open Parser 
+	open Parser
 }
 
-let sign = ['+'|'-']?
+let sign = ['+''-']?
 let whitespace = [' ' '\t']
 let dig = ['0'-'9']
 let frac = '.'['0'-'9']+
 let exp = ['e''E']['+''-']?['0'-'9']+
 let bool = "TRUE" | "FALSE"
-let char = ["\'"][.]["\'"]
-let charvector = ["c("]whitespace*[whitespace* char whitespace* ',']*[whitespace* char whitespace*]
+let char = ['\'']['.']['\'']
+let charvector = "c(" whitespace* (whitespace* char whitespace* ',')*(whitespace* char whitespace*)
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
-| "/*"     { comment lexbuf }           (* Comments *)
+| "#"     { comment lexbuf }           (* Comments *)
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
@@ -41,8 +41,8 @@ rule token = parse
 | bool 		{ BOOL }
 | char      { CHAR }
 | "NA"      { NA }
-| ['A'-'Z'|'a'-'z']
-| ['+'|'-']?['1'-'9']+'.'
+| ['A'-'Z''a'-'z']
+| ['+''-']?['1'-'9']+'.'
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | eof { EOF }
