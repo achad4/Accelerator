@@ -1,5 +1,4 @@
-!#/bin/bash
-
+#!/bin/bash   
 
 ocamllex scanner.mll
 ocamlyacc -v parser.mly

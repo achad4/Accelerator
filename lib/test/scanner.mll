@@ -4,6 +4,7 @@
 
    
   let whitespace = [' ' '\t']
+  let sign = ['+''-']
   let dig = ['0'-'9']
   let frac = '.'['0'-'9']+
   let exp = ['e''E']['+''-']?['0'-'9']+
@@ -31,9 +32,9 @@
 	| "<="     { LEQ }
 	| ">"      { GT }
 	| ">="     { GEQ }
-	| dig+ as lit	   { LITERAL(int_of_string lit) }
-	| sign dig * '.' ((dig+exp) | (dig+) | (exp))+ { DOUBLE }
-	| bool 		{ BOOL }
+	| dig+ as lit { INT(int_of_string lit) }
+	| sign dig * '.' ((dig+exp) | (dig+) | (exp))+ as lit { DOUBLE(float_of_string lit) }
+	| bool 	as lit	{ BOOL(lit = "TRUE") }
 	| char      { CHAR }
 
 

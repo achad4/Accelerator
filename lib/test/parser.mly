@@ -1,7 +1,5 @@
 
-{
-  open Ast
-}
+%{ open Ast %}
 
 %token INT DOUBLE BOOL CHAR NA ID ASSIGN LITERAL PLUS MINUS TIMES
 %token DIVIDE EQ NEW LT LEQ GT GEQ LPAREN RPAREN NEQ LBRACE RBRACE COLON
@@ -23,16 +21,13 @@
 %type <int> s
 %type <char> ID
 
-
-
-
 %%
 
 s : expr { 0 }
 
 
 expr:
-    LITERAL          { 0 }
+    INT          { Literal($1) }
   | ID               { 0 }
   | expr PLUS   expr { 0 }
   | expr MINUS  expr { 0 }
