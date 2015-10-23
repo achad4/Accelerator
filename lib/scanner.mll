@@ -1,4 +1,5 @@
 { 
+	open Parser
 }
 
 let sign = ['+''-']?
@@ -17,6 +18,7 @@ rule token = parse
 | ')'      { RPAREN }
 | '{'      { LBRACE }
 | '}'      { RBRACE }
+| ':'	   { COLON }
 | '\n'     { DLIN }
 | ','      { COMMA }
 | '+'      { PLUS }
