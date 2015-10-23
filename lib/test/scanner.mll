@@ -12,6 +12,9 @@
   let char = ['\'']['.']['\'']
   let charvector = "c(" whitespace* (whitespace* char whitespace* ',')*(whitespace* char whitespace*)
 
+  let int = dig+
+  let double =  sign dig * '.' ((dig+exp) | (dig+) | (exp))+
+
   rule token = parse 
     [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 	| '('      { LPAREN }
@@ -32,10 +35,12 @@
 	| "<="     { LEQ }
 	| ">"      { GT }
 	| ">="     { GEQ }
+	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 	| dig+ as lit { INT(int_of_string lit) }
 	| sign dig * '.' ((dig+exp) | (dig+) | (exp))+ as lit { DOUBLE(float_of_string lit) }
 	| bool 	as lit	{ BOOL(lit = "TRUE") }
 	| char      { CHAR }
+
 
 
 {
