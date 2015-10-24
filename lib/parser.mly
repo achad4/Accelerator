@@ -1,7 +1,7 @@
 
 %{ open Ast %}
 
-%token NA ASSIGN PLUS MINUS TIMES EOF IF FOR ELSE COLON IN
+%token NA ASSIGN PLUS MINUS TIMES EOF IF FOR ELSE NOELSE COLON IN
 %token DIVIDE EQ NEQ LT LEQ GT GEQ LPAREN RPAREN LBRACE RBRACE FUNCTION
 %token DLIN COMMA
 %token <char> CHAR
@@ -10,6 +10,8 @@
 %token <bool> BOOL
 %token <string> ID
 
+%nonassoc NOELSE
+%nonassoc ELSE
 %nonassoc COLON
 %right ASSIGN
 %left EQ NEQ
@@ -61,6 +63,7 @@ data:
 stmt:
     expr DLIN                   { Return($1) }
   | LBRACE stmt_list RBRACE     { Block($2) }
+  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt  { If($3, $5, $7) }
   | FOR LPAREN expr IN expr RPAREN LBRACE stmt RBRACE { For($3,$5, $8) } 
 
