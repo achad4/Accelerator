@@ -3,6 +3,7 @@
 
 %token NA ASSIGN PLUS MINUS TIMES EOF IF FOR ELSE NOELSE COLON IN
 %token DIVIDE EQ NEQ LT LEQ GT GEQ LPAREN RPAREN LBRACE RBRACE FUNCTION
+%token NEXT BREAK
 %token DLIN COMMA
 %token <char> CHAR
 %token <int> INT 
@@ -31,8 +32,8 @@ program :
 
 decls:
   /* nothing */ { [],[] }
-| decls stmt { ($2 :: fst $1), snd $1 }
-| decls fdecl { fst $1, ($2 :: snd $1) }
+| decls stmt    { ($2 :: fst $1), snd $1 }
+| decls fdecl   { fst $1, ($2 :: snd $1) }
 
 fdecl:
     ID ASSIGN FUNCTION LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE DLIN
@@ -53,7 +54,7 @@ stmt_list:
   | stmt_list stmt          { $2 :: $1 }
 
 data:
-  | BOOL             { BoolLit($1) }
+  BOOL             { BoolLit($1) }
   | CHAR             { CharLit($1) }
   | ID               { Id($1) }
   | DOUBLE           { DoubleLit($1) }
@@ -63,9 +64,10 @@ data:
 stmt:
     expr DLIN                   { Return($1) }
   | LBRACE stmt_list RBRACE     { Block($2) }
+  | LBRACE loop_stmt_list RBRACE { Block($2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
-  | IF LPAREN expr RPAREN stmt ELSE stmt  { If($3, $5, $7) }
-  | FOR LPAREN expr IN expr RPAREN LBRACE stmt RBRACE { For($3,$5, $8) } 
+  | IF LPAREN expr RPAREN stmt ELSE stmt { If($3, $5, $7) }
+  | FOR LPAREN ID IN expr RPAREN loop_stmt { For($3,$5, $7) } 
 
 expr:
     data             { $1 }
@@ -82,6 +84,16 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | ID ASSIGN expr   { Assign($1, $3) }
   | LPAREN expr RPAREN { $2 }
+
+
+loop_stmt:
+    NEXT DLIN  { Next }
+  | BREAK DLIN { Break }
+
+loop_stmt_list:
+    /*nothing*/              { [] }
+  | stmt_list                { $1 }
+  | loop_stmt_list loop_stmt { $2 :: $1 }
 
 
 

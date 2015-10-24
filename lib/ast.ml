@@ -31,6 +31,8 @@ type stmt =
 	| Block of stmt list
 	| For of expr * expr * stmt
 	| Return of expr
+	| Next
+	| Break
 
 type func_decl = {
     fname : string;
