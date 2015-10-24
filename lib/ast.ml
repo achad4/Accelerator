@@ -2,11 +2,23 @@
 type op = Add | Sub | Mult | Div | Assign | Equal | Neq | Geq | Leq | Gthan | Lthan | Range
 
 
+type vector = 
+	 IntVector of int list
+	| DoubleVector of float list
+	| BoolVector of bool list
+	| CharVector of char list
+
+(* type matrix = 
+	 IntMatrix of IntVector list
+	| DoubleMatrix of DoubleVector list
+	| CharMatrix of CharVector list
+	| BoolMatrix of BoolVector list *)
+
 type expr =
- 	| Int of int
-	| Double of float
-	| Bool of bool
-	| Char of char
+ 	 IntLit of int
+	| DoubleLit of float
+	| BoolLit of bool
+	| CharLit of char
 	| Na
 	| Id of string
 	| Binop of expr * op * expr

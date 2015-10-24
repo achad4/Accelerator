@@ -10,8 +10,7 @@
   let exp = ['e''E']['+''-']?['0'-'9']+
   let bool = "TRUE" | "FALSE"
   let char = ['\'']_['\'']
-  (*TODO: need to figure out how to type vectors*)
-  let vector = "c(" whitespace* (whitespace* _ whitespace* ',')*(whitespace* _ whitespace*)
+  
   let int = dig+
   let double =  sign dig * '.' ((dig+exp) | (dig+) | (exp))+
 
@@ -40,10 +39,9 @@
 	| int as lit { print_endline "INT"; INT(int_of_string lit) }
 	| double as lit { print_endline "DOUBLE"; DOUBLE(float_of_string lit) }
 	| bool 	as lit	{ print_endline "DOUBLE"; BOOL(lit = "TRUE") }
-	| char as lit    { print_endline "CHAR"; CHAR (String.get lit 0) }
-	| "function" { print_endline "FUNCTION"; FUNCTION }
-	| "IN" 		{ print_endline "IN"; IN }
-	| vector { print_endline "VECTOR"; VECTOR}
+	| char as lit   { print_endline "CHAR"; CHAR (String.get lit 0) }
+	| "function" 	{ print_endline "FUNCTION"; FUNCTION }
+	| "IN" 			{ print_endline "IN"; IN }
 
 
 

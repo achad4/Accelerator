@@ -1,7 +1,7 @@
 
 %{ open Ast %}
 
-%token NA ASSIGN PLUS MINUS TIMES EOF IF SEMI FOR ELSE COLON IN VECTOR
+%token NA ASSIGN PLUS MINUS TIMES EOF IF FOR ELSE COLON IN
 %token DIVIDE EQ NEQ LT LEQ GT GEQ LPAREN RPAREN LBRACE RBRACE FUNCTION
 %token DLIN COMMA
 %token <char> CHAR
@@ -10,6 +10,7 @@
 %token <bool> BOOL
 %token <string> ID
 
+%nonassoc COLON
 %right ASSIGN
 %left EQ NEQ
 %left LT GT LEQ GEQ
@@ -50,11 +51,11 @@ stmt_list:
   | stmt_list stmt          { $2 :: $1 }
 
 data:
-  | BOOL             { Bool($1) }
-  | CHAR             { Char($1) }
+  | BOOL             { BoolLit($1) }
+  | CHAR             { CharLit($1) }
   | ID               { Id($1) }
-  | DOUBLE           { Double($1) }
-  | INT              { Int($1) }
+  | DOUBLE           { DoubleLit($1) }
+  | INT              { IntLit($1) }
   | NA               { Na }
 
 stmt:
@@ -63,13 +64,9 @@ stmt:
   | IF LPAREN expr RPAREN stmt ELSE stmt  { If($3, $5, $7) }
   | FOR LPAREN expr IN expr RPAREN LBRACE stmt RBRACE { For($3,$5, $8) } 
 
-expr_opt:
-    /* nothing */     { Noexpr }
-  | expr              { $1 }
-
 expr:
     data             { $1 }
-  | expr COLON  expr  { Binop($1, Range, $3) }
+  | expr COLON  expr { Binop($1, Range, $3) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
