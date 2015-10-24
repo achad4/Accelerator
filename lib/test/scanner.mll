@@ -10,10 +10,11 @@
   let exp = ['e''E']['+''-']?['0'-'9']+
   let bool = "TRUE" | "FALSE"
   let char = ['\'']_['\'']
-  let charvector = "c(" whitespace* (whitespace* char whitespace* ',')*(whitespace* char whitespace*)
-
+  (*TODO: need to figure out how to type vectors*)
+  let vector = "c(" whitespace* (whitespace* _ whitespace* ',')*(whitespace* _ whitespace*)
   let int = dig+
   let double =  sign dig * '.' ((dig+exp) | (dig+) | (exp))+
+
 
   rule token = parse 
     [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
@@ -36,11 +37,13 @@
 	| ">"      { print_endline "GT"; GT }
 	| ">="     { print_endline "GEQ"; GEQ }
 	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { print_endline "ID"; ID(lxm) }
-	| dig+ as lit { print_endline "INT"; INT(int_of_string lit) }
-	| sign? dig * '.' ((dig+exp) | (dig+) | (exp))+ as lit { print_endline "DOUBLE"; DOUBLE(float_of_string lit) }
+	| int as lit { print_endline "INT"; INT(int_of_string lit) }
+	| double as lit { print_endline "DOUBLE"; DOUBLE(float_of_string lit) }
 	| bool 	as lit	{ print_endline "DOUBLE"; BOOL(lit = "TRUE") }
-	| char      { print_endline "CHAR"; CHAR }
-	| "function" ( print_endline "FUNCTION"; FUNCTION)
+	| char as lit    { print_endline "CHAR"; CHAR (String.get lit 0) }
+	| "function" { print_endline "FUNCTION"; FUNCTION }
+	| "IN" 		{ print_endline "IN"; IN }
+	| vector { print_endline "VECTOR"; VECTOR}
 
 
 
