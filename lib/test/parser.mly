@@ -29,15 +29,14 @@ program :
 
 decls:
   /* nothing */ { [],[] }
-| decls vdecl { ($2 :: fst $1), snd $1 }
+| decls stmt { ($2 :: fst $1), snd $1 }
 | decls fdecl { fst $1, ($2 :: snd $1) }
 
 fdecl:
     ID ASSIGN FUNCTION LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE DLIN
     { { fname = $1;
-        formals = $3;
-        locals = List.rev $6;
-        body = List.rev $7 } }
+        formals = $5;
+        body = List.rev $8 } }
 
 formals_opt:
     /* nothing */       { [] }
