@@ -40,6 +40,7 @@
 	| sign? dig * '.' ((dig+exp) | (dig+) | (exp))+ as lit { print_endline "DOUBLE"; DOUBLE(float_of_string lit) }
 	| bool 	as lit	{ print_endline "DOUBLE"; BOOL(lit = "TRUE") }
 	| char      { print_endline "CHAR"; CHAR }
+	| "function" ( print_endline "FUNCTION"; FUNCTION)
 
 
 

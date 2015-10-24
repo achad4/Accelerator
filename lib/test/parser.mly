@@ -1,17 +1,16 @@
 
 %{ open Ast %}
 
-%token INT DOUBLE BOOL CHAR NA ID ASSIGN LITERAL PLUS MINUS TIMES
-%token DIVIDE EQ NEW LT LEQ GT GEQ LPAREN RPAREN NEQ LBRACE RBRACE COLON
+%token NA ASSIGN PLUS MINUS TIMES EOF IF SEMI FOR ELSE
+%token DIVIDE EQ NEQ LT LEQ GT GEQ LPAREN RPAREN LBRACE RBRACE FUNCTION
 %token DLIN COMMA
+%token <char> CHAR
 %token <int> INT 
 %token <float> DOUBLE 
 %token <bool> BOOL
 %token <string> ID
 %token <Ast.literal> LITERAL
 
-%nonassoc NOELSE
-%nonassoc ELSE
 %right ASSIGN
 %left EQ NEQ
 %left LT GT LEQ GEQ
@@ -26,15 +25,52 @@
 %%
 
 program : 
- | program stmt { $2  }
+ | decls EOF { $1 }
 
- stmt:
-    expr DLIN { Expr($1) }
+decls:
+  /* nothing */ { [],[] }
+| decls stmt { ($2 :: fst $1), snd $1 }
+| decls fdecl { fst $1, ($2 :: snd $1) }
 
+fdecl:
+    ID ASSIGN FUNCTION LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE DLIN
+    { { fname = $1;
+        formals = $5;
+        body = List.rev $8 } }
+
+formals_opt:
+    /* nothing */       { [] }
+  | formal_list         { List.rev $1 }
+
+formal_list:
+    ID                      { [$1] }
+  | formal_list COMMA ID    { $3 :: $1 }
+
+stmt_list:
+    /* nothing */           { [] }
+  | stmt_list stmt          { $2 :: $1 }
+
+data:
+    LITERAL          { Literal($1) }
+  | BOOL             { Bool($1) }
+  | CHAR             { Char($1) }
+  | ID               { Id($1) }
+  | DOUBLE           { Double($1) }
+  | INT              { Int($1) }
+  | NA               { Na() }
+
+stmt:
+    expr DLIN                   { Return($1) }
+  | LBRACE stmt_list RBRACE     { Block($2) }
+  | IF LPAREN expr RPAREN stmt ELSE stmt  { If($3, $5, $7) }
+  | FOR LPAREN expr_opt SEMI expr_opt SEMI expr_opt RPAREN { For($3,$5,$7) } 
+
+expr_opt:
+    /* nothing */     { Noexpr }
+  | expr              { $1 }
 
 expr:
-    LITERAL          { Literal($1) }
-  | ID               { Id($1) }
+    data             { $1 }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
