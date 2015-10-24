@@ -1,9 +1,10 @@
 
 %{ open Ast %}
 
-%token CHAR NA ASSIGN PLUS MINUS TIMES EOF IF SEMI FOR ELSE
-%token DIVIDE EQ NEQ LT LEQ GT GEQ LPAREN RPAREN LBRACE RBRACE COLON
+%token NA ASSIGN PLUS MINUS TIMES EOF IF SEMI FOR ELSE
+%token DIVIDE EQ NEQ LT LEQ GT GEQ LPAREN RPAREN LBRACE RBRACE FUNCTION
 %token DLIN COMMA
+%token <char> CHAR
 %token <int> INT 
 %token <float> DOUBLE 
 %token <bool> BOOL
@@ -27,12 +28,12 @@ program :
  | decls EOF { $1 }
 
 decls:
-  /* nothing */ { [] }
+  /* nothing */ { [],[] }
 | decls vdecl { ($2 :: fst $1), snd $1 }
 | decls fdecl { fst $1, ($2 :: snd $1) }
 
 fdecl:
-    ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE DLIN
+    ID ASSIGN FUNCTION LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE DLIN
     { { fname = $1;
         formals = $3;
         locals = List.rev $6;
@@ -45,13 +46,6 @@ formals_opt:
 formal_list:
     ID                      { [$1] }
   | formal_list COMMA ID    { $3 :: $1 }
-
-vdecl_list:
-    /* nothing */       { [] }
-  | vdecl_list vdecl    { $2 :: $1 }
-
-vdecl:
-    ID DLIN                 { $1 }
 
 stmt_list:
     /* nothing */           { [] }
@@ -78,7 +72,6 @@ expr_opt:
 
 expr:
     data             { $1 }
-  | expr COLON expr  { Range($1, $3) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
