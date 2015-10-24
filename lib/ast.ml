@@ -29,7 +29,7 @@ type stmt =
 	Expr of expr
 	| If of expr * stmt * stmt
 	| Block of stmt list
-	| For of expr * expr * stmt
+	| For of string * expr * stmt
 	| Return of expr
 	| Next
 	| Break
@@ -39,7 +39,5 @@ type func_decl = {
     formals : string list;
     body : stmt list;
   }
-
-
 
 type program = stmt list * func_decl list 
