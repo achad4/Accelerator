@@ -1,0 +1,337 @@
+
+** Conflict (shift/reduce) in state 34.
+** Token involved: COLON
+** This state is reached from program after reading:
+
+decls expr EQ expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 34, looking ahead at COLON, shifting is permitted
+** because of the following sub-derivation:
+
+expr EQ expr 
+        expr . COLON expr 
+
+** In state 34, looking ahead at COLON, reducing production
+** expr -> expr EQ expr 
+** is permitted because of the following sub-derivation:
+
+expr COLON expr // lookahead token appears
+expr EQ expr . 
+
+** Conflict (shift/reduce) in state 32.
+** Token involved: COLON
+** This state is reached from program after reading:
+
+decls expr GEQ expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 32, looking ahead at COLON, shifting is permitted
+** because of the following sub-derivation:
+
+expr GEQ expr 
+         expr . COLON expr 
+
+** In state 32, looking ahead at COLON, reducing production
+** expr -> expr GEQ expr 
+** is permitted because of the following sub-derivation:
+
+expr COLON expr // lookahead token appears
+expr GEQ expr . 
+
+** Conflict (shift/reduce) in state 30.
+** Token involved: COLON
+** This state is reached from program after reading:
+
+decls expr GT expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 30, looking ahead at COLON, shifting is permitted
+** because of the following sub-derivation:
+
+expr GT expr 
+        expr . COLON expr 
+
+** In state 30, looking ahead at COLON, reducing production
+** expr -> expr GT expr 
+** is permitted because of the following sub-derivation:
+
+expr COLON expr // lookahead token appears
+expr GT expr . 
+
+** Conflict (shift/reduce) in state 28.
+** Token involved: COLON
+** This state is reached from program after reading:
+
+decls expr LEQ expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 28, looking ahead at COLON, shifting is permitted
+** because of the following sub-derivation:
+
+expr LEQ expr 
+         expr . COLON expr 
+
+** In state 28, looking ahead at COLON, reducing production
+** expr -> expr LEQ expr 
+** is permitted because of the following sub-derivation:
+
+expr COLON expr // lookahead token appears
+expr LEQ expr . 
+
+** Conflict (shift/reduce) in state 26.
+** Token involved: COLON
+** This state is reached from program after reading:
+
+decls expr LT expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 26, looking ahead at COLON, shifting is permitted
+** because of the following sub-derivation:
+
+expr LT expr 
+        expr . COLON expr 
+
+** In state 26, looking ahead at COLON, reducing production
+** expr -> expr LT expr 
+** is permitted because of the following sub-derivation:
+
+expr COLON expr // lookahead token appears
+expr LT expr . 
+
+** Conflict (shift/reduce) in state 24.
+** Token involved: COLON
+** This state is reached from program after reading:
+
+decls expr MINUS expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 24, looking ahead at COLON, shifting is permitted
+** because of the following sub-derivation:
+
+expr MINUS expr 
+           expr . COLON expr 
+
+** In state 24, looking ahead at COLON, reducing production
+** expr -> expr MINUS expr 
+** is permitted because of the following sub-derivation:
+
+expr COLON expr // lookahead token appears
+expr MINUS expr . 
+
+** Conflict (shift/reduce) in state 22.
+** Token involved: COLON
+** This state is reached from program after reading:
+
+decls expr NEQ expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 22, looking ahead at COLON, shifting is permitted
+** because of the following sub-derivation:
+
+expr NEQ expr 
+         expr . COLON expr 
+
+** In state 22, looking ahead at COLON, reducing production
+** expr -> expr NEQ expr 
+** is permitted because of the following sub-derivation:
+
+expr COLON expr // lookahead token appears
+expr NEQ expr . 
+
+** Conflict (shift/reduce) in state 19.
+** Token involved: COLON
+** This state is reached from program after reading:
+
+decls expr DIVIDE expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 19, looking ahead at COLON, shifting is permitted
+** because of the following sub-derivation:
+
+expr DIVIDE expr 
+            expr . COLON expr 
+
+** In state 19, looking ahead at COLON, reducing production
+** expr -> expr DIVIDE expr 
+** is permitted because of the following sub-derivation:
+
+expr COLON expr // lookahead token appears
+expr DIVIDE expr . 
+
+** Conflict (shift/reduce) in state 17.
+** Token involved: COLON
+** This state is reached from program after reading:
+
+decls expr PLUS expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 17, looking ahead at COLON, shifting is permitted
+** because of the following sub-derivation:
+
+expr PLUS expr 
+          expr . COLON expr 
+
+** In state 17, looking ahead at COLON, reducing production
+** expr -> expr PLUS expr 
+** is permitted because of the following sub-derivation:
+
+expr COLON expr // lookahead token appears
+expr PLUS expr . 
+
+** Conflict (shift/reduce) in state 15.
+** Tokens involved: TIMES PLUS NEQ MINUS LT LEQ GT GEQ EQ DIVIDE COLON
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+decls expr COLON expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 15, looking ahead at TIMES, reducing production
+** expr -> expr COLON expr 
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+expr COLON expr . 
+
+** In state 15, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr COLON expr 
+           expr . TIMES expr 
+
+** Conflict (shift/reduce) in state 13.
+** Token involved: COLON
+** This state is reached from program after reading:
+
+decls expr TIMES expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 13, looking ahead at COLON, shifting is permitted
+** because of the following sub-derivation:
+
+expr TIMES expr 
+           expr . COLON expr 
+
+** In state 13, looking ahead at COLON, reducing production
+** expr -> expr TIMES expr 
+** is permitted because of the following sub-derivation:
+
+expr COLON expr // lookahead token appears
+expr TIMES expr . 
+
+** Conflict (shift/reduce) in state 11.
+** Token involved: COLON
+** This state is reached from program after reading:
+
+decls ID ASSIGN expr 
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+decls EOF 
+decls stmt 
+      expr DLIN 
+      (?)
+
+** In state 11, looking ahead at COLON, shifting is permitted
+** because of the following sub-derivation:
+
+ID ASSIGN expr 
+          expr . COLON expr 
+
+** In state 11, looking ahead at COLON, reducing production
+** expr -> ID ASSIGN expr 
+** is permitted because of the following sub-derivation:
+
+expr COLON expr // lookahead token appears
+ID ASSIGN expr . 
