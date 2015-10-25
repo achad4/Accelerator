@@ -1,18 +1,14 @@
 
 type op = Add | Sub | Mult | Div | Assign | Equal | Neq | Geq | Leq | Gthan | Lthan | Range
 
-
 type vector = 
 	  IntVector of int list
 	| DoubleVector of float list
 	| BoolVector of bool list
 	| CharVector of char list
 
-(* type matrix = 
-	 IntMatrix of IntVector list
-	| DoubleMatrix of DoubleVector list
-	| CharMatrix of CharVector list
-	| BoolMatrix of BoolVector list *)
+type matrix =
+	 Matrix of vector list
 
 type expr =
  	  IntLit of int
