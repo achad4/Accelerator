@@ -15,17 +15,15 @@
 %nonassoc NOELSE 
 %nonassoc ELSE
 %nonassoc COLON
-
-
-
 %right ASSIGN
 %left OR
 %left AND
-%right NOT
-%nonassoc LT GT LEQ GEQ EQ NEQ
+%left EQ NEQ
+%left LT GT LEQ GEQ
 %left PLUS MINUS
-%left TIMES DIVIDE
+%left TIMES DIVIDE MOD
 %left EXP
+%right NOT
 
 %start program
 
