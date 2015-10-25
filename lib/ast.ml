@@ -5,6 +5,7 @@ type vector =
 	  IntVector of int list
 	| DoubleVector of float list
 	| BoolVector of bool list
+	| CharacterVector of string list
 	| CharVector of char list
 
 type matrix =
@@ -14,7 +15,7 @@ type expr =
  	  IntLit of int
 	| DoubleLit of float
 	| BoolLit of bool
-	| CharLit of char
+	| Character of string
 	| Na
 	| Id of string
 	| Binop of expr * op * expr

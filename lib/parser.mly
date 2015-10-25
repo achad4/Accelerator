@@ -5,7 +5,7 @@
 %token DIVIDE EQ NEQ LT LEQ GT GEQ LPAREN RPAREN LBRACE RBRACE FUNCTION
 %token NEXT BREAK
 %token DLIN COMMA
-%token <char> CHAR
+%token <string> CHARACTER
 %token <int> INT 
 %token <float> DOUBLE 
 %token <bool> BOOL
@@ -49,15 +49,15 @@ formal_list:
   | formal_list COMMA ID    { $3 :: $1 }
 
 data:
-    BOOL             { BoolLit($1) }
-  | CHAR             { CharLit($1) }
-  | ID               { Id($1) }
-  | DOUBLE           { DoubleLit($1) }
-  | INT              { IntLit($1) }
-  | NA               { Na }
+    BOOL                  { BoolLit($1) }
+  | ID                    { Id($1) }
+  | CHARACTER             { Character($1) }
+  | DOUBLE                { DoubleLit($1) }
+  | INT                   { IntLit($1) }
+  | NA                    { Na }
 
 stmt:
-    expr DLIN                                       { Return($1) }
+    expr DLIN                                       { Expr($1) }
   | LBRACE stmt_list RBRACE                         { Block($2) }
   | LBRACE loop_stmt_list RBRACE                    { Block($2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE         { If($3, $5, Block([])) }
