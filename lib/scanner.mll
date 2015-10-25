@@ -19,8 +19,8 @@
 	| ')'      { RPAREN }
 	| '{'      { LBRACE }
 	| '}'      { RBRACE }
-	| '['	   { OBRACK }
-	| ']'	   { CBRACK }
+	| '['	   { LBRACK }
+	| ']'	   { RBRACK }
 	| ':'	   { COLON }
 	| '\n'     { DLIN }
 	| ','      { COMMA }
