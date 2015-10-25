@@ -1,5 +1,6 @@
 
-type op = Add | Sub | Mult | Div | Assign | Equal | Neq | Geq | Leq | Gthan | Lthan | Range
+type dual_op = Add | Sub | Mult | Div | Mod | Exp | Assign | Equal | Neq | Geq | Leq | Gthan | Lthan | Range | And | Or
+type sing_op = Not
 
 type vector = 
 	  IntVector of int list
@@ -18,7 +19,8 @@ type expr =
 	| Character of string
 	| Na
 	| Id of string
-	| Binop of expr * op * expr
+	| DualOp of expr * dual_op * expr
+	| SingOp of sing_op * expr
 	| Assign of string * expr
 	| Noexpr
 

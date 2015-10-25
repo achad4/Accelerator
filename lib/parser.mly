@@ -3,6 +3,7 @@
 
 %token NA ASSIGN PLUS MINUS TIMES EOF IF FOR ELSE NOELSE COLON IN
 %token DIVIDE EQ NEQ LT LEQ GT GEQ LPAREN RPAREN LBRACE RBRACE FUNCTION
+%token MOD EXP AND OR NOT
 %token NEXT BREAK
 %token DLIN COMMA
 %token <string> CHARACTER
@@ -66,17 +67,22 @@ stmt:
 
 expr:
     data                { $1 }
-  | expr COLON  expr    { Binop($1, Range, $3) }
-  | expr PLUS   expr    { Binop($1, Add,   $3) }
-  | expr MINUS  expr    { Binop($1, Sub,   $3) }
-  | expr TIMES  expr    { Binop($1, Mult,  $3) }
-  | expr DIVIDE expr    { Binop($1, Div,   $3) }
-  | expr EQ     expr    { Binop($1, Equal, $3) }
-  | expr NEQ    expr    { Binop($1, Neq,   $3) }
-  | expr LT     expr    { Binop($1, Lthan,  $3) }
-  | expr LEQ    expr    { Binop($1, Leq,   $3) }
-  | expr GT     expr    { Binop($1, Gthan,  $3) }
-  | expr GEQ    expr    { Binop($1, Geq,   $3) }
+  | expr COLON  expr    { DualOp($1, Range, $3) }
+  | expr PLUS   expr    { DualOp($1, Add,   $3) }
+  | expr MINUS  expr    { DualOp($1, Sub,   $3) }
+  | expr TIMES  expr    { DualOp($1, Mult,  $3) }
+  | expr DIVIDE expr    { DualOp($1, Div,   $3) }
+  | expr MOD    expr    { DualOp ($1, Mod, $3) }
+  | expr EQ     expr    { DualOp($1, Equal, $3) }
+  | expr NEQ    expr    { DualOp($1, Neq,   $3) }
+  | expr LT     expr    { DualOp($1, Lthan,  $3) }
+  | expr LEQ    expr    { DualOp($1, Leq,   $3) }
+  | expr GT     expr    { DualOp($1, Gthan,  $3) }
+  | expr GEQ    expr    { DualOp($1, Geq,   $3) }
+  | expr AND    expr    { DualOp ($1, And, $3) }
+  | expr OR     expr    { DualOp ($1, And, $3) }
+  | expr EXP    expr    { DualOp ($1, Exp, $3) }
+  | NOT expr            { SingOp ($1) }
   | ID ASSIGN expr      { Assign($1, $3) }
   | LPAREN expr RPAREN  { $2 }
 
