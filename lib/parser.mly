@@ -1,7 +1,7 @@
 
 %{ open Ast %}
 
-%token NA ASSIGN PLUS MINUS TIMES EOF IF FOR ELSE NOELSE COLON IN
+%token NA ASSIGN PLUS MINUS TIMES EOF IF FOR ELSE NOELSE COLON IN RETURN
 %token DIVIDE EQ NEQ LT LEQ GT GEQ LPAREN RPAREN LBRACE RBRACE FUNCTION
 %token NEXT BREAK
 %token DLIN COMMA
@@ -24,7 +24,6 @@
 
 %type <Ast.program> program
 
-
 %%
 
 program : 
@@ -42,19 +41,15 @@ fdecl:
         body = List.rev $8 } }
 
 formals_opt:
-    /* nothing */       { [] }
-  | formal_list         { List.rev $1 }
+    /* nothing */           { [] }
+  | formal_list             { List.rev $1 }
 
 formal_list:
     ID                      { [$1] }
   | formal_list COMMA ID    { $3 :: $1 }
 
-stmt_list:
-    /* nothing */           { [] }
-  | stmt_list stmt          { $2 :: $1 }
-
 data:
-  BOOL             { BoolLit($1) }
+    BOOL             { BoolLit($1) }
   | CHAR             { CharLit($1) }
   | ID               { Id($1) }
   | DOUBLE           { DoubleLit($1) }
@@ -62,39 +57,42 @@ data:
   | NA               { Na }
 
 stmt:
-    expr DLIN                   { Return($1) }
-  | LBRACE stmt_list RBRACE     { Block($2) }
-  | LBRACE loop_stmt_list RBRACE { Block($2) }
-  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
-  | IF LPAREN expr RPAREN stmt ELSE stmt { If($3, $5, $7) }
-  | FOR LPAREN ID IN expr RPAREN loop_stmt { For($3,$5, $7) } 
+    expr DLIN                                       { Expr($1) }
+  | RETURN expr DLIN                                { Return($2) }
+  | LBRACE stmt_list RBRACE                         { Block($2) }
+  | LBRACE loop_stmt_list RBRACE                    { Block($2) }
+  | IF LPAREN expr RPAREN stmt %prec NOELSE         { If($3, $5, Block([])) }
+  | IF LPAREN expr RPAREN stmt ELSE stmt            { If($3, $5, $7) }
+  | FOR LPAREN ID IN expr RPAREN loop_block_body    { For($3, $5, $7) } 
 
 expr:
-    data             { $1 }
-  | expr COLON  expr { Binop($1, Range, $3) }
-  | expr PLUS   expr { Binop($1, Add,   $3) }
-  | expr MINUS  expr { Binop($1, Sub,   $3) }
-  | expr TIMES  expr { Binop($1, Mult,  $3) }
-  | expr DIVIDE expr { Binop($1, Div,   $3) }
-  | expr EQ     expr { Binop($1, Equal, $3) }
-  | expr NEQ    expr { Binop($1, Neq,   $3) }
-  | expr LT     expr { Binop($1, Lthan,  $3) }
-  | expr LEQ    expr { Binop($1, Leq,   $3) }
-  | expr GT     expr { Binop($1, Gthan,  $3) }
-  | expr GEQ    expr { Binop($1, Geq,   $3) }
-  | ID ASSIGN expr   { Assign($1, $3) }
-  | LPAREN expr RPAREN { $2 }
+    data                { $1 }
+  | expr COLON  expr    { Binop($1, Range, $3) }
+  | expr PLUS   expr    { Binop($1, Add,   $3) }
+  | expr MINUS  expr    { Binop($1, Sub,   $3) }
+  | expr TIMES  expr    { Binop($1, Mult,  $3) }
+  | expr DIVIDE expr    { Binop($1, Div,   $3) }
+  | expr EQ     expr    { Binop($1, Equal, $3) }
+  | expr NEQ    expr    { Binop($1, Neq,   $3) }
+  | expr LT     expr    { Binop($1, Lthan,  $3) }
+  | expr LEQ    expr    { Binop($1, Leq,   $3) }
+  | expr GT     expr    { Binop($1, Gthan,  $3) }
+  | expr GEQ    expr    { Binop($1, Geq,   $3) }
+  | ID ASSIGN expr      { Assign($1, $3) }
+  | LPAREN expr RPAREN  { $2 }
 
-
-loop_stmt:
-    NEXT DLIN  { Next }
-  | BREAK DLIN { Break }
+loop_block_body: 
+  LBRACE loop_stmt_list RBRACE { Block(List.rev $2) }
 
 loop_stmt_list:
-    /*nothing*/              { [] }
-  | stmt_list                { $1 }
-  | loop_stmt_list loop_stmt { $2 :: $1 }
+    /*nothing*/                { [] }
+  | stmt_list DLIN   { $1 }
+  | loop_stmt_list loop_expr DLIN  { $2 :: $1 }
 
+loop_expr:
+    NEXT  { Next }
+  | BREAK { Break }
 
-
-
+stmt_list:
+    /* nothing */           { [] }
+  | stmt_list stmt          { $2 :: $1 }

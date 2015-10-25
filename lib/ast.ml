@@ -3,7 +3,7 @@ type op = Add | Sub | Mult | Div | Assign | Equal | Neq | Geq | Leq | Gthan | Lt
 
 
 type vector = 
-	 IntVector of int list
+	  IntVector of int list
 	| DoubleVector of float list
 	| BoolVector of bool list
 	| CharVector of char list
@@ -15,7 +15,7 @@ type vector =
 	| BoolMatrix of BoolVector list *)
 
 type expr =
- 	 IntLit of int
+ 	  IntLit of int
 	| DoubleLit of float
 	| BoolLit of bool
 	| CharLit of char
@@ -26,7 +26,7 @@ type expr =
 	| Noexpr
 
 type stmt =
-	Expr of expr
+	  Expr of expr
 	| If of expr * stmt * stmt
 	| Block of stmt list
 	| For of string * expr * stmt

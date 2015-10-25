@@ -1,7 +1,6 @@
 { 
 	open Parser
 }
-
    
   let whitespace = [' ' '\t']
   let sign = ['+''-']
@@ -13,7 +12,6 @@
   
   let int = dig+
   let double =  sign dig * '.' ((dig+exp) | (dig+) | (exp))+
-
 
   rule token = parse 
     [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
@@ -36,16 +34,15 @@
 	| ">"      { GT }
 	| ">="     { GEQ }
 	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
-	| int as lit { INT(int_of_string lit) }
+	| int as lit    { INT(int_of_string lit) }
 	| double as lit { DOUBLE(float_of_string lit) }
 	| bool 	as lit	{ BOOL(lit = "TRUE") }
-	| char as lit   {  CHAR (String.get lit 0) }
-	| "function" 	{  FUNCTION }
-	| "in" 			{  IN }
+	| char as lit   { CHAR (String.get lit 0) }
+	| "function" 	{ FUNCTION }
+	| "in" 			{ IN }
 	| "next"		{ NEXT }
 	| "break"		{ BREAK }
-
-
+	| "return"		{ RETURN }
 
 {
 	let lexbuf = Lexing.from_channel stdin in
