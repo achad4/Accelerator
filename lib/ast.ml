@@ -30,7 +30,6 @@ type stmt =
 	| If of expr * stmt * stmt
 	| Block of stmt list
 	| For of string * expr * stmt
-	| Return of expr
 	| Next
 	| Break
 

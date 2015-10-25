@@ -1,7 +1,7 @@
 
 %{ open Ast %}
 
-%token NA ASSIGN PLUS MINUS TIMES EOF IF FOR ELSE NOELSE COLON IN RETURN
+%token NA ASSIGN PLUS MINUS TIMES EOF IF FOR ELSE NOELSE COLON IN
 %token DIVIDE EQ NEQ LT LEQ GT GEQ LPAREN RPAREN LBRACE RBRACE FUNCTION
 %token NEXT BREAK
 %token DLIN COMMA
@@ -57,8 +57,7 @@ data:
   | NA               { Na }
 
 stmt:
-    expr DLIN                                       { Expr($1) }
-  | RETURN expr DLIN                                { Return($2) }
+    expr DLIN                                       { Return($1) }
   | LBRACE stmt_list RBRACE                         { Block($2) }
   | LBRACE loop_stmt_list RBRACE                    { Block($2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE         { If($3, $5, Block([])) }
@@ -82,17 +81,17 @@ expr:
   | LPAREN expr RPAREN  { $2 }
 
 loop_block_body: 
-  LBRACE loop_stmt_list RBRACE { Block(List.rev $2) }
+  LBRACE loop_stmt_list RBRACE        { Block(List.rev $2) }
 
 loop_stmt_list:
-    /*nothing*/                { [] }
-  | stmt_list DLIN   { $1 }
-  | loop_stmt_list loop_expr DLIN  { $2 :: $1 }
+    /*nothing*/                       { [] }
+  | stmt_list DLIN                    { $1 }
+  | loop_stmt_list loop_expr DLIN     { $2 :: $1 }
 
 loop_expr:
-    NEXT  { Next }
+    NEXT                              { Next }
   | BREAK { Break }
 
 stmt_list:
-    /* nothing */           { [] }
-  | stmt_list stmt          { $2 :: $1 }
+    stmt                              { [$1] }
+  | stmt_list stmt                    { $2 :: $1 }

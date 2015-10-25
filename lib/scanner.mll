@@ -42,7 +42,6 @@
 	| "in" 			{ IN }
 	| "next"		{ NEXT }
 	| "break"		{ BREAK }
-	| "return"		{ RETURN }
 
 {
 	let lexbuf = Lexing.from_channel stdin in
