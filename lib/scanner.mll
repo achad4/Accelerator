@@ -38,9 +38,9 @@
 	| "!="     { NEQ }
 	| '<'      { LT }
 	| "<="     { LEQ }
-	| ">"      { GT }
+	| '>'      { GT }
 	| ">="     { GEQ }
-	| "#"	   { comment lexbuf }
+	| '#'	   { comment lexbuf }
 	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 	| int as lit    { INT (int_of_string lit) }
 	| double as lit { DOUBLE (float_of_string lit) }
