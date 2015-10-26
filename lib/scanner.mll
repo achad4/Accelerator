@@ -14,11 +14,13 @@
   let double =  sign dig * '.' ((dig+exp) | (dig+) | (exp))+
 
   rule token = parse 
-    [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
+    [' ' '\t' '\r' '\n'] { token lexbuf }
 	| '('      { LPAREN }
 	| ')'      { RPAREN }
 	| '{'      { LBRACE }
 	| '}'      { RBRACE }
+	| '['	   { LBRACK }
+	| ']'	   { RBRACK }
 	| ':'	   { COLON }
 	| '\n'     { DLIN }
 	| ','      { COMMA }
@@ -26,13 +28,19 @@
 	| '-'      { MINUS }
 	| '*'      { TIMES }
 	| '/'      { DIVIDE }
+	| "||"	   { OR }
+	| "&&"     { AND }
+	| '!'      { NOT }
+	| '^'	   { EXP }
+	| "%%"	   { MOD }
 	| "<-"     { ASSIGN }
 	| "=="     { EQ }
 	| "!="     { NEQ }
 	| '<'      { LT }
 	| "<="     { LEQ }
-	| ">"      { GT }
+	| '>'      { GT }
 	| ">="     { GEQ }
+	| '#'	   { comment lexbuf }
 	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 	| int as lit    { INT (int_of_string lit) }
 	| double as lit { DOUBLE (float_of_string lit) }
@@ -42,6 +50,11 @@
 	| "in" 			{ IN }
 	| "next"		{ NEXT }
 	| "break"		{ BREAK }
+	| _ as char { raise (Failure("Illegal character " ^ Char.escaped char)) }
+
+and comment = parse
+	| DLIN	{ token lexbuf }
+	| _ { comment lexbuf }
 
 {
 	let lexbuf = Lexing.from_channel stdin in

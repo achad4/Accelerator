@@ -1,29 +1,33 @@
 
-type op = Add | Sub | Mult | Div | Assign | Equal | Neq | Geq | Leq | Gthan | Lthan | Range
+type dual_op = Add | Sub | Mult | Div | Mod | Exp | Assign | Equal | Neq | Geq | Leq | Gthan | Lthan | Range | And | Or
+type sing_op = Not
 
 type vector = 
-	  IntVector of int list
+	| IntVector of int list
 	| DoubleVector of float list
 	| BoolVector of bool list
 	| CharacterVector of string list
 	| CharVector of char list
 
 type matrix =
-	 Matrix of vector list
+	| Matrix of vector list
 
 type expr =
- 	  IntLit of int
+ 	| IntLit of int
 	| DoubleLit of float
 	| BoolLit of bool
 	| Character of string
 	| Na
 	| Id of string
-	| Binop of expr * op * expr
+	| DualOp of expr * dual_op * expr
+	| SingOp of sing_op * expr
 	| Assign of string * expr
+	| MatrixAccOne of string * int
+	| MatrixAccTwo of string * int * int
 	| Noexpr
 
 type stmt =
-	  Expr of expr
+	| Expr of expr
 	| If of expr * stmt * stmt
 	| Block of stmt list
 	| For of string * expr * stmt
