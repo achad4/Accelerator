@@ -75,8 +75,9 @@ expr:
   | arith_expr          { $1 }
   | ID ASSIGN expr      { Assign($1, $3) }
   | LPAREN expr RPAREN  { $2 }
-  | ID LBRACK expr RBRACK { MatrixAccOne($1, $3) }
-  | ID LBRACK expr RBRACK LBRACK expr RBRACK { MatrixAccTwo($1, $3, $6)}
+  | ID LBRACK expr COMMA expr RBRACK { MatrixAcc($1, $3, $5)}
+  | ID LBRACK COMMA expr RBRACK { MatrixCol($1, $4)}
+  | ID LBRACK expr COMMA RBRACK { MatrixRow($1, $3)}
 
 arith_expr:
   | expr COLON  expr    { DualOp($1, Range, $3) }
