@@ -1,0 +1,1 @@
+clang-omp++ -o a -fopenmp Matrix.cpp
