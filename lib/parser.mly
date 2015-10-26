@@ -44,20 +44,28 @@ fdecl:
         body = List.rev $8 } }
 
 formals_opt:
-  | /* nothing */           { [] }
-  | formal_list             { List.rev $1 }
+  | /* nothing */            { [] }
+  | formal_list              { List.rev $1 }
 
 formal_list:
-  | ID                      { [$1] }
-  | formal_list COMMA ID    { $3 :: $1 }
+  | ID                       { [$1] }
+  | formal_list COMMA ID     { $3 :: $1 }
+
+actuals_opt:
+  | /* nothing */            { [] }
+  | actuals_list             { List.rev $1 }
+
+actuals_list:
+  | expr                     { [$1] }
+  | actuals_list COMMA expr  { $3 :: $1 }
 
 data:
-  | BOOL                    { BoolLit($1) }
-  | ID                      { Id($1) }
-  | CHARACTER               { Character($1) }
-  | DOUBLE                  { DoubleLit($1) }
-  | INT                     { IntLit($1) }
-  | NA                      { Na }
+  | BOOL                     { BoolLit($1) }
+  | ID                       { Id($1) }
+  | CHARACTER                { Character($1) }
+  | DOUBLE                   { DoubleLit($1) }
+  | INT                      { IntLit($1) }
+  | NA                       { Na }
 
 stmt:
   | expr DLIN                                       { Expr($1) }
@@ -76,6 +84,7 @@ expr:
   | ID LBRACK expr COMMA expr RBRACK                { MatrixAcc($1, $3, $5) }
   | ID LBRACK COMMA expr RBRACK                     { MatrixCol($1, $4) }
   | ID LBRACK expr COMMA RBRACK                     { MatrixRow($1, $3) }
+  | ID LPAREN actuals_opt RPAREN                    { FuncCall($1, $3) }
 
 arith_expr:
   | expr COLON  expr    { DualOp($1, Range, $3) }

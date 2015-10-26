@@ -25,6 +25,7 @@ type expr =
 	| MatrixAccElem of string * int * int
 	| MatrixAccRow of string * int
     | MatrixAccCol of string * int
+    | FuncCal of string * expr list
 	| Noexpr
 
 type stmt =
