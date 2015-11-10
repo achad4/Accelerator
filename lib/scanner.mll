@@ -46,6 +46,7 @@
 	| double as lit { DOUBLE (float_of_string lit) }
 	| bool 	as lit	{ BOOL (lit = "TRUE") }
 	| character as lit   { CHARACTER (lit) }
+	| "NA"			{ NA }
 	| "function" 	{ FUNCTION }
 	| "in" 			{ IN }
 	| "next"		{ NEXT }

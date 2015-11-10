@@ -22,8 +22,10 @@ type expr =
 	| DualOp of expr * dual_op * expr
 	| SingOp of sing_op * expr
 	| Assign of string * expr
-	| MatrixAccOne of string * int
-	| MatrixAccTwo of string * int * int
+	| MatrixAccElem of string * int * int
+	| MatrixAccRow of string * int
+    | MatrixAccCol of string * int
+    | FuncCal of string * expr list
 	| Noexpr
 
 type stmt =
