@@ -41,6 +41,7 @@
 	| '>'      { GT }
 	| ">="     { GEQ }
 	| '#'	   { comment lexbuf }
+	| eof { EOF }
 	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 	| int as lit    { INT (int_of_string lit) }
 	| double as lit { DOUBLE (float_of_string lit) }
@@ -54,7 +55,7 @@
 	| _ as char { raise (Failure("Illegal character " ^ Char.escaped char)) }
 
 and comment = parse
-	| DLIN	{ token lexbuf }
+	| '\n'	{ token lexbuf }
 	| _ { comment lexbuf }
 
 {

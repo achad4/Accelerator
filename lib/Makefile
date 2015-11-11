@@ -1,7 +1,7 @@
-OBJS = ast.cmo parser.cmo scanner.cmo
+OBJS = ast.cmo parser.cmo scanner.cmo acc.cmo eval.cmo
 
 
-TARFILES = Makefile scanner.mll parser.mly ast.ml
+TARFILES = Makefile scanner.mll parser.mly ast.ml acc.ml eval.ml
 
 acc : $(OBJS)
 	ocamlc -o acc $(OBJS)
@@ -18,8 +18,8 @@ parser.ml parser.mli : parser.mly
 %.cmi : %.mli
 	ocamlc -c $<
 
-microc.tar.gz : $(TARFILES)
-	cd .. && tar czf microc/microc.tar.gz $(TARFILES:%=microc/%)
+acc.tar.gz : $(TARFILES)
+	cd .. && tar czf acc/acc.tar.gz $(TARFILES:%=microc/%)
 
 .PHONY : clean
 clean :

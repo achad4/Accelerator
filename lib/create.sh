@@ -6,3 +6,4 @@ ocamlc -c parser.mli
 ocamlc -c scanner.ml
 ocamlc -c parser.ml
 ocamlc -o a parser.cmo scanner.cmo
+ocamlc -o a acc accelerator.ml

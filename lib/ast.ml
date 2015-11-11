@@ -22,10 +22,10 @@ type expr =
 	| DualOp of expr * dual_op * expr
 	| SingOp of sing_op * expr
 	| Assign of string * expr
-	| MatrixAccElem of string * int * int
-	| MatrixAccRow of string * int
-    | MatrixAccCol of string * int
-    | FuncCal of string * expr list
+	| MatrixAccElem of string * expr * expr
+	| MatrixAccRow of string * expr
+    | MatrixAccCol of string * expr
+    | FuncCall of string * expr list
 	| Noexpr
 
 type stmt =
@@ -43,3 +43,19 @@ type func_decl = {
   }
 
 type program = stmt list * func_decl list 
+
+let rec string_of_expr = function
+    IntLit(l) -> string_of_int l
+  | Id(s) -> s
+  | Noexpr -> ""
+
+let rec string_of_stmt = function
+    Block(stmts) ->
+      "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
+  | Expr(expr) -> print_endline "expr"; string_of_expr expr ^ ";\n";
+  | If(e, stmt, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt stmt
+  | If(e, stmt1, stmt2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
+      string_of_stmt stmt1 ^ "else\n" ^ string_of_stmt stmt2
+  | For(s, e, stmt) ->
+      "for (" ^ s  ^ " ; " ^ string_of_expr e ^ " ; " ^
+      string_of_stmt stmt  ^ ") " ^ string_of_stmt stmt
