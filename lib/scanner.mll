@@ -14,7 +14,7 @@
   let double =  sign dig * '.' ((dig+exp) | (dig+) | (exp))+
 
   rule token = parse 
-    [' ' '\t' '\r' '\n'] { token lexbuf }
+    whitespace { token lexbuf }
 	| '('      { LPAREN }
 	| ')'      { RPAREN }
 	| '{'      { LBRACE }
