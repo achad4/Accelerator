@@ -7,8 +7,7 @@ type expr =
 type stmt = 
 	Expr of expr
 
-type program =
-    Stmt of stmt
+type program = stmt list 
 
 
 let rec string_of_expression = function
@@ -18,5 +17,5 @@ let rec string_of_expression = function
 let string_of_statement = function
 	Expr(e) -> string_of_expression e
 
-let string_of_program = function
-	Stmt(s) -> string_of_statement s
+let string_of_program program =
+	String.concat "\n" (List.map string_of_statement program)

@@ -11,8 +11,12 @@
 
 %%
 
-program : 
-	stmt EOF 	  { Stmt($1) }
+program :
+	| stmt_list EOF { $1 }
+
+stmt_list:
+    /* nothing */  { [] }
+  | stmt_list stmt { $2 :: $1 }
 
 stmt:
   | expr DLIN     { Expr($1) }
