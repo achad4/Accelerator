@@ -1,7 +1,7 @@
-OBJS = ast.cmo parser.cmo scanner.cmo acc.cmo
+OBJS = ast.cmo parser.cmo scanner.cmo sast.cmo acc.cmo 
 
 
-TARFILES = Makefile scanner.mll parser.mly ast.ml acc.ml
+TARFILES = Makefile scanner.mll parser.mly ast.ml sast.ml acc.ml 
 
 acc : $(OBJS)
 	ocamlc -o acc $(OBJS)
