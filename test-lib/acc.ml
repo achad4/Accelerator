@@ -12,26 +12,26 @@ let _ =
 
 
 let rec compile_detail = function
-	ExprDet(l) -> 
+	IntLit(l) -> 
 		print_endline "intlit";
-		(match l with
-			| IntLit(l) -> string_of_int l
-		)
-	| OpDet(op) -> 
-		print_endline "op"; 
-		(match op with
-			| IntBinop(op) -> string_of_op op
-		) in
+		string_of_int l
+	| Add(e1, e2) -> 
+		(compile_detail e1) ^ " + " ^ (compile_detail e2) in
 
 let rec compile_expr = function
-	Sast.Sexpr(e, t) -> compile_detail e
-	| Sast.Sbinop(e1, op, e2) -> 
+	Sexpr(e, t) -> compile_detail e
+	| Sadd(e1, e2) ->
+		compile_expr e1 ^
+		compile_expr e2 in
+
+
+(* 	| Sast.Sbinop(e1, op, e2) -> 
 		print_endline "sbinop";
 		compile_expr e1 ^ " " ^
 		(match op with
 			| Operator(o, t) -> compile_detail (OpDet(o))
 		) ^
-		compile_expr e2 in
+		compile_expr e2 in *)
 
 (* let rec compile_stmt_detail = function
 	Expr(e) -> compile_expr e in

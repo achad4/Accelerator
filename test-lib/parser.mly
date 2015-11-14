@@ -26,7 +26,7 @@ expr:
 	| arith_expr                                      { $1 }
 
 arith_expr:
-  | data PLUS data    { Binop($1, Add, $3) }	
+  | data PLUS data    { Add($1, $3) }	
 
 
 data:
