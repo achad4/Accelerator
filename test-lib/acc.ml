@@ -13,7 +13,7 @@ let _ =
 
 let rec compile_detail = function
 	IntLit(l) -> 
-		print_endline "intlit";
+		(*print_endline "intlit";*)
 		string_of_int l
 	| Add(e1, e2) -> 
 		(compile_detail e1) ^ " + " ^ (compile_detail e2) in
@@ -46,14 +46,4 @@ let compile sast =
 let c_begin = "main () { " in
 let c_end = ";}" in
 print_endline ( c_begin ^ (compile sast) ^ c_end)
-
-
-
-
-
-
-
-
-
-
 
