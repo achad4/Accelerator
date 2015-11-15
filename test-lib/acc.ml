@@ -43,7 +43,9 @@ let compile sast =
 	let string_list = List.map compile_expr sast in
 	String.concat "" string_list in
 
-print_endline (compile sast)
+let c_begin = "main () { " in
+let c_end = ";}" in
+print_endline ( c_begin ^ (compile sast) ^ c_end)
 
 
 
