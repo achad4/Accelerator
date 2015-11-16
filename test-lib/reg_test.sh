@@ -51,5 +51,8 @@ echo Test Suite finished
 echo Failed Tests: $failures
 echo Total Tests: $count
 echo
+echo ====================================================
 echo Cleaning up
+echo ====================================================
 make clean
+echo
