@@ -3,11 +3,12 @@ type op = Add
 type expr =
  	IntLit of int
  	| Add of expr * expr
+ 	| FuncCall of string * expr 
 
 type stmt = 
 	Expr of expr
 
-type program = stmt list 
+type program = stmt list
 
 
 

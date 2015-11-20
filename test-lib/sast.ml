@@ -3,10 +3,16 @@ type op =
 
 type t = 
 	Int
+	| Na
+
+
+ type id = 
+ 	Id of string
 
 type expr_detail = 
 	 IntLit of int
 	 | Add of expr_detail * expr_detail
+	 | FuncCall of id * expr_detail
 
 type detail = 
 	ExprDet of expr_detail
@@ -14,6 +20,7 @@ type detail =
 type expression = 
 	| Sexpr of expr_detail * t
 	| Sadd of expression * expression
+	| SfuncCall of expression * t
 	 
 type stmt_detail = 
 	Expr of expression
@@ -27,6 +34,9 @@ let string_of_type = function
 
 let rec expr = function
 	Ast.IntLit( c ) -> (* print_int c; *) (* print_endline (string_of_type Int); *) IntLit(c), Int
+	| Ast.FuncCall(id, e) -> 
+		let e1 = expr e in
+		FuncCall(Id(id), fst e1), Na
 	| Ast.Add( e1, e2) ->
 		let e1 = expr e1
 		and e2 = expr e2 in

@@ -1,7 +1,8 @@
 %{ open Ast %}
 
-%token EOF, DLIN, PLUS
+%token EOF, DLIN, PLUS, LPAREN, RPAREN, COMMA
 %token <int> INT
+%token <string> ID
 
 %left PLUS 
 
@@ -24,6 +25,14 @@ stmt:
 expr:
 	data { $1 }
 	| arith_expr                                      { $1 }
+	| ID LPAREN actuals_opt RPAREN                    { FuncCall($1, $3) }
+
+actuals_opt:
+  | actuals_list             { $1 }
+
+ actuals_list:
+  | expr                     { $1 }
+
 
 arith_expr:
   | data PLUS data    { Add($1, $3) }	
