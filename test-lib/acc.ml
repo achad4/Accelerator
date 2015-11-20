@@ -15,7 +15,7 @@ let rec compile_detail = function
 	IntLit(l) -> 
 		(*print_endline "intlit";*)
 		string_of_int l
-	| FuncCall(id, e) -> "cout << " ^ compile_detail e ^ " endl;"
+	| FuncCall(id, e) -> "cout << " ^ compile_detail e ^ ";"
 	| Add(e1, e2) -> 
 		(compile_detail e1) ^ " + " ^ (compile_detail e2) in
 
@@ -46,7 +46,7 @@ let compile sast =
 	let string_list = List.map compile_expr sast in
 	String.concat "" string_list in
 
-let c_begin = "int main () { " in
+let c_begin = "#include<iostream>\n using namespace std; int main () { " in
 let c_end = "}" in
 print_endline ( c_begin ^ (compile sast) ^ c_end)
 
