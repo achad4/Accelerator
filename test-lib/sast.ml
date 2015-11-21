@@ -12,7 +12,9 @@ type t =
 type expr_detail = 
 	 IntLit of int
 	 | Add of expr_detail * expr_detail
-	 | FuncCall of id * expr_detail
+	 | FuncCall of id * expr_detail list
+	 | Assign of id * expr_detail
+
 
 type detail = 
 	ExprDet of expr_detail
@@ -20,8 +22,9 @@ type detail =
 type expression = 
 	| Sexpr of expr_detail * t
 	| Sadd of expression * expression
-	| SfuncCall of expression * t
-	 
+	| SfuncCall of expression list * t
+	| Sassign of expression * t
+
 type stmt_detail = 
 	Expr of expression
 
@@ -30,13 +33,22 @@ type statement =
 
 
 let string_of_type = function
-	Int -> " int"
+	Int -> "int"
+
+let string_of_id = function
+	Id(s) -> s 
 
 let rec expr = function
 	Ast.IntLit( c ) -> (* print_int c; *) (* print_endline (string_of_type Int); *) IntLit(c), Int
-	| Ast.FuncCall(id, e) -> 
+	| Ast.Assign(id, e) -> 
 		let e1 = expr e in
-		FuncCall(Id(id), fst e1), Na
+		Assign(Id(id), fst e1), snd e1
+	| Ast.FuncCall(id, el) -> 		
+		(*iterate over list of expressions and pull out the expression_detail from each one*)
+		let helper e = 
+			fst (expr e) in
+
+		FuncCall(Id(id), (List.map helper el)), Na
 	| Ast.Add( e1, e2) ->
 		let e1 = expr e1
 		and e2 = expr e2 in

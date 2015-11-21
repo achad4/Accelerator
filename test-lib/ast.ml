@@ -3,7 +3,8 @@ type op = Add
 type expr =
  	IntLit of int
  	| Add of expr * expr
- 	| FuncCall of string * expr 
+ 	| FuncCall of string * expr list 
+ 	| Assign of string * expr
 
 type stmt = 
 	Expr of expr
