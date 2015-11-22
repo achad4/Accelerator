@@ -8,11 +8,11 @@ count=0
 failures=0
 
 # Testing Addition
-./acc < addTest.acc > addTest.cpp
-g++ -o addTest addTest.cpp
-./addTest > addTestOutput.txt
+./acc < addTest.acc > compiledCpp/addTest.cpp
+g++ -o executables/addTest compiledCpp/addTest.cpp
+./addTest > output/addTestOutput.txt
 count+=1
-if diff "addTestOutput.txt" "addTestExpected.txt" > /dev/null; then
+if diff "output/addTestOutput.txt" "expected/addTestExpected.txt" > /dev/null; then
 	echo addTest passed
 else
 	echo addTest failed
@@ -20,11 +20,11 @@ else
 fi
 
 # Testing Subtraction
-./acc < subTest.acc > subTest.cpp
-g++ -o subTest subTest.cpp
-./subTest > subTestOutput.txt
+./acc < subTest.acc > compiledCpp/subTest.cpp
+g++ -o executables/subTest compiledCpp/subTest.cpp
+./subTest > output/subTestOutput.txt
 count+=1
-if diff "subTestOutput.txt" "subTestExpected.txt" > /dev/null; then
+if diff "output/subTestOutput.txt" "expected/subTestExpected.txt" > /dev/null; then
 	echo subTest passed
 else
 	echo subTest failed
@@ -32,11 +32,11 @@ else
 fi
 
 # Testing Multiplication
-./acc < multTest.acc > multTest.cpp
-g++ -o multTest multTest.cpp
-./multTest > multTestOutput.txt
+./acc < multTest.acc > compiledCpp/multTest.cpp
+g++ -o executables/multTest compiledCpp/multTest.cpp
+./multTest > output/multTestOutput.txt
 count+=1
-if diff "multTestOutput.txt" "multTestExpected.txt" > /dev/null; then
+if diff "output/multTestOutput.txt" "expected/multTestExpected.txt" > /dev/null; then
 	echo multTest passed
 else
 	echo multTest failed
