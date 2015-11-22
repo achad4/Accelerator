@@ -15,4 +15,5 @@
     | '\n'     { (*print_endline "DLIN";*) DLIN }
     | '+'      { (*print_endline "+";*) PLUS }
     | '-'      { MINUS }
+    | '*'      { MULT }
     | "<-"     { ASSIGN }

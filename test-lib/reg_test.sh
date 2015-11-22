@@ -31,6 +31,17 @@ else
 	failures+=1
 fi
 
+# Testing Multiplication
+./acc < multTest.acc > multTest.cpp
+g++ -o multTest multTest.cpp
+./multTest > multTestOutput.txt
+count+=1
+if diff "multTestOutput.txt" "multTestExpected.txt" > /dev/null; then
+	echo multTest passed
+else
+	echo multTest failed
+	failures+=1
+fi
 
 echo ====================================================
 echo Results

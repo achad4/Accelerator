@@ -9,10 +9,6 @@ let _ =
 (*   print_endline (string_of_program program);
  *)  let sast = Sast.program program in
 
-
-
-
-
 let rec compile_detail = function
 	IntLit(l) -> 
 		(*print_endline "intlit";*)
@@ -24,6 +20,8 @@ let rec compile_detail = function
 
 		"cout << " ^ String.concat "" (List.map helper el) ^ ";"
 	| Assign(id, e) -> (string_of_id id) ^ "=" ^compile_detail e ^ ";"
+    | Mult(e1, e2) ->
+        (compile_detail e1) ^ " * " ^ (compile_detail e2)
     | Sub(e1, e2) -> 
         (compile_detail e1) ^ " - " ^ (compile_detail e2) 
 	| Add(e1, e2) -> 
@@ -32,13 +30,16 @@ let rec compile_detail = function
 
 let rec compile_expr = function
 	Sexpr(e, t) -> compile_detail e
-	| SfuncCall(el, t) -> String.concat "" (List.map compile_expr el)
-	| Sassign(e, t) -> print_endline ("here: " ^ (string_of_type t)); (string_of_type t) ^ compile_expr e
+	| SfuncCall(el, t) -> 
+        String.concat "" (List.map compile_expr el)
+	| Sassign(e, t) -> 
+        print_endline ("here: " ^ (string_of_type t)); (string_of_type t) ^ compile_expr e
+    | Smult(e1, e2) ->
+        compile_expr e1 ^ compile_expr e2
     | Ssub(e1, e2) ->
         compile_expr e1 ^ compile_expr e2
-	| Sadd(e1, e2) ->
-		compile_expr e1 ^
-		compile_expr e2 in
+	| Sadd(e1, e2) -> 
+        compile_expr e1 ^ compile_expr e2 in
 
 let compile sast =
 	let string_list = List.map compile_expr sast in
