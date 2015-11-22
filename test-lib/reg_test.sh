@@ -8,9 +8,9 @@ count=0
 failures=0
 
 # Testing Addition
-./acc < addTest.acc > compiledCpp/addTest.cpp
+./acc < sourceFiles/addTest.acc > compiledCpp/addTest.cpp
 g++ -o executables/addTest compiledCpp/addTest.cpp
-./addTest > output/addTestOutput.txt
+./executables/addTest > output/addTestOutput.txt
 count+=1
 if diff "output/addTestOutput.txt" "expected/addTestExpected.txt" > /dev/null; then
 	echo addTest passed
@@ -20,9 +20,9 @@ else
 fi
 
 # Testing Subtraction
-./acc < subTest.acc > compiledCpp/subTest.cpp
+./acc < sourceFiles/subTest.acc > compiledCpp/subTest.cpp
 g++ -o executables/subTest compiledCpp/subTest.cpp
-./subTest > output/subTestOutput.txt
+./executables/subTest > output/subTestOutput.txt
 count+=1
 if diff "output/subTestOutput.txt" "expected/subTestExpected.txt" > /dev/null; then
 	echo subTest passed
@@ -32,9 +32,9 @@ else
 fi
 
 # Testing Multiplication
-./acc < multTest.acc > compiledCpp/multTest.cpp
+./acc < sourceFiles/multTest.acc > compiledCpp/multTest.cpp
 g++ -o executables/multTest compiledCpp/multTest.cpp
-./multTest > output/multTestOutput.txt
+./executables/multTest > output/multTestOutput.txt
 count+=1
 if diff "output/multTestOutput.txt" "expected/multTestExpected.txt" > /dev/null; then
 	echo multTest passed
