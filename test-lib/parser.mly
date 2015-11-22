@@ -1,6 +1,7 @@
 %{ open Ast %}
 
-%token EOF, DLIN, PLUS, MINUS, MULT, DIV,  LPAREN, RPAREN, COMMA, ASSIGN
+%token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO
+%token LPAREN, RPAREN, COMMA, ASSIGN
 %token <int> INT
 %token <string> ID
 
@@ -43,6 +44,7 @@ arith_expr:
   | data PLUS data    { Add($1, $3) }
   | data MINUS data   { Sub($1, $3) }
   | data DIV data     { Div($1, $3) }
+  | data EXPO data    { Expo($1, $3) }
 
 
 data:

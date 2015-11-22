@@ -20,6 +20,8 @@ let rec compile_detail = function
 
 		"cout << " ^ String.concat "" (List.map helper el) ^ ";"
 	| Assign(id, e) -> (string_of_id id) ^ "=" ^compile_detail e ^ ";"
+    | Expo(e1, e2) ->
+        "pow(" ^ (compile_detail e1) ^ ",  " ^ (compile_detail e2) ^ ")"
     | Div(e1, e2) ->
         (compile_detail e1) ^ " / " ^ (compile_detail e2)
     | Mult(e1, e2) ->
@@ -36,6 +38,8 @@ let rec compile_expr = function
         String.concat "" (List.map compile_expr el)
 	| Sassign(e, t) -> 
         print_endline ("here: " ^ (string_of_type t)); (string_of_type t) ^ compile_expr e
+    | Sexpo(e1, e2) ->
+        compile_expr e1 ^ compile_expr e2
     | Sdiv(e1, e2) ->
         compile_expr e1 ^ compile_expr e2
     | Smult(e1, e2) ->
@@ -49,7 +53,11 @@ let compile sast =
 	let string_list = List.map compile_expr sast in
 	String.concat "" string_list in
 
-let c_begin = "#include<iostream>\n using namespace std; int main () { " in
+let c_begin = "#include<iostream>\n
+               #include<stdio.h>\n
+               #include<math.h>\n
+               using namespace std;\n 
+               int main () {\n " in
 let c_end = ";}" in
 print_endline ( c_begin ^ (compile sast) ^ c_end)
 

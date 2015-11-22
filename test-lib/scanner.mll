@@ -17,4 +17,5 @@
     | '-'      { MINUS }
     | '*'      { MULT }
     | '/'      { DIV }
+    | '^'      { EXPO }
     | "<-"     { ASSIGN }

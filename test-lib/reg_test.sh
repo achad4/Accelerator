@@ -55,6 +55,18 @@ else
 	failures+=1
 fi
 
+# Testing Exponentiation
+./acc < sourceFiles/expoTest.acc > compiledCpp/expoTest.cpp
+g++ -o executables/expoTest compiledCpp/expoTest.cpp
+./executables/expoTest > output/expoTestOutput.txt
+count+=1
+if diff "output/expoTestOutput.txt" "expected/expoTestExpected.txt" > /dev/null; then
+	echo expoTest passed
+else
+	echo expoTest failed
+	failures+=1
+fi
+
 
 echo ====================================================
 echo Results

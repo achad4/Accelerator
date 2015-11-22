@@ -3,6 +3,7 @@ type op =
     | Sub
     | Mult
     | Div
+    | Expo
 
 type expr =
  	IntLit of int
@@ -10,6 +11,7 @@ type expr =
     | Sub of expr * expr
     | Mult of expr * expr
     | Div of expr * expr
+    | Expo of expr * expr
  	| FuncCall of string * expr list 
  	| Assign of string * expr
 
@@ -24,6 +26,7 @@ let rec string_of_expression = function
     | Sub(e1, e2 ) -> (string_of_expression e1) ^ "-" ^ (string_of_expression e2)
     | Mult(e1, e2) -> (string_of_expression e1) ^ "*" ^ (string_of_expression e2)
     | Div(e1, e2) -> (string_of_expression e1) ^ "/" ^ (string_of_expression e2)
+    | Expo(e1, e2) -> (string_of_expression e1) ^ "^" ^ (string_of_expression e2)
     | FuncCall( s, e ) -> "function call " ^ s
     | Assign( s, e ) -> "assign " ^ s ^ " = " ^ (string_of_expression e)
 

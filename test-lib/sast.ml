@@ -3,6 +3,7 @@ type op =
     | Sub
     | Mult
     | Div
+    | Expo
 
 type t = 
 	Int
@@ -18,6 +19,7 @@ type expr_detail =
      | Sub of expr_detail * expr_detail
      | Mult of expr_detail * expr_detail
      | Div of expr_detail * expr_detail
+     | Expo of expr_detail * expr_detail
 	 | FuncCall of id * expr_detail list
 	 | Assign of id * expr_detail
 
@@ -31,6 +33,7 @@ type expression =
     | Ssub of expression * expression
     | Smult of expression * expression
     | Sdiv of expression * expression
+    | Sexpo of expression * expression
 	| SfuncCall of expression list * t
 	| Sassign of expression * t
 
@@ -110,6 +113,20 @@ let rec expr = function
             if t1 = t2 then
                 (
                 Div((fst e1),(fst e2)), Int
+                )
+            else
+                failwith "Type incompatability"
+
+    | Ast.Expo( e1, e2 ) ->
+            let e1 = expr e1
+            and e2 = expr e2 in
+
+            let _, t1 = e1
+            and _, t2 = e2 in
+
+            if t1 = t2 then
+                (
+                Expo((fst e1),(fst e2)), Int
                 )
             else
                 failwith "Type incompatability"
