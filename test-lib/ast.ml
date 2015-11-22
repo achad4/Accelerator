@@ -5,6 +5,7 @@ type op =
     | Div
     | Expo
     | Mod
+    | Assign
 
 type expr =
  	IntLit of int

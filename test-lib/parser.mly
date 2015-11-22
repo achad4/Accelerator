@@ -8,6 +8,7 @@
 %left PLUS MINUS 
 %left MULT DIV
 %left MOD
+%right ASSIGN
 
 %start program
 

@@ -79,6 +79,18 @@ else
 	failures+=1
 fi
 
+# Testing Assignment
+./acc < sourceFiles/assignTest.acc > compiledCpp/assignTest.cpp
+g++ -o executables/assignTest compiledCpp/assignTest.cpp
+./executables/assignTest > output/assignTestOutput.txt
+count+=1
+if diff "output/assignTestOutput.txt" "expected/assignTestExpected.txt" > /dev/null; then
+	echo assignTest passed
+else
+	echo assignTest failed
+	failures+=1
+fi
+
 
 echo ====================================================
 echo Results

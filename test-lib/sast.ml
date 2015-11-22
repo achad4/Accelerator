@@ -5,6 +5,7 @@ type op =
     | Div
     | Expo
     | Mod
+    | Assign
 
 type t = 
 	Int
