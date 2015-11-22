@@ -1,5 +1,6 @@
 type op = 
 	Add
+    | Sub
 
 type t = 
 	Int
@@ -12,6 +13,7 @@ type t =
 type expr_detail = 
 	 IntLit of int
 	 | Add of expr_detail * expr_detail
+     | Sub of expr_detail * expr_detail
 	 | FuncCall of id * expr_detail list
 	 | Assign of id * expr_detail
 
@@ -22,6 +24,7 @@ type detail =
 type expression = 
 	| Sexpr of expr_detail * t
 	| Sadd of expression * expression
+    | Ssub of expression * expression
 	| SfuncCall of expression list * t
 	| Sassign of expression * t
 
@@ -33,7 +36,8 @@ type statement =
 
 
 let string_of_type = function
-	Int -> "int"
+	  Int -> "int"
+    | Na -> "Na"
 
 let string_of_id = function
 	Id(s) -> s 
@@ -63,7 +67,21 @@ let rec expr = function
 				Add((fst e1), (fst e2)), Int
 			)
 		else
-			failwith "Type incompatibility";;
+			failwith "Type incompatibility"
+    | Ast.Sub( e1, e2 ) ->
+            let e1 = expr e1
+            and e2 = expr e2 in
+
+            let _, t1 = e1
+            and _, t2 = e2 in
+
+            if t1 = t2 then
+                (
+                Sub((fst e1),(fst e2)), Int
+                )
+            else
+                failwith "Type incompatability"
+
 
 let stmt = function
 	Ast.Expr( e ) ->

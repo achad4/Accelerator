@@ -24,6 +24,8 @@ let rec compile_detail = function
 
 		"cout << " ^ String.concat "" (List.map helper el) ^ ";"
 	| Assign(id, e) -> (string_of_id id) ^ "=" ^compile_detail e ^ ";"
+    | Sub(e1, e2) -> 
+        (compile_detail e1) ^ " - " ^ (compile_detail e2) 
 	| Add(e1, e2) -> 
 		(compile_detail e1) ^ " + " ^ (compile_detail e2) in
 
@@ -32,6 +34,8 @@ let rec compile_expr = function
 	Sexpr(e, t) -> compile_detail e
 	| SfuncCall(el, t) -> String.concat "" (List.map compile_expr el)
 	| Sassign(e, t) -> print_endline ("here: " ^ (string_of_type t)); (string_of_type t) ^ compile_expr e
+    | Ssub(e1, e2) ->
+        compile_expr e1 ^ compile_expr e2
 	| Sadd(e1, e2) ->
 		compile_expr e1 ^
 		compile_expr e2 in
@@ -41,6 +45,6 @@ let compile sast =
 	String.concat "" string_list in
 
 let c_begin = "#include<iostream>\n using namespace std; int main () { " in
-let c_end = "}" in
+let c_end = ";}" in
 print_endline ( c_begin ^ (compile sast) ^ c_end)
 
