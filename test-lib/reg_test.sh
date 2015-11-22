@@ -67,6 +67,18 @@ else
 	failures+=1
 fi
 
+# Testing Modulus
+./acc < sourceFiles/modTest.acc > compiledCpp/modTest.cpp
+g++ -o executables/modTest compiledCpp/modTest.cpp
+./executables/modTest > output/modTestOutput.txt
+count+=1
+if diff "output/modTestOutput.txt" "expected/modTestExpected.txt" > /dev/null; then
+	echo modTest passed
+else
+	echo modTest failed
+	failures+=1
+fi
+
 
 echo ====================================================
 echo Results

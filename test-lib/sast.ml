@@ -4,6 +4,7 @@ type op =
     | Mult
     | Div
     | Expo
+    | Mod
 
 type t = 
 	Int
@@ -20,6 +21,7 @@ type expr_detail =
      | Mult of expr_detail * expr_detail
      | Div of expr_detail * expr_detail
      | Expo of expr_detail * expr_detail
+     | Mod of expr_detail * expr_detail
 	 | FuncCall of id * expr_detail list
 	 | Assign of id * expr_detail
 
@@ -34,6 +36,7 @@ type expression =
     | Smult of expression * expression
     | Sdiv of expression * expression
     | Sexpo of expression * expression
+    | Smod of expression * expression
 	| SfuncCall of expression list * t
 	| Sassign of expression * t
 
@@ -131,7 +134,21 @@ let rec expr = function
             else
                 failwith "Type incompatability"
 
+    | Ast.Mod( e1, e2 ) ->
+            let e1 = expr e1
+            and e2 = expr e2 in
 
+            let _, t1 = e1
+            and _, t2 = e2 in
+
+            if t1 = t2 then
+                (
+                Mod((fst e1),(fst e2)), Int
+                )
+            else
+                failwith "Type incompatability"
+
+                
 let stmt = function
 	Ast.Expr( e ) ->
 	 (* print_endline (Ast.string_of_expression e); *)
