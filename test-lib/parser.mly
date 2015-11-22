@@ -1,11 +1,11 @@
 %{ open Ast %}
 
-%token EOF, DLIN, PLUS, MINUS, MULT, LPAREN, RPAREN, COMMA, ASSIGN
+%token EOF, DLIN, PLUS, MINUS, MULT, DIV,  LPAREN, RPAREN, COMMA, ASSIGN
 %token <int> INT
 %token <string> ID
 
 %left PLUS MINUS 
-%left MULT
+%left MULT DIV
 
 %start program
 
@@ -41,7 +41,8 @@ actuals_opt:
 arith_expr:
   | data MULT data    { Mult($1, $3) }
   | data PLUS data    { Add($1, $3) }
-  | data MINUS data   { Sub($1, $3) }  
+  | data MINUS data   { Sub($1, $3) }
+  | data DIV data     { Div($1, $3) }
 
 
 data:

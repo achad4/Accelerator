@@ -16,4 +16,5 @@
     | '+'      { (*print_endline "+";*) PLUS }
     | '-'      { MINUS }
     | '*'      { MULT }
+    | '/'      { DIV }
     | "<-"     { ASSIGN }

@@ -20,6 +20,8 @@ let rec compile_detail = function
 
 		"cout << " ^ String.concat "" (List.map helper el) ^ ";"
 	| Assign(id, e) -> (string_of_id id) ^ "=" ^compile_detail e ^ ";"
+    | Div(e1, e2) ->
+        (compile_detail e1) ^ " / " ^ (compile_detail e2)
     | Mult(e1, e2) ->
         (compile_detail e1) ^ " * " ^ (compile_detail e2)
     | Sub(e1, e2) -> 
@@ -34,6 +36,8 @@ let rec compile_expr = function
         String.concat "" (List.map compile_expr el)
 	| Sassign(e, t) -> 
         print_endline ("here: " ^ (string_of_type t)); (string_of_type t) ^ compile_expr e
+    | Sdiv(e1, e2) ->
+        compile_expr e1 ^ compile_expr e2
     | Smult(e1, e2) ->
         compile_expr e1 ^ compile_expr e2
     | Ssub(e1, e2) ->

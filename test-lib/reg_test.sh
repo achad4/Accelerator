@@ -43,6 +43,19 @@ else
 	failures+=1
 fi
 
+# Testing Division
+./acc < sourceFiles/divTest.acc > compiledCpp/divTest.cpp
+g++ -o executables/divTest compiledCpp/divTest.cpp
+./executables/divTest > output/divTestOutput.txt
+count+=1
+if diff "output/divTestOutput.txt" "expected/divTestExpected.txt" > /dev/null; then
+	echo divTest passed
+else
+	echo divTest failed
+	failures+=1
+fi
+
+
 echo ====================================================
 echo Results
 echo ====================================================
