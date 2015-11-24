@@ -12,7 +12,7 @@ type t =
 	| Na
 
 
- type id = 
+type id = 
  	Id of string
 
 type expr_detail = 
@@ -25,7 +25,6 @@ type expr_detail =
      | Mod of expr_detail * expr_detail
 	 | FuncCall of id * expr_detail list
 	 | Assign of id * expr_detail
-
 
 type detail = 
 	ExprDet of expr_detail

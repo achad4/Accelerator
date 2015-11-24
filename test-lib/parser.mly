@@ -40,7 +40,6 @@ actuals_opt:
   | expr                     { [$1] }
   | actuals_list COMMA expr  { $3 :: $1 }
 
-
 arith_expr:
   | data MULT data    { Mult($1, $3) }
   | data PLUS data    { Add($1, $3) }
@@ -48,7 +47,6 @@ arith_expr:
   | data DIV data     { Div($1, $3) }
   | data EXPO data    { Expo($1, $3) }
   | data MOD data     { Mod($1, $3) }
-
 
 data:
   | INT           { IntLit($1) }
