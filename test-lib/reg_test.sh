@@ -91,6 +91,17 @@ else
 	failures+=1
 fi
 
+# Testing Assign and Print
+./acc < sourceFiles/assignAndPrintTest.acc > compiledCpp/assignAndPrintTest.cpp
+g++ -o executables/assignAndPrintTest compiledCpp/assignAndPrintTest.cpp
+./executables/assignAndPrintTest > output/assignAndPrintTestOutput.txt
+count+=1
+if diff "output/assignAndPrintTest.txt" "expected/assignAndPrintTest.txt" > /dev/null; then
+	echo assignTest passed
+else
+	echo assignTest failed
+	failures+=1
+fi
 
 echo ====================================================
 echo Results

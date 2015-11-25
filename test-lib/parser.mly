@@ -20,17 +20,17 @@ program :
 	| stmt_list EOF { $1 }
     
 stmt_list:
-    /* nothing */  { [] }
+    | stmt           { [$1] }
     | stmt_list stmt { $2 :: $1 }
 
 stmt:
-    | expr DLIN     { Expr($1) }
+    | expr DLIN     { $1 }
 
 expr:
-	data { $1 }
+	| data                                            { $1 }
 	| arith_expr                                      { $1 }
 	| ID LPAREN actuals_opt RPAREN                    { FuncCall($1, $3) }
-    | ID ASSIGN expr                                  { Assign($1, $3) }
+  | ID ASSIGN expr                                  { Assign($1, $3) }
 
 actuals_opt:
   | /* nothing */            { [] }
