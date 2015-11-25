@@ -19,7 +19,7 @@ let rec compile_detail = function
 			compile_detail e in
 
 		"cout << " ^ String.concat "" (List.map helper el) ^ ";"
-	| Assign(id, e) -> (string_of_id id) ^ "=" ^ compile_detail e ^ ";"
+	| Assign(id, e) -> "int " ^ (string_of_id id) ^ "=" ^ (compile_detail e) ^ ";"
     | Mod(e1, e2) -> (compile_detail e1) ^ " % " ^ (compile_detail e2) 
     | Expo(e1, e2) ->
         "pow(" ^ (compile_detail e1) ^ ",  " ^ (compile_detail e2) ^ ")"
