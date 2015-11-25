@@ -91,6 +91,18 @@ else
 	failures+=1
 fi
 
+# Testing boolean literal
+./acc < sourceFiles/trueLitTest.acc > compiledCpp/trueLitTest.cpp
+g++ -o executables/trueLitTest compiledCpp/trueLitTest.cpp
+./executables/trueLitTest > output/trueLitTestOutput.txt
+count+=1
+if diff "output/trueLitTestOutput.txt" "expected/trueLitTestExpected.txt" > /dev/null; then
+	echo trueLitTest passed
+else
+	echo trueLitTest failed
+	failures+=1
+fi
+
 
 echo ====================================================
 echo Results

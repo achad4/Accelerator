@@ -13,13 +13,17 @@ let rec compile_detail = function
 	IntLit(l) -> 
 		(*print_endline "intlit";*)
 		string_of_int l
+    | BoolLit(b) ->
+        string_of_bool b
 	| FuncCall(id, el) -> 
 		
 		let helper e =
 			compile_detail e in
 
 		"cout << " ^ String.concat "" (List.map helper el) ^ ";"
-	| Assign(id, e) -> "int " ^ (string_of_id id) ^ "=" ^ (compile_detail e) ^ ";"
+    | And(b1, b2) -> (compile_detail b1) ^ " && " ^ (compile_detail b2)
+    | Or(b1, b2) -> (compile_detail b1) ^ " || " ^ (compile_detail b2)
+	| Assign(id, e) -> "int " ^ (string_of_id id) ^ "=" ^ (compile_detail e)
     | Mod(e1, e2) -> (compile_detail e1) ^ " % " ^ (compile_detail e2) 
     | Expo(e1, e2) ->
         "pow(" ^ (compile_detail e1) ^ ",  " ^ (compile_detail e2) ^ ")"
@@ -35,6 +39,8 @@ let rec compile_detail = function
 
 let rec compile_expr = function
 	Sexpr(e, t) -> compile_detail e
+    | Sand(b1, b2) -> compile_expr b1 ^ compile_expr b2
+    | Sor(b1, b2) -> compile_expr b1 ^ compile_expr b2
 	| SfuncCall(el, t) -> 
         String.concat "" (List.map compile_expr el)
 	| Sassign(e, t) -> 
