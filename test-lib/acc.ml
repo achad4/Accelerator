@@ -9,21 +9,17 @@ let _ =
   let sast = Sast.program program in
 
 let rec compile_detail = function
-	IntLit(l) -> 
-	|	string_of_int l
-	| FuncCall(id, el) -> 
-		
-		let helper e =
-			compile_detail e in
-
+  | IdLit(s) -> s
+	| IntLit(l) -> string_of_int l
+	| FuncCall(id, el) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ ";"
-	  | Assign(id, e) -> "int " ^ (string_of_id id) ^ "=" ^ (compile_detail e) ^ ";"
-    | Mod(e1, e2) -> (compile_detail e1) ^ " % " ^ (compile_detail e2) 
-    | Expo(e1, e2) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ (compile_detail e2) ^ ")"
-    | Div(e1, e2) -> (compile_detail e1) ^ " / " ^ (compile_detail e2)
-    | Mult(e1, e2) -> (compile_detail e1) ^ " * " ^ (compile_detail e2)
-    | Sub(e1, e2) -> (compile_detail e1) ^ " - " ^ (compile_detail e2) 
-	  | Add(e1, e2) -> (compile_detail e1) ^ " + " ^ (compile_detail e2) in
+	| Assign(id, e) -> "int " ^ (string_of_id id) ^ "=" ^ (compile_detail e) ^ ";"
+  | Mod(e1, e2) -> (compile_detail e1) ^ " % " ^ (compile_detail e2) 
+  | Expo(e1, e2) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ (compile_detail e2) ^ ")"
+  | Div(e1, e2) -> (compile_detail e1) ^ " / " ^ (compile_detail e2)
+  | Mult(e1, e2) -> (compile_detail e1) ^ " * " ^ (compile_detail e2)
+  | Sub(e1, e2) -> (compile_detail e1) ^ " - " ^ (compile_detail e2) 
+  | Add(e1, e2) -> (compile_detail e1) ^ " + " ^ (compile_detail e2) in
 
 
 let rec compile_expr = function

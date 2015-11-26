@@ -8,6 +8,7 @@ type op =
     | Assign
 
 type t = 
+    | String
 	| Int
 	| Na
 
@@ -16,6 +17,7 @@ type id =
  	| Id of string
 
 type expr_detail = 
+     | IdLit of string
 	 | IntLit of int
 	 | Add of expr_detail * expr_detail
      | Sub of expr_detail * expr_detail
@@ -47,6 +49,7 @@ type statement =
 	Sstmt of stmt_detail * t
 
 let string_of_type = function
+    | String -> "string"
 	| Int -> "int"
     | Na -> "Na"
 
@@ -54,7 +57,7 @@ let string_of_id = function
 	Id(s) -> s 
 
 let rec expr = function
-
+    | Ast.Id ( s ) -> IdLit(s), String
 	| Ast.IntLit( c ) -> IntLit(c), Int
 	| Ast.Assign(id, e) -> 
 		let e1 = expr e in
