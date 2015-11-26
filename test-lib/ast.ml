@@ -1,5 +1,5 @@
 type op = 
-    Add
+    | Add
     | Sub
     | Mult
     | Div
@@ -8,7 +8,8 @@ type op =
     | Assign
 
 type expr =
- 	IntLit of int
+    | Id of string
+ 	| IntLit of int
  	| Add of expr * expr
     | Sub of expr * expr
     | Mult of expr * expr
@@ -24,7 +25,7 @@ type stmt =
 type program = stmt list
 
 let rec string_of_expression = function
-	IntLit(e) -> string_of_int e
+	| IntLit(e) -> string_of_int e
 	| Add(e1, e2) -> (string_of_expression e1) ^ "+" ^ (string_of_expression e2)
     | Sub(e1, e2 ) -> (string_of_expression e1) ^ "-" ^ (string_of_expression e2)
     | Mult(e1, e2) -> (string_of_expression e1) ^ "*" ^ (string_of_expression e2)

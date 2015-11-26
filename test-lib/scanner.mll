@@ -5,18 +5,18 @@
   let dig = ['0'-'9']+
   let whitespace = [' ' '\t']
   rule token = parse
-  	whitespace { (*print_endline "WHITE";*) token lexbuf } 
+  	whitespace      { token lexbuf } 
   	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
-  	| ','      { COMMA }
-  	| '('      { LPAREN }
-	| ')'      { RPAREN }
-  	| dig as lit    { (*print_endline "INT";*) INT(int_of_string lit) }
-    | eof      { (*print_endline "EOF";*) EOF }
-    | '\n'     { (*print_endline "DLIN";*) DLIN }
-    | '+'      { (*print_endline "+";*) PLUS }
-    | '-'      { MINUS }
-    | '*'      { MULT }
-    | '/'      { DIV }
-    | '^'      { EXPO }
-    | "<-"     { ASSIGN }
-    | "%%"     { MOD }
+  	| ','           { COMMA }
+  	| '('           { LPAREN }
+	  | ')'           { RPAREN }
+  	| dig as lit    { INT(int_of_string lit) }
+    | eof           { EOF }
+    | '\n'          { DLIN }
+    | '+'           { PLUS }
+    | '-'           { MINUS }
+    | '*'           { MULT }
+    | '/'           { DIV }
+    | '^'           { EXPO }
+    | "<-"          { ASSIGN }
+    | "%%"          { MOD }
