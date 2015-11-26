@@ -24,7 +24,7 @@ stmt_list:
     | stmt_list stmt { $2 :: $1 }
 
 stmt:
-    | expr DLIN     { $1 }
+    | expr DLIN     { Expr($1) }
 
 expr:
 	| data                                            { $1 }
