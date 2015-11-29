@@ -26,7 +26,7 @@ let rec compile_detail = function
   | Add(e1, e2) -> (compile_detail e1) ^ " + " ^ (compile_detail e2) in
 
 let rec compile_expr = function
-	| Sexpr(e, t) -> compile_detail e
+	| Sexpr(e, t) -> compile_detail e ^ ";" 
 	| SfuncCall(el, t) -> String.concat "" (List.map compile_expr el)
 	| Sassign(e, t) -> print_endline ("here: " ^ (string_of_type t)); (string_of_type t) ^ compile_expr e
   | Smod(e1, e2) -> compile_expr e1 ^ compile_expr e2 

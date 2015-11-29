@@ -128,7 +128,8 @@ else
 fi
 
 # Testing boolean or
-./acc < sourceFiles/orTest.acc > compiledCpp/orTest.cpp
+
+
 g++ -o executables/orTest compiledCpp/orTest.cpp
 ./executables/orTest > output/orTestOutput.txt
 count+=1
@@ -148,6 +149,18 @@ if diff "output/notTestOutput.txt" "expected/notTestExpected.txt" > /dev/null; t
 	echo notTest passed
 else
 	echo notTest failed
+	failures+=1
+fi
+
+# Testing boolean not
+./acc < sourceFiles/multiStatementTest.acc > compiledCpp/multiStatementTest.cpp
+g++ -o executables/multiStatementTest compiledCpp/multiStatementTest.cpp
+./executables/multiStatementTest > output/multiStatementTest.txt
+count+=1
+if diff "output/multiStatementTest.txt" "expected/multiStatementTestExpected.txt" > /dev/null; then
+	echo multiStatementTest passed
+else
+	echo multiStatementTest failed
 	failures+=1
 fi
 
