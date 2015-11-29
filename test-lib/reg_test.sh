@@ -91,15 +91,39 @@ else
 	failures+=1
 fi
 
-# Testing Assign and Print
-./acc < sourceFiles/assignAndPrintTest.acc > compiledCpp/assignAndPrintTest.cpp
-g++ -o executables/assignAndPrintTest compiledCpp/assignAndPrintTest.cpp
-./executables/assignAndPrintTest > output/assignAndPrintTestOutput.txt
+# Testing boolean literal true
+./acc < sourceFiles/trueLitTest.acc > compiledCpp/trueLitTest.cpp
+g++ -o executables/trueLitTest compiledCpp/trueLitTest.cpp
+./executables/trueLitTest > output/trueLitTestOutput.txt
 count+=1
-if diff "output/assignAndPrintTest.txt" "expected/assignAndPrintTest.txt" > /dev/null; then
-	echo assignTest passed
+if diff "output/trueLitTestOutput.txt" "expected/trueLitTestExpected.txt" > /dev/null; then
+	echo trueLitTest passed
 else
-	echo assignTest failed
+	echo trueLitTest failed
+	failures+=1
+fi
+
+# Testing boolean literal false
+./acc < sourceFiles/falseLitTest.acc > compiledCpp/falseLitTest.cpp
+g++ -o executables/falseLitTest compiledCpp/falseLitTest.cpp
+./executables/falseLitTest > output/falseLitTestOutput.txt
+count+=1
+if diff "output/falseLitTestOutput.txt" "expected/falseLitTestExpected.txt" > /dev/null; then
+	echo falseLitTest passed
+else
+	echo falseLitTest failed
+	failures+=1
+fi
+
+# Testing boolean and
+./acc < sourceFiles/andTest.acc > compiledCpp/andTest.cpp
+g++ -o executables/andTest compiledCpp/andTest.cpp
+./executables/andTest > output/andTestOutput.txt
+count+=1
+if diff "output/andTestOutput.txt" "expected/andTestExpected.txt" > /dev/null; then
+	echo andTest passed
+else
+	echo andTest failed
 	failures+=1
 fi
 

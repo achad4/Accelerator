@@ -6,12 +6,14 @@ type op =
     | Expo
     | Mod
     | Assign
+    | And
+    | Or
 
 type t = 
     | String
 	| Int
+    | Bool
 	| Na
-
 
 type id = 
  	| Id of string
@@ -19,6 +21,7 @@ type id =
 type expr_detail = 
      | IdLit of string
 	 | IntLit of int
+     | BoolLit of bool
 	 | Add of expr_detail * expr_detail
      | Sub of expr_detail * expr_detail
      | Mult of expr_detail * expr_detail
@@ -27,6 +30,8 @@ type expr_detail =
      | Mod of expr_detail * expr_detail
 	 | FuncCall of id * expr_detail list
 	 | Assign of id * expr_detail
+     | And of expr_detail * expr_detail
+     | Or of expr_detail * expr_detail
 
 type detail = 
 	| ExprDet of expr_detail
@@ -41,6 +46,8 @@ type expression =
     | Smod of expression * expression
 	| SfuncCall of expression list * t
 	| Sassign of expression * t
+    | Sand of expression * expression
+    | Sor of expression * expression
 
 type stmt_detail = 
 	Expr of expression
@@ -51,6 +58,7 @@ type statement =
 let string_of_type = function
     | String -> "string"
 	| Int -> "int"
+    | Bool -> "bool"
     | Na -> "Na"
 
 let string_of_id = function
@@ -59,6 +67,7 @@ let string_of_id = function
 let rec expr = function
     | Ast.Id ( s ) -> IdLit(s), String
 	| Ast.IntLit( c ) -> IntLit(c), Int
+    | Ast.BoolLit(b) -> BoolLit(b), Bool
 	| Ast.Assign(id, e) -> 
 		let e1 = expr e in
 		Assign(Id(id), fst e1), snd e1
@@ -147,8 +156,33 @@ let rec expr = function
                 )
             else
                 failwith "Type incompatability"
+    | Ast.And( b1, b2) ->
+            let b1 = expr b1
+            and b2 = expr b2 in
 
-                
+            let _, t1 = b1
+            and _, t2 = b2 in
+
+            if t1 = t2 then
+                (
+                   And((fst b1),(fst b2)), Bool
+                )
+            else
+                failwith "Type incompatibility"
+    | Ast.Or( b1, b2) ->
+            let b1 = expr b1
+            and b2 = expr b2 in
+
+            let _, t1 = b1
+            and _, t2 = b2 in
+
+            if t1 = t2 then
+                (
+                   Or((fst b1),(fst b2)), Bool
+                )
+            else
+                failwith "Type incompatibility"
+
 let stmt = function
 	Ast.Expr( e ) ->
 	 (* print_endline (Ast.string_of_expression e); *)
