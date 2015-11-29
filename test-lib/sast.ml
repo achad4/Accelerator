@@ -8,12 +8,12 @@ type op =
     | Assign
     | And
     | Or
+    | Not
 
 type t = 
 	Int
     | Bool
 	| Na
-
 
 type id = 
  	Id of string
@@ -31,6 +31,7 @@ type expr_detail =
 	 | Assign of id * expr_detail
      | And of expr_detail * expr_detail
      | Or of expr_detail * expr_detail
+     | Not of expr_detail
 
 type detail = 
 	ExprDet of expr_detail
@@ -47,6 +48,7 @@ type expression =
 	| Sassign of expression * t
     | Sand of expression * expression
     | Sor of expression * expression
+    | Snot of expression
 
 type stmt_detail = 
 	Expr of expression
@@ -180,6 +182,15 @@ let rec expr = function
             if t1 = t2 then
                 (
                    Or((fst b1),(fst b2)), Bool
+                )
+            else
+                failwith "Type incompatibility"
+    | Ast.Not( b1 ) ->
+            let b1 = expr b1 in
+            let _, t1 = b1 in
+            if t1 = Bool then
+                (
+                    Not(fst b1), Bool
                 )
             else
                 failwith "Type incompatibility"

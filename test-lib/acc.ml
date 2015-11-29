@@ -23,6 +23,7 @@ let rec compile_detail = function
 		"cout << " ^ String.concat "" (List.map helper el) ^ ";"
     | And(b1, b2) -> (compile_detail b1) ^ " && " ^ (compile_detail b2)
     | Or(b1, b2) -> (compile_detail b1) ^ " || " ^ (compile_detail b2)
+    | Not(b1) -> "! " ^ (compile_detail b1)
 	| Assign(id, e) -> "int " ^ (string_of_id id) ^ "=" ^ (compile_detail e)
     | Mod(e1, e2) -> (compile_detail e1) ^ " % " ^ (compile_detail e2) 
     | Expo(e1, e2) ->
@@ -41,6 +42,7 @@ let rec compile_expr = function
 	Sexpr(e, t) -> compile_detail e
     | Sand(b1, b2) -> compile_expr b1 ^ compile_expr b2
     | Sor(b1, b2) -> compile_expr b1 ^ compile_expr b2
+    | Snot(b1) -> (compile_expr b1)
 	| SfuncCall(el, t) -> 
         String.concat "" (List.map compile_expr el)
 	| Sassign(e, t) -> 

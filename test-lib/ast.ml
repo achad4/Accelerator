@@ -8,6 +8,7 @@ type op =
     | Assign
     | And
     | Or
+    | Not
 
 type expr =
  	IntLit of int
@@ -22,6 +23,7 @@ type expr =
  	| Assign of string * expr
     | And of expr * expr
     | Or of expr * expr
+    | Not of expr
 
 type stmt = 
 	Expr of expr
@@ -41,6 +43,7 @@ let rec string_of_expression = function
     | Assign( s, e ) -> "assign " ^ s ^ " = " ^ (string_of_expression e)
     | And( b1, b2) -> (string_of_expression b1) ^ " && " ^ (string_of_expression b2)
     | Or( b1, b2) -> (string_of_expression b1) ^ " || " ^ (string_of_expression b2)
+    | Not( b1 ) -> "!" ^ (string_of_expression b1)
     
 
 let string_of_statement = function
