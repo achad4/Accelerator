@@ -91,7 +91,7 @@ else
 	failures+=1
 fi
 
-# Testing boolean literal
+# Testing boolean literal true
 ./acc < sourceFiles/trueLitTest.acc > compiledCpp/trueLitTest.cpp
 g++ -o executables/trueLitTest compiledCpp/trueLitTest.cpp
 ./executables/trueLitTest > output/trueLitTestOutput.txt
@@ -100,6 +100,18 @@ if diff "output/trueLitTestOutput.txt" "expected/trueLitTestExpected.txt" > /dev
 	echo trueLitTest passed
 else
 	echo trueLitTest failed
+	failures+=1
+fi
+
+# Testing boolean literal false
+./acc < sourceFiles/falseLitTest.acc > compiledCpp/falseLitTest.cpp
+g++ -o executables/falseLitTest compiledCpp/falseLitTest.cpp
+./executables/falseLitTest > output/falseLitTestOutput.txt
+count+=1
+if diff "output/falseLitTestOutput.txt" "expected/falseLitTestExpected.txt" > /dev/null; then
+	echo falseLitTest passed
+else
+	echo falseLitTest failed
 	failures+=1
 fi
 
