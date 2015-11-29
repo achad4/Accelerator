@@ -1,7 +1,7 @@
 %{ open Ast %}
 
 %token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD
-%token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR
+%token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT
 %token <int> INT
 %token <string> ID
 %token <bool> TRUE FALSE
@@ -10,7 +10,7 @@
 %left MULT DIV
 %left MOD
 %left AND OR
-%right ASSIGN
+%right ASSIGN NOT
 
 %start program
 
@@ -31,10 +31,10 @@ stmt:
 expr:
 	| num_data { $1 }
   | bool_data { $1 }
-	| arith_expr                                      { $1 }
-  | bool_expr                                       { $1 }
-	| ID LPAREN actuals_opt RPAREN                    { FuncCall($1, $3) }
-  | ID ASSIGN expr                                  { Assign($1, $3) }
+	| arith_expr                           { $1 }
+  | bool_expr                            { $1 }
+	| ID LPAREN actuals_opt RPAREN         { FuncCall($1, $3) }
+  | ID ASSIGN expr                       { Assign($1, $3) }
 
 actuals_opt:
   | /* nothing */                        { [] }
@@ -55,6 +55,7 @@ arith_expr:
 bool_expr:
   | bool_data AND bool_data   { And($1, $3) }
   | bool_data OR bool_data    { Or($1, $3) }
+  | NOT bool_data             { Not($2) }
 
 num_data:
   | INT           { IntLit($1) }

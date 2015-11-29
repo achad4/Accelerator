@@ -127,6 +127,30 @@ else
 	failures+=1
 fi
 
+# Testing boolean or
+./acc < sourceFiles/orTest.acc > compiledCpp/orTest.cpp
+g++ -o executables/orTest compiledCpp/orTest.cpp
+./executables/orTest > output/orTestOutput.txt
+count+=1
+if diff "output/orTestOutput.txt" "expected/orTestExpected.txt" > /dev/null; then
+	echo orTest passed
+else
+	echo orTest failed
+	failures+=1
+fi
+
+# Testing boolean not
+./acc < sourceFiles/notTest.acc > compiledCpp/notTest.cpp
+g++ -o executables/notTest compiledCpp/notTest.cpp
+./executables/notTest > output/notTestOutput.txt
+count+=1
+if diff "output/notTestOutput.txt" "expected/notTestExpected.txt" > /dev/null; then
+	echo notTest passed
+else
+	echo notTest failed
+	failures+=1
+fi
+
 echo ====================================================
 echo Results
 echo ====================================================
