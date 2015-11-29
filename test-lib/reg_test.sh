@@ -115,6 +115,19 @@ else
 	failures+=1
 fi
 
+# Testing boolean and
+./acc < sourceFiles/andTest.acc > compiledCpp/andTest.cpp
+g++ -o executables/andTest compiledCpp/andTest.cpp
+./executables/andTest > output/andTestOutput.txt
+count+=1
+if diff "output/andTestOutput.txt" "expected/andTestExpected.txt" > /dev/null; then
+	echo andTest passed
+else
+	echo andTest failed
+	failures+=1
+fi
+
+
 
 echo ====================================================
 echo Results

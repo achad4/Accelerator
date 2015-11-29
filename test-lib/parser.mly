@@ -4,8 +4,7 @@
 %token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR
 %token <int> INT
 %token <string> ID
-%token <bool> TRUE
-%token <bool> FALSE
+%token <bool> TRUE FALSE
 
 %left PLUS MINUS 
 %left MULT DIV
