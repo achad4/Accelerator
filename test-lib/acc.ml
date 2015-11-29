@@ -11,9 +11,13 @@ let _ =
 let rec compile_detail = function
   | IdLit(s) -> s
 	| IntLit(l) -> string_of_int l
+  | BoolLit(b) -> string_of_bool b
 	| FuncCall(id, el) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ ";"
-	| Assign(id, e) -> "int " ^ (string_of_id id) ^ "=" ^ (compile_detail e) ^ ";"
+  | And(b1, b2) -> (compile_detail b1) ^ " && " ^ (compile_detail b2)
+  | Or(b1, b2) -> (compile_detail b1) ^ " || " ^ (compile_detail b2)
+  | Not(b1) -> "! " ^ (compile_detail b1)
+  | Assign(id, e) -> "int " ^ (string_of_id id) ^ "=" ^ (compile_detail e)
   | Mod(e1, e2) -> (compile_detail e1) ^ " % " ^ (compile_detail e2) 
   | Expo(e1, e2) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ (compile_detail e2) ^ ")"
   | Div(e1, e2) -> (compile_detail e1) ^ " / " ^ (compile_detail e2)
@@ -31,7 +35,10 @@ let rec compile_expr = function
   | Sdiv(e1, e2) -> compile_expr e1 ^ compile_expr e2
   | Smult(e1, e2) -> compile_expr e1 ^ compile_expr e2
   | Ssub(e1, e2) -> compile_expr e1 ^ compile_expr e2
-	| Sadd(e1, e2) -> compile_expr e1 ^ compile_expr e2 in
+	| Sadd(e1, e2) -> compile_expr e1 ^ compile_expr e2 
+  | Sand(b1, b2) -> compile_expr b1 ^ compile_expr b2
+  | Sor(b1, b2) -> compile_expr b1 ^ compile_expr b2
+  | Snot(b1) -> (compile_expr b1)in
 
 let compile sast =
 	let string_list = List.map compile_expr sast in

@@ -6,6 +6,8 @@
   let whitespace = [' ' '\t']
   rule token = parse
   	| whitespace    { token lexbuf } 
+    | "true" as lit { TRUE(bool_of_string lit) }
+    | "false" as lit{ FALSE(bool_of_string lit) }
   	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
   	| ','           { COMMA }
   	| '('           { LPAREN }
@@ -20,3 +22,5 @@
     | '^'           { EXPO }
     | "<-"          { ASSIGN }
     | "%%"          { MOD }
+    | "&&"          { AND }
+    | "||"          { OR }

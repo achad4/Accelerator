@@ -8,6 +8,7 @@ type op =
     | Assign
     | And
     | Or
+    | Not
 
 type expr =
     | Id of string
@@ -23,6 +24,7 @@ type expr =
  	| Assign of string * expr
     | And of expr * expr
     | Or of expr * expr
+    | Not of expr
 
 type stmt = 
 	Expr of expr
@@ -30,6 +32,7 @@ type stmt =
 type program = stmt list
 
 let rec string_of_expression = function
+    | Id(s) -> s
 	| IntLit(e) -> string_of_int e
     | BoolLit(b) -> string_of_bool b
 	| Add(e1, e2) -> (string_of_expression e1) ^ "+" ^ (string_of_expression e2)
@@ -42,6 +45,7 @@ let rec string_of_expression = function
     | Assign( s, e ) -> "assign " ^ s ^ " = " ^ (string_of_expression e)
     | And( b1, b2) -> (string_of_expression b1) ^ " && " ^ (string_of_expression b2)
     | Or( b1, b2) -> (string_of_expression b1) ^ " || " ^ (string_of_expression b2)
+    | Not( b1 ) -> "!" ^ (string_of_expression b1)
     
 
 let string_of_statement = function
