@@ -29,12 +29,14 @@ stmt:
   | expr DLIN                            { Expr($1) }
 
 expr:
+  | ID { Id($1) }
 	| num_data { $1 }
   | bool_data { $1 }
 	| arith_expr                           { $1 }
   | bool_expr                            { $1 }
 	| ID LPAREN actuals_opt RPAREN         { FuncCall($1, $3) }
   | ID ASSIGN expr                       { Assign($1, $3) }
+
 
 actuals_opt:
   | /* nothing */                        { [] }

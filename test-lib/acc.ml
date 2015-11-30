@@ -13,7 +13,7 @@ let rec compile_detail = function
 	| IntLit(l) -> string_of_int l
   | BoolLit(b) -> string_of_bool b
 	| FuncCall(id, el) -> let helper e = compile_detail e in
-		"cout << " ^ String.concat "" (List.map helper el) ^ "; cout << endl;"
+		"cout << " ^ String.concat "" (List.map helper el) ^ "; cout << endl"
   | And(b1, b2) -> (compile_detail b1) ^ " && " ^ (compile_detail b2)
   | Or(b1, b2) -> (compile_detail b1) ^ " || " ^ (compile_detail b2)
   | Not(b1) -> "! " ^ (compile_detail b1)
