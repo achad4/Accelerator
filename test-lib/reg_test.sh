@@ -12,7 +12,7 @@ failures=0
 g++ -o executables/addTest compiledCpp/addTest.cpp
 ./executables/addTest > output/addTestOutput.txt
 count+=1
-if diff "output/addTestOutput.txt" "expected/addTestExpected.txt" > /dev/null; then
+if diff -b "output/addTestOutput.txt" "expected/addTestExpected.txt" > /dev/null; then
 	echo addTest passed
 else
 	echo addTest failed
@@ -24,7 +24,7 @@ fi
 g++ -o executables/subTest compiledCpp/subTest.cpp
 ./executables/subTest > output/subTestOutput.txt
 count+=1
-if diff "output/subTestOutput.txt" "expected/subTestExpected.txt" > /dev/null; then
+if diff -b "output/subTestOutput.txt" "expected/subTestExpected.txt" > /dev/null; then
 	echo subTest passed
 else
 	echo subTest failed
@@ -36,7 +36,7 @@ fi
 g++ -o executables/multTest compiledCpp/multTest.cpp
 ./executables/multTest > output/multTestOutput.txt
 count+=1
-if diff "output/multTestOutput.txt" "expected/multTestExpected.txt" > /dev/null; then
+if diff -b "output/multTestOutput.txt" "expected/multTestExpected.txt" > /dev/null; then
 	echo multTest passed
 else
 	echo multTest failed
@@ -48,7 +48,7 @@ fi
 g++ -o executables/divTest compiledCpp/divTest.cpp
 ./executables/divTest > output/divTestOutput.txt
 count+=1
-if diff "output/divTestOutput.txt" "expected/divTestExpected.txt" > /dev/null; then
+if diff -b "output/divTestOutput.txt" "expected/divTestExpected.txt" > /dev/null; then
 	echo divTest passed
 else
 	echo divTest failed
@@ -60,7 +60,7 @@ fi
 g++ -o executables/expoTest compiledCpp/expoTest.cpp
 ./executables/expoTest > output/expoTestOutput.txt
 count+=1
-if diff "output/expoTestOutput.txt" "expected/expoTestExpected.txt" > /dev/null; then
+if diff -b "output/expoTestOutput.txt" "expected/expoTestExpected.txt" > /dev/null; then
 	echo expoTest passed
 else
 	echo expoTest failed
@@ -72,7 +72,7 @@ fi
 g++ -o executables/modTest compiledCpp/modTest.cpp
 ./executables/modTest > output/modTestOutput.txt
 count+=1
-if diff "output/modTestOutput.txt" "expected/modTestExpected.txt" > /dev/null; then
+if diff -b "output/modTestOutput.txt" "expected/modTestExpected.txt" > /dev/null; then
 	echo modTest passed
 else
 	echo modTest failed
@@ -84,7 +84,7 @@ fi
 g++ -o executables/assignTest compiledCpp/assignTest.cpp
 ./executables/assignTest > output/assignTestOutput.txt
 count+=1
-if diff "output/assignTestOutput.txt" "expected/assignTestExpected.txt" > /dev/null; then
+if diff -b "output/assignTestOutput.txt" "expected/assignTestExpected.txt" > /dev/null; then
 	echo assignTest passed
 else
 	echo assignTest failed
@@ -96,7 +96,7 @@ fi
 g++ -o executables/trueLitTest compiledCpp/trueLitTest.cpp
 ./executables/trueLitTest > output/trueLitTestOutput.txt
 count+=1
-if diff "output/trueLitTestOutput.txt" "expected/trueLitTestExpected.txt" > /dev/null; then
+if diff -b "output/trueLitTestOutput.txt" "expected/trueLitTestExpected.txt" > /dev/null; then
 	echo trueLitTest passed
 else
 	echo trueLitTest failed
@@ -108,7 +108,7 @@ fi
 g++ -o executables/falseLitTest compiledCpp/falseLitTest.cpp
 ./executables/falseLitTest > output/falseLitTestOutput.txt
 count+=1
-if diff "output/falseLitTestOutput.txt" "expected/falseLitTestExpected.txt" > /dev/null; then
+if diff -b "output/falseLitTestOutput.txt" "expected/falseLitTestExpected.txt" > /dev/null; then
 	echo falseLitTest passed
 else
 	echo falseLitTest failed
@@ -120,7 +120,7 @@ fi
 g++ -o executables/andTest compiledCpp/andTest.cpp
 ./executables/andTest > output/andTestOutput.txt
 count+=1
-if diff "output/andTestOutput.txt" "expected/andTestExpected.txt" > /dev/null; then
+if diff -b "output/andTestOutput.txt" "expected/andTestExpected.txt" > /dev/null; then
 	echo andTest passed
 else
 	echo andTest failed
@@ -133,7 +133,7 @@ fi
 g++ -o executables/orTest compiledCpp/orTest.cpp
 ./executables/orTest > output/orTestOutput.txt
 count+=1
-if diff "output/orTestOutput.txt" "expected/orTestExpected.txt" > /dev/null; then
+if diff -b "output/orTestOutput.txt" "expected/orTestExpected.txt" > /dev/null; then
 	echo orTest passed
 else
 	echo orTest failed
@@ -145,7 +145,7 @@ fi
 g++ -o executables/notTest compiledCpp/notTest.cpp
 ./executables/notTest > output/notTestOutput.txt
 count+=1
-if diff "output/notTestOutput.txt" "expected/notTestExpected.txt" > /dev/null; then
+if diff -b "output/notTestOutput.txt" "expected/notTestExpected.txt" > /dev/null; then
 	echo notTest passed
 else
 	echo notTest failed
@@ -157,7 +157,7 @@ fi
 g++ -o executables/multiStatementTest compiledCpp/multiStatementTest.cpp
 ./executables/multiStatementTest > output/multiStatementTest.txt
 count+=1
-if diff "output/multiStatementTest.txt" "expected/multiStatementTestExpected.txt" > /dev/null; then
+if diff -b "output/multiStatementTest.txt" "expected/multiStatementTestExpected.txt" > /dev/null; then
 	echo multiStatementTest passed
 else
 	echo multiStatementTest failed
