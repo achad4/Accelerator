@@ -41,7 +41,8 @@ let rec compile_expr = function
 
 let compile sast =
 	let string_list = List.map compile_expr sast in
-	String.concat "" string_list ^ ";" in
+    let rev_list = List.rev string_list in
+	String.concat "" rev_list ^ ";" in
 
   let c_begin = "#include<iostream>\n
                  #include<stdio.h>\n
