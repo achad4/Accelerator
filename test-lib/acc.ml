@@ -10,9 +10,10 @@ let _ =
 
 let rec compile_detail = function
   | IdLit(s) -> s
-	| IntLit(l) -> string_of_int l
+  | IntLit(l) -> string_of_int l
+  | FloatLit(f) -> string_of_float f
   | BoolLit(b) -> string_of_bool b
-	| FuncCall(id, el) -> let helper e = compile_detail e in
+  | FuncCall(id, el) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ "; cout << endl;"
   | And(b1, b2) -> (compile_detail b1) ^ " && " ^ (compile_detail b2)
   | Or(b1, b2) -> (compile_detail b1) ^ " || " ^ (compile_detail b2)

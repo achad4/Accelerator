@@ -5,6 +5,10 @@ type op =
     | Div
     | Expo
     | Mod
+    | FAdd
+    | FSub
+    | FMult
+    | FDiv
     | Assign
     | And
     | Or
@@ -13,6 +17,7 @@ type op =
 type t = 
     | String
 	| Int
+    | Float
     | Bool
 	| Na
 
@@ -23,12 +28,17 @@ type expr_detail =
      | IdLit of string
 	 | IntLit of int
      | BoolLit of bool
+     | FloatLit of float
 	 | Add of expr_detail * expr_detail
      | Sub of expr_detail * expr_detail
      | Mult of expr_detail * expr_detail
      | Div of expr_detail * expr_detail
      | Expo of expr_detail * expr_detail
      | Mod of expr_detail * expr_detail
+     | FAdd of expr_detail * expr_detail
+     | FSub of expr_detail * expr_detail
+     | FMult of expr_detail * expr_detail
+     | FDiv of expr_detail * expr_detail
 	 | FuncCall of id * expr_detail list
 	 | Assign of id * expr_detail
      | And of expr_detail * expr_detail
@@ -46,6 +56,10 @@ type expression =
     | Sdiv of expression * expression
     | Sexpo of expression * expression
     | Smod of expression * expression
+    | SFAdd of expression * expression
+    | SFSub of expression * expression
+    | SFMult of expression * expression
+    | SFDiv of expression * expression
 	| SfuncCall of expression list * t
 	| Sassign of expression * t
     | Sand of expression * expression
@@ -62,6 +76,7 @@ let string_of_type = function
     | String -> "string"
 	| Int -> "int"
     | Bool -> "bool"
+    | Float -> "float"
     | Na -> "Na"
 
 let string_of_id = function
@@ -70,6 +85,7 @@ let string_of_id = function
 let rec expr = function
     | Ast.Id ( s ) -> IdLit(s), String
 	| Ast.IntLit( c ) -> IntLit(c), Int
+    | Ast.FloatLit( f ) -> FloatLit(f), Float
     | Ast.BoolLit(b) -> BoolLit(b), Bool
 	| Ast.Assign(id, e) -> 
 		let e1 = expr e in
@@ -88,6 +104,19 @@ let rec expr = function
 		if t1 = t2 then
 			(
 				Add((fst e1), (fst e2)), Int
+			)
+		else
+			failwith "Type incompatibility"
+	| Ast.FAdd( e1, e2) ->
+		let e1 = expr e1
+		and e2 = expr e2 in
+
+		let _, t1 = e1
+		and _, t2 = e2 in
+
+		if t1 = t2 = Float then
+			(
+				FAdd((fst e1), (fst e2)), Float
 			)
 		else
 			failwith "Type incompatibility"
