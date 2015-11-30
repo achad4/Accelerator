@@ -107,19 +107,6 @@ let rec expr = function
 			)
 		else
 			failwith "Type incompatibility"
-	| Ast.FAdd( e1, e2) ->
-		let e1 = expr e1
-		and e2 = expr e2 in
-
-		let _, t1 = e1
-		and _, t2 = e2 in
-
-		if t1 = t2 = Float then
-			(
-				FAdd((fst e1), (fst e2)), Float
-			)
-		else
-			failwith "Type incompatibility"
     | Ast.Sub( e1, e2 ) ->
             let e1 = expr e1
             and e2 = expr e2 in
@@ -223,6 +210,58 @@ let rec expr = function
                 )
             else
                 failwith "Type incompatibility"
+	| Ast.FAdd( e1, e2) ->
+		let e1 = expr e1
+		and e2 = expr e2 in
+
+		let _, t1 = e1
+		and _, t2 = e2 in
+
+		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+			(
+				FAdd((fst e1), (fst e2)), Float
+			)
+		else
+			failwith "Type incompatibility"
+	| Ast.FSub( e1, e2) ->
+		let e1 = expr e1
+		and e2 = expr e2 in
+
+		let _, t1 = e1
+		and _, t2 = e2 in
+
+		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+			(
+				FSub((fst e1), (fst e2)), Float
+			)
+		else
+			failwith "Type incompatibility"
+	| Ast.FMult( e1, e2) ->
+		let e1 = expr e1
+		and e2 = expr e2 in
+
+		let _, t1 = e1
+		and _, t2 = e2 in
+
+		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+			(
+				FMult((fst e1), (fst e2)), Float
+			)
+		else
+			failwith "Type incompatibility"
+	| Ast.FDiv( e1, e2) ->
+		let e1 = expr e1
+		and e2 = expr e2 in
+
+		let _, t1 = e1
+		and _, t2 = e2 in
+
+		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+			(
+				FDiv((fst e1), (fst e2)), Float
+			)
+		else
+			failwith "Type incompatibility"
 
 let stmt = function
 	Ast.Expr( e ) ->

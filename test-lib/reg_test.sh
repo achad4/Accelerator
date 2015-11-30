@@ -164,6 +164,31 @@ else
 	failures+=1
 fi
 
+# Testing float literal
+./acc < sourceFiles/floatLitTest.acc > compiledCpp/floatLitTest.cpp
+g++ -o executables/floatLitTest compiledCpp/floatLitTest.cpp
+./executables/floatLitTest > output/floatLitTest.txt
+count+=1
+if diff "output/floatLitTest.txt" "expected/floatLitTestExpected.txt" > /dev/null; then
+	echo floatLitTest passed
+else
+	echo floatLitTest failed
+	failures+=1
+fi
+
+# Testing float addition
+./acc < sourceFiles/floatOpTest.acc > compiledCpp/floatOpTest.cpp
+g++ -o executables/floatOpTest compiledCpp/floatOpTest.cpp
+./executables/floatOpTest > output/floatOpTest.txt
+count+=1
+if diff "output/floatOpTest.txt" "expected/floatOpTestExpected.txt" > /dev/null; then
+	echo floatOpTest passed
+else
+	echo floatOpTest failed
+	failures+=1
+fi
+
+
 echo ====================================================
 echo Results
 echo ====================================================

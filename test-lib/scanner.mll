@@ -3,7 +3,7 @@
 }
 
   let dig = ['0'-'9']
-  let frac = '.' digit*
+  let frac = '.' dig*
   let whitespace = [' ' '\t']
   let flt = dig* frac?
   rule token = parse
