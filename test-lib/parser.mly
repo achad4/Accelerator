@@ -31,7 +31,7 @@ stmt:
 
 expr:
   | ID                                   { Id($1) }
-  | arith_expr                           { $1 }
+  | int_expr                             { $1 }
   | bool_expr                            { $1 }
   | float_expr                           { $1 }       
   | ID LPAREN actuals_opt RPAREN         { FuncCall($1, $3) }
@@ -46,14 +46,14 @@ actuals_opt:
   | expr                                 { [$1] }
   | actuals_list COMMA expr              { $3 :: $1 }
 
-arith_expr:
-  | num_data                    { $1 }
-  | arith_expr MULT arith_expr  { Mult($1, $3) }
-  | arith_expr PLUS arith_expr  { Add($1, $3) }
-  | arith_expr MINUS arith_expr { Sub($1, $3) }
-  | arith_expr DIV arith_expr   { Div($1, $3) }
-  | arith_expr EXPO arith_expr  { Expo($1, $3) }
-  | arith_expr MOD arith_expr   { Mod($1, $3) }
+int_expr:
+  | int_data                { $1 }
+  | int_expr MULT int_expr  { Mult($1, $3) }
+  | int_expr PLUS int_expr  { Add($1, $3) }
+  | int_expr MINUS int_expr { Sub($1, $3) }
+  | int_expr DIV int_expr   { Div($1, $3) }
+  | int_expr EXPO int_expr  { Expo($1, $3) }
+  | int_expr MOD int_expr   { Mod($1, $3) }
 
 float_expr:
   | float_data                      { $1 }
@@ -68,7 +68,7 @@ bool_expr:
   | bool_expr OR bool_expr    { Or($1, $3) }
   | NOT bool_expr             { Not($2) }
 
-num_data:
+int_data:
   | INT           { IntLit($1) }
 
 bool_data:
