@@ -30,6 +30,7 @@ stmt:
   | expr DLIN                            { Expr($1) }
 
 expr:
+  | ID                                   { Id($1) }
   | arith_expr                           { $1 }
   | bool_expr                            { $1 }
   | float_expr                           { $1 }       
