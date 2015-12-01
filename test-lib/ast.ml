@@ -9,17 +9,26 @@ type op =
     | And
     | Or
     | Not
+    | FMult
+    | FAdd
+    | FSub
+    | FDiv
 
 type expr =
     | Id of string
  	| IntLit of int
     | BoolLit of bool
+    | FloatLit of float
  	| Add of expr * expr
     | Sub of expr * expr
     | Mult of expr * expr
     | Div of expr * expr
     | Expo of expr * expr
     | Mod of expr * expr
+    | FAdd of expr * expr
+    | FSub of expr * expr
+    | FMult of expr * expr
+    | FDiv of expr * expr
  	| FuncCall of string * expr list 
  	| Assign of string * expr
     | And of expr * expr
@@ -35,12 +44,17 @@ let rec string_of_expression = function
     | Id(s) -> s
 	| IntLit(e) -> string_of_int e
     | BoolLit(b) -> string_of_bool b
+    | FloatLit(f) -> string_of_float f
 	| Add(e1, e2) -> (string_of_expression e1) ^ "+" ^ (string_of_expression e2)
     | Sub(e1, e2 ) -> (string_of_expression e1) ^ "-" ^ (string_of_expression e2)
     | Mult(e1, e2) -> (string_of_expression e1) ^ "*" ^ (string_of_expression e2)
     | Div(e1, e2) -> (string_of_expression e1) ^ "/" ^ (string_of_expression e2)
     | Expo(e1, e2) -> (string_of_expression e1) ^ "^" ^ (string_of_expression e2)
     | Mod(e1, e2) -> (string_of_expression e1) ^ "%" ^ (string_of_expression e2)
+    | FMult(f1, f2) -> (string_of_expression f1) ^ "*" ^ (string_of_expression f1)
+    | FAdd(f1, f2) -> (string_of_expression f1) ^ "+" ^ (string_of_expression f2)
+    | FSub(f1, f2) -> (string_of_expression f1) ^ "-" ^ (string_of_expression f2)
+    | FDiv(f1, f2) -> (string_of_expression f1) ^ "/" ^ (string_of_expression f2)
     | FuncCall( s, e ) -> "function call " ^ s
     | Assign( s, e ) -> "assign " ^ s ^ " = " ^ (string_of_expression e)
     | And( b1, b2) -> (string_of_expression b1) ^ " && " ^ (string_of_expression b2)
