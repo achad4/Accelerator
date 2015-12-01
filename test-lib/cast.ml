@@ -81,18 +81,19 @@ let string_of_type = function
 let string_of_id = function
   Id(s) -> s 
 
+
 let rec expr = function
-    | Ast.Id ( s ) -> IdLit(s), String
-  | Ast.IntLit( c ) -> IntLit(c), Int
-    | Ast.BoolLit(b) -> BoolLit(b), Bool
-  | Ast.Assign(id, e) -> 
+  | Sast.IdLit ( s ) -> IdLit(s), String
+  | Sast.IntLit( c ) -> IntLit(c), Int
+  | Sast.BoolLit(b) -> BoolLit(b), Bool
+  | Sast.Assign(id, e) -> 
     let e1 = expr e in
     Assign(Id(id), fst e1), snd e1
-  | Ast.FuncCall(id, el) ->     
+  | Sast.FuncCall(id, el) ->     
     (*iterate over list of expressions and pull out the expression_detail from each one*)
     let helper e = fst (expr e) in
     FuncCall(Id(id), (List.map helper el)), Na
-  | Ast.Add( e1, e2) ->
+  | Sast.Add( e1, e2) ->
     let e1 = expr e1
     and e2 = expr e2 in
 
@@ -105,7 +106,7 @@ let rec expr = function
       )
     else
       failwith "Type incompatibility"
-    | Ast.Sub( e1, e2 ) ->
+    | Sast.Sub( e1, e2 ) ->
             let e1 = expr e1
             and e2 = expr e2 in
 
@@ -118,7 +119,7 @@ let rec expr = function
                 )
             else
                 failwith "Type incompatability"
-    | Ast.Mult( e1, e2 ) ->
+    | Sast.Mult( e1, e2 ) ->
             let e1 = expr e1
             and e2 = expr e2 in
 
@@ -132,7 +133,7 @@ let rec expr = function
             else
                 failwith "Type incompatability"
 
-    | Ast.Div( e1, e2 ) ->
+    | Sast.Div( e1, e2 ) ->
             let e1 = expr e1
             and e2 = expr e2 in
 
@@ -146,7 +147,7 @@ let rec expr = function
             else
                 failwith "Type incompatability"
 
-    | Ast.Expo( e1, e2 ) ->
+    | Sast.Expo( e1, e2 ) ->
             let e1 = expr e1
             and e2 = expr e2 in
 
@@ -160,7 +161,7 @@ let rec expr = function
             else
                 failwith "Type incompatability"
 
-    | Ast.Mod( e1, e2 ) ->
+    | Sast.Mod( e1, e2 ) ->
             let e1 = expr e1
             and e2 = expr e2 in
 
@@ -173,7 +174,7 @@ let rec expr = function
                 )
             else
                 failwith "Type incompatability"
-    | Ast.And( b1, b2) ->
+    | Sast.And( b1, b2) ->
             let b1 = expr b1
             and b2 = expr b2 in
 
@@ -186,7 +187,7 @@ let rec expr = function
                 )
             else
                 failwith "Type incompatibility"
-    | Ast.Or( b1, b2) ->
+    | Sast.Or( b1, b2) ->
             let b1 = expr b1
             and b2 = expr b2 in
 
@@ -199,7 +200,7 @@ let rec expr = function
                 )
             else
                 failwith "Type incompatibility"
-    | Ast.Not( b1 ) ->
+    | Sast.Not( b1 ) ->
             let b1 = expr b1 in
             let _, t1 = b1 in
             if t1 = Bool then
@@ -210,11 +211,10 @@ let rec expr = function
                 failwith "Type incompatibility"
 
 let stmt = function
-  Ast.Expr( e ) ->
+  Sast.Expr( e ) -> Expr( e )
    (* print_endline (Ast.string_of_expression e); *)
    let r = expr e in
-   let expr = Sexpr( (fst r), (snd r) ) in
-   Sstmt(Expr(expr), snd r)
+   Sexpr( (fst r), (snd r) )
  
  (*return a c program in the form of a single *)
 let program sast = 
