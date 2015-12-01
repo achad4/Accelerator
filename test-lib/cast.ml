@@ -58,17 +58,172 @@ type stmt_detail =
 type statement = 
   Sstmt of stmt_detail * t
 
-type func_decl_detail = 
-  func_decl * t
 
-type func_decl = {
+type func_decl_detail = {
     fname : string;
     formals : string list;
-    body : stmt list;
+    body : statement list;
 }
+
+type func_decl = 
+  func_decl_detail * t
 
 type program = 
   func_decl list
+
+
+let string_of_type = function
+    | String -> "string"
+  | Int -> "int"
+    | Bool -> "bool"
+    | Na -> "Na"
+
+let string_of_id = function
+  Id(s) -> s 
+
+let rec expr = function
+    | Ast.Id ( s ) -> IdLit(s), String
+  | Ast.IntLit( c ) -> IntLit(c), Int
+    | Ast.BoolLit(b) -> BoolLit(b), Bool
+  | Ast.Assign(id, e) -> 
+    let e1 = expr e in
+    Assign(Id(id), fst e1), snd e1
+  | Ast.FuncCall(id, el) ->     
+    (*iterate over list of expressions and pull out the expression_detail from each one*)
+    let helper e = fst (expr e) in
+    FuncCall(Id(id), (List.map helper el)), Na
+  | Ast.Add( e1, e2) ->
+    let e1 = expr e1
+    and e2 = expr e2 in
+
+    let _, t1 = e1
+    and _, t2 = e2 in
+
+    if t1 = t2 then
+      (
+        Add((fst e1), (fst e2)), Int
+      )
+    else
+      failwith "Type incompatibility"
+    | Ast.Sub( e1, e2 ) ->
+            let e1 = expr e1
+            and e2 = expr e2 in
+
+            let _, t1 = e1
+            and _, t2 = e2 in
+
+            if t1 = t2 then
+                (
+                Sub((fst e1),(fst e2)), Int
+                )
+            else
+                failwith "Type incompatability"
+    | Ast.Mult( e1, e2 ) ->
+            let e1 = expr e1
+            and e2 = expr e2 in
+
+            let _, t1 = e1
+            and _, t2 = e2 in
+
+            if t1 = t2 then
+                (
+                Mult((fst e1),(fst e2)), Int
+                )
+            else
+                failwith "Type incompatability"
+
+    | Ast.Div( e1, e2 ) ->
+            let e1 = expr e1
+            and e2 = expr e2 in
+
+            let _, t1 = e1
+            and _, t2 = e2 in
+
+            if t1 = t2 then
+                (
+                Div((fst e1),(fst e2)), Int
+                )
+            else
+                failwith "Type incompatability"
+
+    | Ast.Expo( e1, e2 ) ->
+            let e1 = expr e1
+            and e2 = expr e2 in
+
+            let _, t1 = e1
+            and _, t2 = e2 in
+
+            if t1 = t2 then
+                (
+                Expo((fst e1),(fst e2)), Int
+                )
+            else
+                failwith "Type incompatability"
+
+    | Ast.Mod( e1, e2 ) ->
+            let e1 = expr e1
+            and e2 = expr e2 in
+
+            let _, t1 = e1
+            and _, t2 = e2 in
+
+            if t1 = t2 then
+                (
+                Mod((fst e1),(fst e2)), Int
+                )
+            else
+                failwith "Type incompatability"
+    | Ast.And( b1, b2) ->
+            let b1 = expr b1
+            and b2 = expr b2 in
+
+            let _, t1 = b1
+            and _, t2 = b2 in
+
+            if t1 = t2 then
+                (
+                   And((fst b1),(fst b2)), Bool
+                )
+            else
+                failwith "Type incompatibility"
+    | Ast.Or( b1, b2) ->
+            let b1 = expr b1
+            and b2 = expr b2 in
+
+            let _, t1 = b1
+            and _, t2 = b2 in
+
+            if t1 = t2 then
+                (
+                   Or((fst b1),(fst b2)), Bool
+                )
+            else
+                failwith "Type incompatibility"
+    | Ast.Not( b1 ) ->
+            let b1 = expr b1 in
+            let _, t1 = b1 in
+            if t1 = Bool then
+                (
+                    Not(fst b1), Bool
+                )
+            else
+                failwith "Type incompatibility"
+
+let stmt = function
+  Ast.Expr( e ) ->
+   (* print_endline (Ast.string_of_expression e); *)
+   let r = expr e in
+   let expr = Sexpr( (fst r), (snd r) ) in
+   Sstmt(Expr(expr), snd r)
+ 
+ (*return a c program in the form of a single *)
+let program sast = 
+  [({
+    fname = "main";
+    formals = [];
+    body = List.map stmt sast
+  }, Int)]
+
 
 
 

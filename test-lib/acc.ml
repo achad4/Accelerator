@@ -2,11 +2,15 @@ open Parser
 open Scanner
 open Ast
 open Sast
+open Cast
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in
   let program = Parser.program Scanner.token lexbuf in
   let sast = Sast.program program in
+  let cast = Cast.program program in
+
+
 
 let rec compile_detail = function
   | IdLit(s) -> s
@@ -39,7 +43,30 @@ let rec compile_expr = function
   | Sor(b1, b2) -> compile_expr b1 ^ compile_expr b2
   | Snot(b1) -> (compile_expr b1) in
 
-let compile sast =
+
+let rec compile_stmt = function
+  | Sstmt(Expr(e), t) -> compile_expr e in
+
+let compile_func (f, t) = 
+  let stmt_string_list = List.map compile_stmt f.body in
+    string_of_type t ^ " " ^ f.fname
+    ^ "(" ^ String.concat "," f.formals ^ "{\n"
+    ^ String.concat "; " stmt_string_list
+    ^ "\n}" in
+
+
+
+let compile cast = 
+  let string_list = List.map compile_func cast in
+    let rev_list = List.rev string_list in
+  String.concat "" rev_list in
+
+  let c_begin = "#include<iostream>\n
+                 #include<stdio.h>\n
+                 #include<math.h>\n
+                 using namespace std;\n" in
+
+(* let compile sast =
 	let string_list = List.map compile_expr sast in
     let rev_list = List.rev string_list in
 	String.concat "" rev_list ^ ";" in
@@ -49,5 +76,7 @@ let compile sast =
                  #include<math.h>\n
                  using namespace std;\n 
                  int main () {\n " in
-let c_end = "}" in
-print_endline ( c_begin ^ (compile sast) ^ c_end)
+let c_end = "}" in *)
+
+
+print_endline ( c_begin ^ (compile sast))
