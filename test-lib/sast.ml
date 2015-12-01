@@ -101,7 +101,7 @@ let rec expr = function
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if t1 = t2 then
+		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
 			(
 				Add((fst e1), (fst e2)), Int
 			)
@@ -114,7 +114,7 @@ let rec expr = function
             let _, t1 = e1
             and _, t2 = e2 in
 
-            if t1 = t2 then
+   		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
                 (
                 Sub((fst e1),(fst e2)), Int
                 )
@@ -126,8 +126,8 @@ let rec expr = function
 
             let _, t1 = e1
             and _, t2 = e2 in
-
-            if t1 = t2 then
+            
+		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
                 (
                 Mult((fst e1),(fst e2)), Int
                 )
@@ -141,7 +141,7 @@ let rec expr = function
             let _, t1 = e1
             and _, t2 = e2 in
 
-            if t1 = t2 then
+        if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
                 (
                 Div((fst e1),(fst e2)), Int
                 )
@@ -155,7 +155,7 @@ let rec expr = function
             let _, t1 = e1
             and _, t2 = e2 in
 
-            if t1 = t2 then
+		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
                 (
                 Expo((fst e1),(fst e2)), Int
                 )
@@ -169,7 +169,7 @@ let rec expr = function
             let _, t1 = e1
             and _, t2 = e2 in
 
-            if t1 = t2 then
+		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
                 (
                 Mod((fst e1),(fst e2)), Int
                 )
@@ -182,7 +182,7 @@ let rec expr = function
             let _, t1 = b1
             and _, t2 = b2 in
 
-            if t1 = t2 then
+		if ((t1 = t2) && (t1 = Bool) && (t2 = Bool)) then
                 (
                    And((fst b1),(fst b2)), Bool
                 )
@@ -195,7 +195,7 @@ let rec expr = function
             let _, t1 = b1
             and _, t2 = b2 in
 
-            if t1 = t2 then
+		if ((t1 = t2) && (t1 = Bool) && (t2 = Bool)) then
                 (
                    Or((fst b1),(fst b2)), Bool
                 )
