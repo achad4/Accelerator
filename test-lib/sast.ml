@@ -53,7 +53,7 @@ type expression =
     | Snot of expression * t
 
 type statement = 
-	Expr of expression * t
+	Sstmt of expression * t
 
 let string_of_type = function
     | String -> "string"
