@@ -51,7 +51,7 @@ let rec compile_stmt = function
 let compile_func (f, t) = 
   let stmt_string_list = List.map compile_stmt f.body in
     string_of_ctype t ^ " " ^ f.fname
-    ^ "(" ^ String.concat "," f.formals ^ "{\n"
+    ^ "(" ^ String.concat "," f.formals ^ ")\n{\n"
     ^ String.concat "; " stmt_string_list
     ^ "\n}" in
 

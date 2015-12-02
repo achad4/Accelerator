@@ -5,6 +5,7 @@
                  #include<math.h>
 
                  using namespace std;
-int main({
+int main()
+{
 cout << 4 - 1; cout << endl;;
 }
