@@ -10,54 +10,47 @@ type op =
   | Or
   | Not
 
-type t = 
+type ct = 
   | String
   | Int
   | Bool
-  | Na
+  | Void
 
 type id = 
   | Id of string
 
-type expr_detail = 
+type cexpr_detail = 
    | IdLit of string
    | IntLit of int
    | BoolLit of bool
-   | Add of expr_detail * expr_detail
-   | Sub of expr_detail * expr_detail
-   | Mult of expr_detail * expr_detail
-   | Div of expr_detail * expr_detail
-   | Expo of expr_detail * expr_detail
-   | Mod of expr_detail * expr_detail
-   | FuncCall of id * expr_detail list
-   | Assign of id * expr_detail
-   | And of expr_detail * expr_detail
-   | Or of expr_detail * expr_detail
-   | Not of expr_detail
+   | Add of cexpr_detail * cexpr_detail * ct
+   | Sub of cexpr_detail * cexpr_detail * ct
+   | Mult of cexpr_detail * cexpr_detail * ct
+   | Div of cexpr_detail * cexpr_detail * ct
+   | Expo of cexpr_detail * cexpr_detail * ct
+   | Mod of cexpr_detail * cexpr_detail * ct
+   | FuncCall of id * cexpr_detail list * ct
+   | Assign of id * cexpr_detail * ct
+   | And of cexpr_detail * cexpr_detail * ct
+   | Or of cexpr_detail * cexpr_detail * ct
+   | Not of cexpr_detail * ct
 
-type detail = 
-  | ExprDet of expr_detail
-
-type expression = 
-  | Sexpr of expr_detail * t
-  | Sadd of expression * expression
-  | Ssub of expression * expression
-  | Smult of expression * expression
-  | Sdiv of expression * expression
-  | Sexpo of expression * expression
-  | Smod of expression * expression
-  | SfuncCall of expression list * t
-  | Sassign of expression * t
-  | Sand of expression * expression
-  | Sor of expression * expression
-  | Snot of expression
-
-type stmt_detail = 
-  Expr of expression
+type cexpression = 
+  | Cexpr of cexpr_detail * ct
+  | Cadd of cexpression * cexpression * ct
+  | Csub of cexpression * cexpression * ct
+  | Cmult of cexpression * cexpression * ct
+  | Cdiv of cexpression * cexpression * ct
+  | Cexpo of cexpression * cexpression * ct
+  | Cmod of cexpression * cexpression * ct
+  | CfuncCall of cexpression list * ct
+  | Cassign of cexpression * ct
+  | Cand of cexpression * cexpression * ct
+  | Cor of cexpression * cexpression * ct
+  | Cnot of cexpression * ct
 
 type statement = 
-  Sstmt of stmt_detail * t
-
+  Cexpr of cexpression * ct
 
 type func_decl_detail = {
     fname : string;
@@ -66,155 +59,81 @@ type func_decl_detail = {
 }
 
 type func_decl = 
-  func_decl_detail * t
+  func_decl_detail * ct
 
 type program = 
   func_decl list
 
 
 let string_of_type = function
-    | String -> "string"
-  | Int -> "int"
-    | Bool -> "bool"
-    | Na -> "Na"
+  | Sast.String -> "string"
+  | Sast.Int -> "int"
+  | Sast.Bool -> "bool"
+  | Sast.Na -> "Na"
 
 let string_of_id = function
   Id(s) -> s 
 
+let type_match = function
+  | Sast.String -> String
+  | Sast.Int -> Int
+  | Sast.Bool -> Bool
+  | Sast.Na -> Void
 
-let rec expr = function
-  | Sast.IdLit ( s ) -> IdLit(s), String
-  | Sast.IntLit( c ) -> IntLit(c), Int
-  | Sast.BoolLit(b) -> BoolLit(b), Bool
-  | Sast.Assign(id, e) -> 
-    let e1 = expr e in
-    Assign(Id(id), fst e1), snd e1
-  | Sast.FuncCall(id, el) ->     
-    (*iterate over list of expressions and pull out the expression_detail from each one*)
-    let helper e = fst (expr e) in
-    FuncCall(Id(id), (List.map helper el)), Na
-  | Sast.Add( e1, e2) ->
-    let e1 = expr e1
-    and e2 = expr e2 in
+let rec cexpr_detail = function
+ | Sast.IdLit(s) ->  IdLit(s)
+ | Sast.IntLit(i) -> IntLit(i)
+ | Sast.BoolLit(b) -> BoolLit(b)
+ (*Expand when you pull in Alan's Fadd etc.*)
+ | Sast.Add(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Int), Int 
+ | Sast.Sub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Int), Int
+ | Sast.Mult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, Int), Int
+ | Sast.Div(e1, e2, t) -> Div(cexpr_detail e1, cexpr_detail e2, Int), Int
+ | Sast.Expo(e1, e2, t) -> Expo(cexpr_detail e1, cexpr_detail e2, Int), Int
+ | Sast.Mod(e1, e2, t) -> Mod(cexpr_detail e1, cexpr_detail e2, Int), Int
+ | Sast.FuncCall(e1, e2, t) -> 
+                              let ct = type_match t in
+                              FuncCall(cexpr_detail e1, cexpr_detail e2, ct), ct 
+ | Sast.Assign(e1, e2, t) -> 
+                            let ct = type_match t in
+                             Assign(cexpr_detail e1, cexpr_detail e2, ct), ct
+ | Sast.And(e1, e2, t) -> let ct = type_match t in 
+                          And(cexpr_detail e1, cexpr_detail e2, ct), ct
+ | Sast.Or(e1, e2, t) ->  let ct = type_match t in
+                          Or(cexpr_detail e1, cexpr_detail e2, ct), ct
+ | Sast.Not(e, t) -> let ct = type_match t in
+                      Not(e, ct), ct
 
-    let _, t1 = e1
-    and _, t2 = e2 in
 
-    if t1 = t2 then
-      (
-        Add((fst e1), (fst e2)), Int
-      )
-    else
-      failwith "Type incompatibility"
-    | Sast.Sub( e1, e2 ) ->
-            let e1 = expr e1
-            and e2 = expr e2 in
+let rec cexpr = function
+  | Sast.Sexpr(e, t) -> cexpr_detail e
+      
+(*   | Sast.Sadd(e1, e2) -> 
+      cexpr e1, 
+      cexpr e2
+  | Sast.Ssub(e1, e2) -> cexpr e1, cexpr e2
+  | Sast.Smult(e1, e2) -> cexpr e1, cexpr e2
+  | Sast.Sdiv(e1, e2) -> cexpr e1, cexpr e2
+  | Sast.Sexpo(e1, e2) -> cexpr e1, cexpr e2
+  | Sast.Smod(e1, e2) -> cexpr e1, cexpr e2
+  | Sast.SfuncCall(el, t) -> (List.map cexpr e), t
+  | Sast.Sassign(e, t) -> cexpr e, t
+  | Sast.Sand(e1, e2) -> cexpr e1, cexpr e2
+  | Sast.Sor(e1, e2) -> cexpr e1, cexpr e2
+  | Sast.Snot(e) -> cexpr e *)
 
-            let _, t1 = e1
-            and _, t2 = e2 in
 
-            if t1 = t2 then
-                (
-                Sub((fst e1),(fst e2)), Int
-                )
-            else
-                failwith "Type incompatability"
-    | Sast.Mult( e1, e2 ) ->
-            let e1 = expr e1
-            and e2 = expr e2 in
 
-            let _, t1 = e1
-            and _, t2 = e2 in
-
-            if t1 = t2 then
-                (
-                Mult((fst e1),(fst e2)), Int
-                )
-            else
-                failwith "Type incompatability"
-
-    | Sast.Div( e1, e2 ) ->
-            let e1 = expr e1
-            and e2 = expr e2 in
-
-            let _, t1 = e1
-            and _, t2 = e2 in
-
-            if t1 = t2 then
-                (
-                Div((fst e1),(fst e2)), Int
-                )
-            else
-                failwith "Type incompatability"
-
-    | Sast.Expo( e1, e2 ) ->
-            let e1 = expr e1
-            and e2 = expr e2 in
-
-            let _, t1 = e1
-            and _, t2 = e2 in
-
-            if t1 = t2 then
-                (
-                Expo((fst e1),(fst e2)), Int
-                )
-            else
-                failwith "Type incompatability"
-
-    | Sast.Mod( e1, e2 ) ->
-            let e1 = expr e1
-            and e2 = expr e2 in
-
-            let _, t1 = e1
-            and _, t2 = e2 in
-
-            if t1 = t2 then
-                (
-                Mod((fst e1),(fst e2)), Int
-                )
-            else
-                failwith "Type incompatability"
-    | Sast.And( b1, b2) ->
-            let b1 = expr b1
-            and b2 = expr b2 in
-
-            let _, t1 = b1
-            and _, t2 = b2 in
-
-            if t1 = t2 then
-                (
-                   And((fst b1),(fst b2)), Bool
-                )
-            else
-                failwith "Type incompatibility"
-    | Sast.Or( b1, b2) ->
-            let b1 = expr b1
-            and b2 = expr b2 in
-
-            let _, t1 = b1
-            and _, t2 = b2 in
-
-            if t1 = t2 then
-                (
-                   Or((fst b1),(fst b2)), Bool
-                )
-            else
-                failwith "Type incompatibility"
-    | Sast.Not( b1 ) ->
-            let b1 = expr b1 in
-            let _, t1 = b1 in
-            if t1 = Bool then
-                (
-                    Not(fst b1), Bool
-                )
-            else
-                failwith "Type incompatibility"
+(* let stmt_detail = function
+  Sast.Expr( e ) -> 
+   print_endline (Ast.string_of_cexpression e);
+   let r = cexpr e in
+    ( (fst r), (snd r) ), (snd r) *)
 
 let stmt = function
-  Sast.Expr( e ) -> Expr( e )
-   (* print_endline (Ast.string_of_expression e); *)
-   let r = expr e in
-   Sexpr( (fst r), (snd r) )
+  Sast.Expr(e, t) ->
+    let r = cexpr e in
+    Cexpr( (fst r), (snd r) ), type_match t
  
  (*return a c program in the form of a single *)
 let program sast = 

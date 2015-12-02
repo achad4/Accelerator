@@ -23,40 +23,37 @@ type expr_detail =
      | IdLit of string
 	 | IntLit of int
      | BoolLit of bool
-	 | Add of expr_detail * expr_detail
-     | Sub of expr_detail * expr_detail
-     | Mult of expr_detail * expr_detail
-     | Div of expr_detail * expr_detail
-     | Expo of expr_detail * expr_detail
-     | Mod of expr_detail * expr_detail
-	 | FuncCall of id * expr_detail list
-	 | Assign of id * expr_detail
-     | And of expr_detail * expr_detail
-     | Or of expr_detail * expr_detail
-     | Not of expr_detail
+	 | Add of expr_detail * expr_detail * t
+     | Sub of expr_detail * expr_detail  * t
+     | Mult of expr_detail * expr_detail * t
+     | Div of expr_detail * expr_detail * t
+     | Expo of expr_detail * expr_detail * t
+     | Mod of expr_detail * expr_detail * t
+	 | FuncCall of id * expr_detail list * t
+	 | Assign of id * expr_detail * t
+     | And of expr_detail * expr_detail * t
+     | Or of expr_detail * expr_detail * t
+     | Not of expr_detail * t
 
 type detail = 
 	| ExprDet of expr_detail
 
 type expression = 
 	| Sexpr of expr_detail * t
-	| Sadd of expression * expression
-    | Ssub of expression * expression
-    | Smult of expression * expression
-    | Sdiv of expression * expression
-    | Sexpo of expression * expression
-    | Smod of expression * expression
+	| Sadd of expression * expression * t
+    | Ssub of expression * expression * t
+    | Smult of expression * expression * t
+    | Sdiv of expression * expression * t
+    | Sexpo of expression * expression * t
+    | Smod of expression * expression * t
 	| SfuncCall of expression list * t
 	| Sassign of expression * t
-    | Sand of expression * expression
-    | Sor of expression * expression
-    | Snot of expression
-
-type stmt_detail = 
-	Expr of expression
+    | Sand of expression * expression * t
+    | Sor of expression * expression * t
+    | Snot of expression * t
 
 type statement = 
-	Sstmt of stmt_detail * t
+	Expr of expression * t
 
 let string_of_type = function
     | String -> "string"
@@ -73,11 +70,11 @@ let rec expr = function
     | Ast.BoolLit(b) -> BoolLit(b), Bool
 	| Ast.Assign(id, e) -> 
 		let e1 = expr e in
-		Assign(Id(id), fst e1), snd e1
+		Assign(Id(id), fst e1, snd e1), snd e1
 	| Ast.FuncCall(id, el) -> 		
 		(*iterate over list of expressions and pull out the expression_detail from each one*)
 		let helper e = fst (expr e) in
-		FuncCall(Id(id), (List.map helper el)), Na
+		FuncCall(Id(id), (List.map helper el), Na), Na
 	| Ast.Add( e1, e2) ->
 		let e1 = expr e1
 		and e2 = expr e2 in
@@ -87,7 +84,7 @@ let rec expr = function
 
 		if t1 = t2 then
 			(
-				Add((fst e1), (fst e2)), Int
+				Add((fst e1), (fst e2), Int), Int
 			)
 		else
 			failwith "Type incompatibility"
@@ -100,7 +97,7 @@ let rec expr = function
 
             if t1 = t2 then
                 (
-                Sub((fst e1),(fst e2)), Int
+                Sub((fst e1),(fst e2), Int), Int
                 )
             else
                 failwith "Type incompatability"
@@ -113,7 +110,7 @@ let rec expr = function
 
             if t1 = t2 then
                 (
-                Mult((fst e1),(fst e2)), Int
+                Mult((fst e1),(fst e2), Int), Int
                 )
             else
                 failwith "Type incompatability"
@@ -127,7 +124,7 @@ let rec expr = function
 
             if t1 = t2 then
                 (
-                Div((fst e1),(fst e2)), Int
+                Div((fst e1),(fst e2), Int), Int
                 )
             else
                 failwith "Type incompatability"
@@ -141,7 +138,7 @@ let rec expr = function
 
             if t1 = t2 then
                 (
-                Expo((fst e1),(fst e2)), Int
+                Expo((fst e1),(fst e2), Int), Int
                 )
             else
                 failwith "Type incompatability"
@@ -155,7 +152,7 @@ let rec expr = function
 
             if t1 = t2 then
                 (
-                Mod((fst e1),(fst e2)), Int
+                Mod((fst e1),(fst e2), Int), Int
                 )
             else
                 failwith "Type incompatability"
@@ -168,7 +165,7 @@ let rec expr = function
 
             if t1 = t2 then
                 (
-                   And((fst b1),(fst b2)), Bool
+                   And((fst b1),(fst b2), Bool), Bool
                 )
             else
                 failwith "Type incompatibility"
@@ -181,7 +178,7 @@ let rec expr = function
 
             if t1 = t2 then
                 (
-                   Or((fst b1),(fst b2)), Bool
+                   Or((fst b1),(fst b2), Bool), Bool
                 )
             else
                 failwith "Type incompatibility"
@@ -190,7 +187,7 @@ let rec expr = function
             let _, t1 = b1 in
             if t1 = Bool then
                 (
-                    Not(fst b1), Bool
+                    Not((fst b1), Bool), Bool
                 )
             else
                 failwith "Type incompatibility"
@@ -199,7 +196,7 @@ let stmt = function
 	Ast.Expr( e ) ->
 	 (* print_endline (Ast.string_of_expression e); *)
 	 let r = expr e in
-	 Sexpr( (fst r), (snd r) )
+	 Sexpr( (fst r), (snd r) ), (snd r)
 
 let program program = 
 	List.map stmt program
