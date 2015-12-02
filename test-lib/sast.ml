@@ -196,7 +196,7 @@ let stmt = function
 	Ast.Expr( e ) ->
 	 (* print_endline (Ast.string_of_expression e); *)
 	 let r = expr e in
-	 Sexpr( (fst r), (snd r) ), (snd r)
+	 Sstmt(Sexpr( (fst r), (snd r) ), (snd r))
 
 let program program = 
 	List.map stmt program

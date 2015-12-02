@@ -13,43 +13,44 @@ let _ =
 
 
 let rec compile_detail = function
-  | IdLit(s) -> s
-	| IntLit(l) -> string_of_int l
-  | BoolLit(b) -> string_of_bool b
-	| FuncCall(id, el) -> let helper e = compile_detail e in
+  | Cast.IdLit(s) -> s
+	| Cast.IntLit(l) -> string_of_int l
+  | Cast.BoolLit(b) -> string_of_bool b
+	| Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ "; cout << endl;"
-  | And(b1, b2) -> (compile_detail b1) ^ " && " ^ (compile_detail b2)
-  | Or(b1, b2) -> (compile_detail b1) ^ " || " ^ (compile_detail b2)
-  | Not(b1) -> "! " ^ (compile_detail b1)
-  | Assign(id, e) -> "int " ^ (string_of_id id) ^ "=" ^ (compile_detail e)
-  | Mod(e1, e2) -> (compile_detail e1) ^ " % " ^ (compile_detail e2) 
-  | Expo(e1, e2) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ (compile_detail e2) ^ ")"
-  | Div(e1, e2) -> (compile_detail e1) ^ " / " ^ (compile_detail e2)
-  | Mult(e1, e2) -> (compile_detail e1) ^ " * " ^ (compile_detail e2)
-  | Sub(e1, e2) -> (compile_detail e1) ^ " - " ^ (compile_detail e2) 
-  | Add(e1, e2) -> (compile_detail e1) ^ " + " ^ (compile_detail e2) in
+  | Cast.And(b1, b2, t) -> (compile_detail b1) ^ " && " ^ (compile_detail b2)
+  | Cast.Or(b1, b2, t) -> (compile_detail b1) ^ " || " ^ (compile_detail b2)
+  | Cast.Not(b1, t) -> "! " ^ (compile_detail b1)
+  | Cast.Assign(id, e, t) -> "int " ^ (string_of_id id) ^ "=" ^ (compile_detail e)
+  | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ (compile_detail e2) 
+  | Cast.Expo(e1, e2, t) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ (compile_detail e2) ^ ")"
+  | Cast.Div(e1, e2, t) -> (compile_detail e1) ^ " / " ^ (compile_detail e2)
+  | Cast.Mult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ (compile_detail e2)
+  | Cast.Sub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ (compile_detail e2) 
+  | Cast.Add(e1, e2, t) -> (compile_detail e1) ^ " + " ^ (compile_detail e2) in
 
 let rec compile_expr = function
-	| Sexpr(e, t) -> compile_detail e ^ ";" 
-	| SfuncCall(el, t) -> String.concat "" (List.map compile_expr el)
-	| Sassign(e, t) -> print_endline ("here: " ^ (string_of_type t)); (string_of_type t) ^ compile_expr e
-  | Smod(e1, e2) -> compile_expr e1 ^ compile_expr e2 
-  | Sexpo(e1, e2) -> compile_expr e1 ^ compile_expr e2
-  | Sdiv(e1, e2) -> compile_expr e1 ^ compile_expr e2 
-  | Smult(e1, e2) -> compile_expr e1 ^ compile_expr e2
-  | Ssub(e1, e2) -> compile_expr e1 ^ compile_expr e2 
-	| Sadd(e1, e2) -> compile_expr e1 ^ compile_expr e2 
-  | Sand(b1, b2) -> compile_expr b1 ^ compile_expr b2 
-  | Sor(b1, b2) -> compile_expr b1 ^ compile_expr b2
-  | Snot(b1) -> (compile_expr b1) in
+	| Cexpr(e, t) -> compile_detail e ^ ";" 
+	| CfuncCall(el, t) -> String.concat "" (List.map compile_expr el)
+	| Cassign(e, t) -> print_endline ("here: " ^ (string_of_ctype t)); (string_of_ctype t) ^ compile_expr e
+  | Cmod(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | Cexpo(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
+  | Cdiv(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | Cmult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
+  | Csub(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+	| Cadd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | Cand(b1, b2, t) -> compile_expr b1 ^ compile_expr b2 
+  | Cor(b1, b2, t) -> compile_expr b1 ^ compile_expr b2
+  | Cnot(b1, t) -> (compile_expr b1) in
+
 
 
 let rec compile_stmt = function
-  | Sstmt(Expr(e), t) -> compile_expr e in
+  | Cstmt(e, t) -> compile_expr e in
 
 let compile_func (f, t) = 
   let stmt_string_list = List.map compile_stmt f.body in
-    string_of_type t ^ " " ^ f.fname
+    string_of_ctype t ^ " " ^ f.fname
     ^ "(" ^ String.concat "," f.formals ^ "{\n"
     ^ String.concat "; " stmt_string_list
     ^ "\n}" in
@@ -79,4 +80,4 @@ let compile cast =
 let c_end = "}" in *)
 
 
-print_endline ( c_begin ^ (compile sast))
+print_endline ( c_begin ^ (compile cast))

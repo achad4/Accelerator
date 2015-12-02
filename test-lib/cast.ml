@@ -65,11 +65,11 @@ type program =
   func_decl list
 
 
-let string_of_type = function
-  | Sast.String -> "string"
-  | Sast.Int -> "int"
-  | Sast.Bool -> "bool"
-  | Sast.Na -> "Na"
+let string_of_ctype = function
+  | String -> "string"
+  | Int -> "int"
+  | Bool -> "bool"
+  | Void -> "Na"
 
 let string_of_id = function
   Id(s) -> s 
