@@ -111,20 +111,17 @@ let rec cexpr_detail = function
 
 let rec cexpr = function
   | Sast.Sexpr(e, t) -> Cexpr(cexpr_detail e, type_match t)
-      
-(*   | Sast.Sadd(e1, e2) -> 
-      cexpr e1, 
-      cexpr e2
-  | Sast.Ssub(e1, e2) -> cexpr e1, cexpr e2
-  | Sast.Smult(e1, e2) -> cexpr e1, cexpr e2
-  | Sast.Sdiv(e1, e2) -> cexpr e1, cexpr e2
-  | Sast.Sexpo(e1, e2) -> cexpr e1, cexpr e2
-  | Sast.Smod(e1, e2) -> cexpr e1, cexpr e2
-  | Sast.SfuncCall(el, t) -> (List.map cexpr e), t
-  | Sast.Sassign(e, t) -> cexpr e, t
-  | Sast.Sand(e1, e2) -> cexpr e1, cexpr e2
-  | Sast.Sor(e1, e2) -> cexpr e1, cexpr e2
-  | Sast.Snot(e) -> cexpr e *)
+  | Sast.Sadd(e1, e2, t) -> Cadd(cexpr e1, cexpr e2, type_match t)
+  | Sast.Ssub(e1, e2, t) -> Csub(cexpr e1, cexpr e2, type_match t)
+  | Sast.Smult(e1, e2, t) -> Cmult(cexpr e1, cexpr e2, type_match t)
+  | Sast.Sdiv(e1, e2, t) -> Cdiv(cexpr e1, cexpr e2, type_match t)
+  | Sast.Sexpo(e1, e2, t) -> Cexpo(cexpr e1, cexpr e2, type_match t)
+  | Sast.Smod(e1, e2, t) -> Cmod(cexpr e1, cexpr e2, type_match t)
+  | Sast.SfuncCall(el, t) -> CfuncCall((List.map cexpr el), type_match t)
+  | Sast.Sassign(e, t) -> Cassign(cexpr e, type_match t)
+  | Sast.Sand(e1, e2, t) -> Cand(cexpr e1, cexpr e2, type_match t)
+  | Sast.Sor(e1, e2, t) -> Cor(cexpr e1, cexpr e2, type_match t)
+  | Sast.Snot(e, t) -> Cnot(cexpr e, type_match t)
 
 
 
