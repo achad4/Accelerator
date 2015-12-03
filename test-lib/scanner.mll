@@ -2,8 +2,10 @@
 	open Parser
 }
 
-  let dig = ['0'-'9']+
+  let dig = ['0'-'9']
+  let frac = '.' dig*
   let whitespace = [' ' '\t']
+  let flt = dig* frac?
   rule token = parse
   	| whitespace    { token lexbuf } 
     | "true" as lit { TRUE(bool_of_string lit) }
@@ -12,7 +14,8 @@
   	| ','           { COMMA }
   	| '('           { LPAREN }
 	  | ')'           { RPAREN }
-  	| dig as lit    { INT(int_of_string lit) }
+  	| dig+ as lit    { INT(int_of_string lit) }
+    | flt as lit    { FLOAT(float_of_string lit) }
     | eof           { EOF }
     | '\n'          { DLIN }
     | '+'           { PLUS }

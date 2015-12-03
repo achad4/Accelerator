@@ -14,7 +14,8 @@ let _ =
 
 let rec compile_detail = function
   | Cast.IdLit(s) -> s
-	| Cast.IntLit(l) -> string_of_int l
+	| Cast.IntLit(i) -> string_of_int i
+  | Cast.FloatLit(f) -> string_of_float f
   | Cast.BoolLit(b) -> string_of_bool b
 	| Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ "; cout << endl;"
@@ -27,7 +28,11 @@ let rec compile_detail = function
   | Cast.Div(e1, e2, t) -> (compile_detail e1) ^ " / " ^ (compile_detail e2)
   | Cast.Mult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ (compile_detail e2)
   | Cast.Sub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ (compile_detail e2) 
-  | Cast.Add(e1, e2, t) -> (compile_detail e1) ^ " + " ^ (compile_detail e2) in
+  | Cast.Add(e1, e2, t) -> (compile_detail e1) ^ " + " ^ (compile_detail e2)
+  | Cast.FAdd(e1, e2, t) -> (compile_detail e1) ^ " + " ^ (compile_detail e2)
+  | Cast.FSub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ (compile_detail e2)
+  | Cast.FMult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ (compile_detail e2)
+  | Cast.FDiv(e1, e2, t) -> (compile_detail e1) ^ " / " ^ (compile_detail e2) in
 
 let rec compile_expr = function
 	| Cexpr(e, t) -> compile_detail e ^ ";" 
@@ -39,6 +44,10 @@ let rec compile_expr = function
   | Cmult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
   | Csub(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
 	| Cadd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | CFAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2  
+  | CFSub(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | CFMult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | CFDiv(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cand(b1, b2, t) -> compile_expr b1 ^ compile_expr b2 
   | Cor(b1, b2, t) -> compile_expr b1 ^ compile_expr b2
   | Cnot(b1, t) -> (compile_expr b1) in
@@ -66,18 +75,5 @@ let compile cast =
                  #include<stdio.h>\n
                  #include<math.h>\n
                  using namespace std;\n" in
-
-(* let compile sast =
-	let string_list = List.map compile_expr sast in
-    let rev_list = List.rev string_list in
-	String.concat "" rev_list ^ ";" in
-
-  let c_begin = "#include<iostream>\n
-                 #include<stdio.h>\n
-                 #include<math.h>\n
-                 using namespace std;\n 
-                 int main () {\n " in
-let c_end = "}" in *)
-
 
 print_endline ( c_begin ^ (compile cast))

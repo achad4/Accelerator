@@ -13,6 +13,7 @@ type op =
 type ct = 
   | String
   | Int
+  | Float
   | Bool
   | Void
 
@@ -22,11 +23,16 @@ type id =
 type cexpr_detail = 
    | IdLit of string
    | IntLit of int
+   | FloatLit of float
    | BoolLit of bool
    | Add of cexpr_detail * cexpr_detail * ct
    | Sub of cexpr_detail * cexpr_detail * ct
    | Mult of cexpr_detail * cexpr_detail * ct
    | Div of cexpr_detail * cexpr_detail * ct
+   | FAdd of cexpr_detail * cexpr_detail * ct
+   | FSub of cexpr_detail * cexpr_detail * ct
+   | FMult of cexpr_detail * cexpr_detail * ct
+   | FDiv of cexpr_detail * cexpr_detail * ct
    | Expo of cexpr_detail * cexpr_detail * ct
    | Mod of cexpr_detail * cexpr_detail * ct
    | FuncCall of id * cexpr_detail list * ct
@@ -41,6 +47,10 @@ type cexpression =
   | Csub of cexpression * cexpression * ct
   | Cmult of cexpression * cexpression * ct
   | Cdiv of cexpression * cexpression * ct
+  | CFAdd of cexpression * cexpression * ct
+  | CFSub of cexpression * cexpression * ct
+  | CFMult of cexpression * cexpression * ct
+  | CFDiv of cexpression * cexpression * ct
   | Cexpo of cexpression * cexpression * ct
   | Cmod of cexpression * cexpression * ct
   | CfuncCall of cexpression list * ct
@@ -67,6 +77,7 @@ type program =
 
 let string_of_ctype = function
   | String -> "string"
+  | Float -> "float"
   | Int -> "int"
   | Bool -> "bool"
   | Void -> "Na"
@@ -77,6 +88,7 @@ let string_of_id = function
 let type_match = function
   | Sast.String -> String
   | Sast.Int -> Int
+  | Sast.Float -> Float
   | Sast.Bool -> Bool
   | Sast.Na -> Void
 
@@ -86,20 +98,22 @@ let id_match = function
 let rec cexpr_detail = function
  | Sast.IdLit(s) ->  IdLit(s)
  | Sast.IntLit(i) -> IntLit(i)
+ | Sast.FloatLit(i) -> FloatLit(i)
  | Sast.BoolLit(b) -> BoolLit(b)
  (*Expand when you pull in Alan's Fadd etc.*)
  | Sast.Add(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Int)
  | Sast.Sub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.Mult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.Div(e1, e2, t) -> Div(cexpr_detail e1, cexpr_detail e2, Int)
+ | Sast.FAdd(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Float)
+ | Sast.FSub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Float)
+ | Sast.FMult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, Float)
+ | Sast.FDiv(e1, e2, t) -> Div(cexpr_detail e1, cexpr_detail e2, Float)
  | Sast.Expo(e1, e2, t) -> Expo(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.Mod(e1, e2, t) -> Mod(cexpr_detail e1, cexpr_detail e2, Int)
- | Sast.FuncCall(id, el, t) -> 
-                              let ct = type_match t in
-
-                              FuncCall(id_match id, List.map cexpr_detail el, ct)
- | Sast.Assign(id, e, t) -> 
-                            let ct = type_match t in
+ | Sast.FuncCall(id, el, t) -> let ct = type_match t in
+                               FuncCall(id_match id, List.map cexpr_detail el, ct)
+ | Sast.Assign(id, e, t) -> let ct = type_match t in
                              Assign(id_match id, cexpr_detail e, ct)
  | Sast.And(e1, e, t) -> let ct = type_match t in 
                           And(cexpr_detail e1, cexpr_detail e, ct)
@@ -108,13 +122,16 @@ let rec cexpr_detail = function
  | Sast.Not(e, t) -> let ct = type_match t in
                       Not(cexpr_detail e, ct)
 
-
 let rec cexpr = function
   | Sast.Sexpr(e, t) -> Cexpr(cexpr_detail e, type_match t)
   | Sast.Sadd(e1, e2, t) -> Cadd(cexpr e1, cexpr e2, type_match t)
   | Sast.Ssub(e1, e2, t) -> Csub(cexpr e1, cexpr e2, type_match t)
   | Sast.Smult(e1, e2, t) -> Cmult(cexpr e1, cexpr e2, type_match t)
   | Sast.Sdiv(e1, e2, t) -> Cdiv(cexpr e1, cexpr e2, type_match t)
+  | Sast.SFAdd(e1, e2, t) -> Cadd(cexpr e1, cexpr e2, type_match t)
+  | Sast.SFSub(e1, e2, t) -> Csub(cexpr e1, cexpr e2, type_match t)
+  | Sast.SFMult(e1, e2, t) -> Cmult(cexpr e1, cexpr e2, type_match t)
+  | Sast.SFDiv(e1, e2, t) -> Cdiv(cexpr e1, cexpr e2, type_match t)
   | Sast.Sexpo(e1, e2, t) -> Cexpo(cexpr e1, cexpr e2, type_match t)
   | Sast.Smod(e1, e2, t) -> Cmod(cexpr e1, cexpr e2, type_match t)
   | Sast.SfuncCall(el, t) -> CfuncCall((List.map cexpr el), type_match t)
@@ -122,14 +139,6 @@ let rec cexpr = function
   | Sast.Sand(e1, e2, t) -> Cand(cexpr e1, cexpr e2, type_match t)
   | Sast.Sor(e1, e2, t) -> Cor(cexpr e1, cexpr e2, type_match t)
   | Sast.Snot(e, t) -> Cnot(cexpr e, type_match t)
-
-
-
-(* let stmt_detail = function
-  Sast.Expr( e ) -> 
-   print_endline (Ast.string_of_cexpression e);
-   let r = cexpr e in
-    ( (fst r), (snd r) ), (snd r) *)
 
 let stmt = function
   Sast.Sstmt(e, t) ->
