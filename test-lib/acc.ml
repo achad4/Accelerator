@@ -18,7 +18,7 @@ let rec compile_detail = function
   | Cast.FloatLit(f) -> string_of_float f
   | Cast.BoolLit(b) -> string_of_bool b
 	| Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
-		"cout << " ^ String.concat "" (List.map helper el) ^ "; cout << endl;"
+		"cout << " ^ String.concat "" (List.map helper el) ^ "; cout << endl"
   | Cast.And(b1, b2, t) -> (compile_detail b1) ^ " && " ^ (compile_detail b2)
   | Cast.Or(b1, b2, t) -> (compile_detail b1) ^ " || " ^ (compile_detail b2)
   | Cast.Not(b1, t) -> "! " ^ (compile_detail b1)
@@ -35,9 +35,9 @@ let rec compile_detail = function
   | Cast.FDiv(e1, e2, t) -> (compile_detail e1) ^ " / " ^ (compile_detail e2) in
 
 let rec compile_expr = function
-	| Cexpr(e, t) -> compile_detail e ^ ";" 
+	| Cexpr(e, t) -> compile_detail e 
 	| CfuncCall(el, t) -> String.concat "" (List.map compile_expr el)
-	| Cassign(e, t) -> print_endline ("here: " ^ (string_of_ctype t)); (string_of_ctype t) ^ compile_expr e
+	| Cassign(e, t) -> (string_of_ctype t) ^ compile_expr e
   | Cmod(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cexpo(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
   | Cdiv(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
@@ -61,10 +61,13 @@ let string_list l = List.map string_of_statement l in
                           "}else{" ^ (String.concat "" (string_list sl1)) ^ "}"
 *)
 let rec compile_stmt = function
-  | Cstmt(e, t) -> compile_expr e
-  | Cif(e, sl1, sl2, t) -> let string_list l = List.map compile_stmt l in
-                           "if(" ^ compile_expr e ^ "){" ^ (String.concat "" (string_list sl1)) ^ 
-                           "}else{" ^ (String.concat "" (string_list sl2)) ^ "}" in
+  | Cstmt(e, t) -> compile_expr e ^ ";"
+  | Cblock(sl, t) -> let string_list l = List.map compile_stmt l in
+                  "{\n" ^ String.concat "" (string_list sl) ^ "}\n"
+  | Cif(e, s1, s2, t) ->   "if(" ^ compile_expr e ^ ")" 
+                           ^ (compile_stmt s1)  ^ 
+                           "else" 
+                           ^  (compile_stmt s2) in
 
 let compile_func (f, t) = 
   let stmt_string_list = List.map compile_stmt (List.rev f.body) in

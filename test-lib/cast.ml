@@ -61,7 +61,8 @@ type cexpression =
 
 type statement = 
   | Cstmt of cexpression * ct
-  | Cif of cexpression * statement list * statement list * ct
+  | Cblock of statement list * ct
+  | Cif of cexpression * statement * statement * ct
 
 type func_decl_detail = {
     fname : string;
@@ -144,10 +145,10 @@ let rec cexpr = function
 let rec stmt = function
   | Sast.Sstmt(e, t) -> let r = cexpr e in
                         Cstmt(r, type_match t)
-  | Sast.Sif(e, sl1, sl2, t) -> let r = cexpr e in
-                             let list1 = List.map stmt sl1 in
-                             let list2 = List.map stmt sl2 in
-                             Cif(r, list1, list2, type_match t)
+  | Sast.Sblock(sl, t) -> let l = List.map stmt sl in
+                        Cblock(l, type_match t)
+  | Sast.Sif(e, s1, s2, t) -> let r = cexpr e in
+                              Cif(r, stmt s1, stmt s2, type_match t)
  
  (*return a c program in the form of a single *)
 let program sast = 

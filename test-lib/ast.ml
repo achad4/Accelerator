@@ -37,7 +37,8 @@ type expr =
 
 type stmt = 
 	| Expr of expr
-    | If of expr * stmt list * stmt list
+    | Block of stmt list
+    | If of expr * stmt * stmt
 
 type program = stmt list
 
@@ -65,9 +66,11 @@ let rec string_of_expression = function
 
 let rec string_of_statement = function
 	| Expr(e) -> string_of_expression e
-    | If(e, sl1, sl2) ->  let string_list l = List.map string_of_statement l in
-                          "if(" ^ (string_of_expression e) ^ "){" ^ (String.concat "" (string_list sl1)) ^ 
-                          "}else{" ^ (String.concat "" (string_list sl2)) ^ "}"
+    | Block(sl) -> let string_list l = List.map string_of_statement l in
+                  "{\n" ^ String.concat "" (string_list sl) ^ "}\n"
+    | If(e, s1, s2) ->  let string_list l = List.map string_of_statement l in
+                          "if(" ^ (string_of_expression e) ^ ")" ^ string_of_statement s1 ^ 
+                          "else" ^ string_of_statement s2
 
 let string_of_program program =
 	String.concat "\n" (List.map string_of_statement program)

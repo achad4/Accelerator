@@ -28,7 +28,8 @@ stmt_list:
 
 stmt:
   | expr DLIN                            { Expr($1) }
-  | IF RPAREN bool_expr LPAREN RBRACE stmt_list LBRACE ELSE RBRACE stmt_list LBRACE    { If($3, $6, $10) }
+  | LBRACE stmt_list RBRACE              { Block(List.rev $2) }
+  | IF LPAREN bool_expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
 
 expr:
   | ID                                   { Id($1) }

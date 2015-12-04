@@ -7,5 +7,5 @@
                  using namespace std;
 int main()
 {
-cout << 4 - 1; cout << endl;;
+cout << 4 - 1; cout << endl;
 }
