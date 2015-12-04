@@ -128,8 +128,7 @@ else
 fi
 
 # Testing boolean or
-
-
+./acc < sourceFiles/orTest.acc > compiledCpp/orTest.cpp
 g++ -o executables/orTest compiledCpp/orTest.cpp
 ./executables/orTest > output/orTestOutput.txt
 count+=1
