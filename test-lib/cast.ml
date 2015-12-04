@@ -60,7 +60,8 @@ type cexpression =
   | Cnot of cexpression * ct
 
 type statement = 
-  Cstmt of cexpression * ct
+  | Cstmt of cexpression * ct
+  | Cif of cexpression * statement list * statement list * ct
 
 type func_decl_detail = {
     fname : string;
@@ -140,10 +141,13 @@ let rec cexpr = function
   | Sast.Sor(e1, e2, t) -> Cor(cexpr e1, cexpr e2, type_match t)
   | Sast.Snot(e, t) -> Cnot(cexpr e, type_match t)
 
-let stmt = function
-  Sast.Sstmt(e, t) ->
-    let r = cexpr e in
-    Cstmt(r, type_match t)
+let rec stmt = function
+  | Sast.Sstmt(e, t) -> let r = cexpr e in
+                        Cstmt(r, type_match t)
+  | Sast.Sif(e, sl1, sl2, t) -> let r = cexpr e in
+                             let list1 = List.map stmt sl1 in
+                             let list2 = List.map stmt sl2 in
+                             Cif(r, list1, list2, type_match t)
  
  (*return a c program in the form of a single *)
 let program sast = 

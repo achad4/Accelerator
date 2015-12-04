@@ -199,6 +199,18 @@ else
 	failures+=1
 fi
 
+# Testing if statement
+./acc < sourceFiles/ifElseTest.acc > compiledCpp/ifElseTest.cpp
+g++ -o executables/ifElseTest compiledCpp/ifElseTest.cpp
+./executables/ifElseTest > output/ifElseTest.txt
+count+=1
+if diff "output/ifElseTest.txt" "expected/ifElseExpected.txt" > /dev/null; then
+	echo ifElseTest passed
+else
+	echo ifElseTest failed
+	failures+=1
+fi
+
 echo ====================================================
 echo Results
 echo ====================================================

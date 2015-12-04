@@ -36,7 +36,8 @@ type expr =
     | Not of expr
 
 type stmt = 
-	Expr of expr
+	| Expr of expr
+    | If of expr * stmt list * stmt list
 
 type program = stmt list
 
@@ -62,8 +63,11 @@ let rec string_of_expression = function
     | Not( b1 ) -> "!" ^ (string_of_expression b1)
     
 
-let string_of_statement = function
-	Expr(e) -> string_of_expression e
+let rec string_of_statement = function
+	| Expr(e) -> string_of_expression e
+    | If(e, sl1, sl2) ->  let string_list l = List.map string_of_statement l in
+                          "if(" ^ (string_of_expression e) ^ "){" ^ (String.concat "" (string_list sl1)) ^ 
+                          "}else{" ^ (String.concat "" (string_list sl2)) ^ "}"
 
 let string_of_program program =
 	String.concat "\n" (List.map string_of_statement program)

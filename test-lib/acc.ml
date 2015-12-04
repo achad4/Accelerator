@@ -54,8 +54,17 @@ let rec compile_expr = function
 
 
 
+
+(*
+let string_list l = List.map string_of_statement l in
+                          "if(" ^ (string_of_expression e) ^ "){" ^ (String.concat "" (string_list sl1)) ^ 
+                          "}else{" ^ (String.concat "" (string_list sl1)) ^ "}"
+*)
 let rec compile_stmt = function
-  | Cstmt(e, t) -> compile_expr e in
+  | Cstmt(e, t) -> compile_expr e
+  | Cif(e, sl1, sl2, t) -> let string_list l = List.map compile_stmt l in
+                           "if(" ^ compile_expr e ^ "){" ^ (String.concat "" (string_list sl1)) ^ 
+                           "}else{" ^ (String.concat "" (string_list sl2)) ^ "}" in
 
 let compile_func (f, t) = 
   let stmt_string_list = List.map compile_stmt (List.rev f.body) in

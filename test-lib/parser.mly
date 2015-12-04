@@ -1,7 +1,7 @@
 %{ open Ast %}
 
-%token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD
-%token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT
+%token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE
+%token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, EQ
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -28,6 +28,7 @@ stmt_list:
 
 stmt:
   | expr DLIN                            { Expr($1) }
+  | IF RPAREN bool_expr LPAREN RBRACE stmt_list LBRACE ELSE RBRACE stmt_list LBRACE    { If($3, $6, $10) }
 
 expr:
   | ID                                   { Id($1) }
