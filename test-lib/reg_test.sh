@@ -199,6 +199,7 @@ else
 	failures+=1
 fi
 
+<<COMMENT1
 # Testing if statement
 ./acc < sourceFiles/ifElseTest.acc > compiledCpp/ifElseTest.cpp
 g++ -o executables/ifElseTest compiledCpp/ifElseTest.cpp
@@ -210,6 +211,7 @@ else
 	echo ifElseTest failed
 	failures+=1
 fi
+COMMENT1
 
 echo ====================================================
 echo Results
