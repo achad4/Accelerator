@@ -17,6 +17,7 @@ let rec compile_detail = function
 	| Cast.IntLit(i) -> string_of_int i
   | Cast.FloatLit(f) -> string_of_float f
   | Cast.BoolLit(b) -> string_of_bool b
+  | Cast.IntVect(iv) -> ""
 	| Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ "; cout << endl;"
   | Cast.And(b1, b2, t) -> (compile_detail b1) ^ " && " ^ (compile_detail b2)
@@ -82,6 +83,7 @@ let compile cast =
   let c_begin = "#include<iostream>\n
                  #include<stdio.h>\n
                  #include<math.h>\n
+                 #include<vector>\n
                  using namespace std;\n" in
 
 print_endline ( c_begin ^ (compile cast))

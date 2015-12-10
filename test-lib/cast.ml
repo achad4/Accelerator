@@ -25,7 +25,7 @@ type cexpr_detail =
    | IntLit of int
    | FloatLit of float
    | BoolLit of bool
-   | IntVect of cexpr_detail list
+   | IntVect of cexpr_detail list * ct
    | Add of cexpr_detail * cexpr_detail * ct
    | Sub of cexpr_detail * cexpr_detail * ct
    | Mult of cexpr_detail * cexpr_detail * ct
@@ -102,7 +102,8 @@ let rec cexpr_detail = function
  | Sast.IntLit(i) -> IntLit(i)
  | Sast.FloatLit(i) -> FloatLit(i)
  | Sast.BoolLit(b) -> BoolLit(b)
- | Sast.IntVect(i) -> IntVect(i)
+ | Sast.IntVect(iv, t) -> let ct = type_match t in
+         IntVect(List.map cexpr_detail iv, ct)
  (*Expand when you pull in Alan's Fadd etc.*)
  | Sast.Add(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Int)
  | Sast.Sub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Int)
