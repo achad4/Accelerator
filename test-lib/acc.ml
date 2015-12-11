@@ -77,7 +77,7 @@ let rec compile_stmt = function
                            "else" 
                            ^  (compile_stmt s2)
   (*for(int i = start; i < end; i++)*)
-  | Cfor(id, e1, e2, s, t) -> "for( int " ^ compile_expr id ^ "="  ^ compile_expr e1 ^ "; " ^ "i < " ^ 
+  | Cfor(id, e1, e2, s, t) -> "for( int " ^ compile_expr id ^ "="  ^ compile_expr e1 ^ "; " ^ "i <= " ^ 
                           compile_expr e2 ^ "; i++)\n" ^
                           compile_stmt s in
 

@@ -225,6 +225,18 @@ else
 	failures+=1
 fi
 
+# Testing for loops
+./acc < sourceFiles/forTest.acc > compiledCpp/forTest.cpp
+g++ -o executables/forTest compiledCpp/forTest.cpp
+./executables/forTest > output/forTest.txt
+count+=1
+if diff "output/forTest.txt" "expected/forTestExpected.txt" > /dev/null; then
+	echo forTest passed
+else
+	echo forTest failed
+	failures+=1
+fi
+
 echo ====================================================
 echo Results
 echo ====================================================
