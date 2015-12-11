@@ -1,6 +1,8 @@
-if (true) {
-    print(1)
-} else {
-    print(0)
+if(true)
+{
+	print(true)
 }
-
+else
+{
+	print(false)
+}

@@ -27,7 +27,7 @@ stmt_list:
   | stmt_list stmt                       { $2 :: $1 }
 
 stmt:
-  | expr DLIN                            { Expr($1) }
+  | expr DLIN                                  { Expr($1) }
   | LBRACE DLIN stmt_list RBRACE DLIN          { Block(List.rev $3) }
   | IF LPAREN bool_expr RPAREN DLIN stmt ELSE DLIN stmt    { If($3, $6, $9) }
 
