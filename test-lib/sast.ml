@@ -29,7 +29,7 @@ type expr_detail =
 	 | IntLit of int
      | BoolLit of bool
      | FloatLit of float
-     | IntVector of string * expr_detail list * t
+     | Vector of string * expr_detail list * t
      | Na of t
 	 | Add of expr_detail * expr_detail * t
      | Sub of expr_detail * expr_detail  * t
@@ -89,9 +89,13 @@ let rec expr = function
 	| Ast.IntLit( c ) -> IntLit(c), Int
     | Ast.FloatLit( f ) -> FloatLit(f), Float
     | Ast.BoolLit(b) -> BoolLit(b), Bool
-    | Ast.IntVector(s, iv) -> let helper e = fst (expr e) in
-        IntVector(s, (List.map helper iv), Int), Int
+    | Ast.Vector(s, vl) ->
+          let head = List.hd vl in
+          let _, vtype = expr head in
+          let helper e = fst (expr e) in
+        Vector(s, (List.map helper vl), vtype), vtype
     | Ast.Na -> Na(Na), Na
+    | Ast.None -> Na(Na), Na
 	| Ast.Assign(id, e) -> 
 		let e1 = expr e in
 		Assign(Id(id), fst e1, snd e1), snd e1
@@ -274,11 +278,16 @@ let rec stmt = function
     | Ast.Block( sl ) -> let l = List.map stmt sl in
                          Sblock(l, Na)
     | Ast.If(e, s1, s2) -> let r = expr e in
+<<<<<<< HEAD
                            Sif(Sexpr( (fst r), (snd r) ), stmt s1, stmt s2, Na)
     | Ast.For(id, e1, e2, s) ->  let r1 = expr e1 in
                              let r2 = expr e2 in
                             let r3 = expr id in
                             Sfor(Sexpr( (fst r3), (snd r3) ), Sexpr( (fst r1), (snd r1) ), Sexpr( (fst r2), (snd r2) ), stmt s, Na)
+=======
+                           Sif(Sexpr( (fst r), (snd r) ), 
+                           stmt s1, stmt s2, Na)
+>>>>>>> 156577cdd1d2791c26bb11d31dedc1e06261b420
 
 let program program = 
 	List.map stmt program
