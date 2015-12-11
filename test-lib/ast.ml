@@ -19,7 +19,7 @@ type expr =
  	| IntLit of int
     | BoolLit of bool
     | FloatLit of float
-    | IntVector of expr list
+    | IntVector of string * expr list
     | Na
     | Add of expr * expr
     | Sub of expr * expr
@@ -49,7 +49,8 @@ let rec string_of_expression = function
 	| IntLit(e) -> string_of_int e
     | BoolLit(b) -> string_of_bool b
     | FloatLit(f) -> string_of_float f
-    | IntVector(v) -> "vector<int>" ^ (String.concat ", " (List.map string_of_expression v)) ^ ")"
+    | IntVector(s, v) -> "vector<int> " ^ s ^ "(" ^
+                (String.concat ", " (List.map string_of_expression v)) ^ ")"
     | Na -> "null"
 	| Add(e1, e2) -> (string_of_expression e1) ^ "+" ^ (string_of_expression e2)
     | Sub(e1, e2 ) -> (string_of_expression e1) ^ "-" ^ (string_of_expression e2)

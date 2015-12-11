@@ -35,7 +35,7 @@ expr:
   | int_expr                             { $1 }
   | bool_expr                            { $1 }
   | float_expr                           { $1 }
-  | VECTSTART int_opt RPAREN             { IntVector($2) }
+  | ID ASSIGN VECTSTART int_opt RPAREN   { IntVector($1, $4) }
   | ID LPAREN actuals_opt RPAREN         { FuncCall($1, $3) }
   | ID ASSIGN expr                       { Assign($1, $3) }
 

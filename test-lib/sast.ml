@@ -29,7 +29,8 @@ type expr_detail =
 	 | IntLit of int
      | BoolLit of bool
      | FloatLit of float
-     | IntVect of expr_detail list * t
+     | IntVector of string * expr_detail list * t
+     | Na of t
 	 | Add of expr_detail * expr_detail * t
      | Sub of expr_detail * expr_detail  * t
      | Mult of expr_detail * expr_detail * t
@@ -86,8 +87,9 @@ let rec expr = function
 	| Ast.IntLit( c ) -> IntLit(c), Int
     | Ast.FloatLit( f ) -> FloatLit(f), Float
     | Ast.BoolLit(b) -> BoolLit(b), Bool
-    | Ast.IntVector(iv) -> let helper e = fst (expr e) in
-        IntVect((List.map helper iv),Int), Int
+    | Ast.IntVector(s, iv) -> let helper e = fst (expr e) in
+        IntVector(s, (List.map helper iv), Int), Int
+    | Ast.Na -> Na(Na), Na
 	| Ast.Assign(id, e) -> 
 		let e1 = expr e in
 		Assign(Id(id), fst e1, snd e1), snd e1
