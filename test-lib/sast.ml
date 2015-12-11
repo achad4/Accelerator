@@ -273,21 +273,25 @@ let rec expr = function
 			failwith "Type incompatibility"
 
 let rec stmt = function
-	| Ast.Expr( e ) -> let r = expr e in
-	                 Sstmt(Sexpr( (fst r), (snd r) ), (snd r))
-    | Ast.Block( sl ) -> let l = List.map stmt sl in
-                         Sblock(l, Na)
-    | Ast.If(e, s1, s2) -> let r = expr e in
-<<<<<<< HEAD
-                           Sif(Sexpr( (fst r), (snd r) ), stmt s1, stmt s2, Na)
-    | Ast.For(id, e1, e2, s) ->  let r1 = expr e1 in
-                             let r2 = expr e2 in
-                            let r3 = expr id in
-                            Sfor(Sexpr( (fst r3), (snd r3) ), Sexpr( (fst r1), (snd r1) ), Sexpr( (fst r2), (snd r2) ), stmt s, Na)
-=======
-                           Sif(Sexpr( (fst r), (snd r) ), 
-                           stmt s1, stmt s2, Na)
->>>>>>> 156577cdd1d2791c26bb11d31dedc1e06261b420
+	| Ast.Expr( e ) -> 
+            let r = expr e in
+	        Sstmt(Sexpr( (fst r), (snd r) ), (snd r))
+    | Ast.Block( sl ) -> 
+            let l = List.map stmt sl in
+            Sblock(l, Na)
+    | Ast.If(e, s1, s2) -> 
+            let r = expr e in
+            Sif(Sexpr( (fst r), (snd r) ), 
+                stmt s1, stmt s2, Na)
+    | Ast.For(e, ie1, ie2, sl) ->
+            let re = expr e
+            and rie1 = expr ie1
+            and rie2 = expr ie2 in
+            Sfor(Sexpr(fst(re),snd(re)), 
+                 Sexpr(fst(rie1),snd(rie1)), 
+                 Sexpr(fst(rie2),snd(rie2)), 
+                 stmt sl,
+                 Na)
 
 let program program = 
 	List.map stmt program

@@ -92,7 +92,11 @@ let rec string_of_statement = function
     | If(e, s1, s2) -> "if(" ^ (string_of_expression e) ^ ")" ^ 
                        string_of_statement s1 ^ 
                        "else" ^ string_of_statement s2
-
+    | For (e, ie1, ie2, sl) -> 
+            "for(" ^ string_of_expression e ^
+            " in " ^ string_of_expression ie1 ^
+            ":" ^ string_of_expression ie2 ^
+            "){\n" ^ string_of_statement sl
                 
 let string_of_program program =
 	String.concat "\n" (List.map string_of_statement program)
