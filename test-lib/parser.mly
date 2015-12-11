@@ -1,7 +1,8 @@
 %{ open Ast %}
 
 %token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE, NA
-%token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, EQ, VECTSTART
+%token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, VECTSTART
+%token EQ
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -29,25 +30,37 @@ stmt_list:
 stmt:
   | expr DLIN                                  { Expr($1) }
   | LBRACE DLIN stmt_list RBRACE DLIN          { Block(List.rev $3) }
-  | IF LPAREN bool_expr RPAREN DLIN stmt ELSE DLIN stmt    { If($3, $6, $9) }
+  | IF LPAREN bool_expr RPAREN DLIN stmt ELSE DLIN stmt  { If($3, $6, $9) }
 
 expr:
   | ID                                   { Id($1) }
   | int_expr                             { $1 }
   | bool_expr                            { $1 }
   | float_expr                           { $1 }
-  | ID ASSIGN VECTSTART int_opt RPAREN   { IntVector($1, $4) }
+  | ID ASSIGN VECTSTART vect_opt RPAREN  { Vector($1, $4) }
   | ID LPAREN actuals_opt RPAREN         { FuncCall($1, $3) }
   | ID ASSIGN expr                       { Assign($1, $3) }
 
-int_opt:
+vect_opt:
   | /* nothing */                        { [] }
   | int_lits                             { List.rev $1 }
+  | bool_lits                            { List.rev $1 }
+  | float_lits                           { List.rev $1 }
 
 int_lits:
-  | NA                                   { [Na] }
   | int_expr                             { [$1] }
   | int_lits COMMA int_expr              { $3 :: $1 }
+  | int_lits COMMA NA                    { None :: $1 }
+
+bool_lits:
+  | bool_expr                            { [$1] }
+  | bool_lits COMMA bool_expr            { $3 :: $1 }
+  | bool_lits COMMA NA                   { None :: $1 }
+
+float_lits:
+  | float_expr                           { [$1] }
+  | float_lits COMMA float_expr          { $3 :: $1 }
+  | float_lits COMMA NA                  { None :: $1 }
 
 actuals_opt:
   | /* nothing */                        { [] }
@@ -67,7 +80,7 @@ int_expr:
   | int_expr MOD int_expr   { Mod($1, $3) }
 
 float_expr:
-  | float_data                      { $1 }
+  | float_data                     { $1 }
   | float_expr MULT float_expr     { FMult($1, $3) }
   | float_expr PLUS float_expr     { FAdd($1, $3) }
   | float_expr MINUS float_expr    { FSub($1, $3) }
