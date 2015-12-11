@@ -1,7 +1,7 @@
 %{ open Ast %}
 
-%token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE, NA
-%token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, EQ, VECTSTART
+%token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE, NA, IN
+%token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, EQ, VECTSTART, FOR, RANGE
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -30,6 +30,7 @@ stmt:
   | expr DLIN                                  { Expr($1) }
   | LBRACE DLIN stmt_list RBRACE DLIN          { Block(List.rev $3) }
   | IF LPAREN bool_expr RPAREN DLIN stmt ELSE DLIN stmt    { If($3, $6, $9) }
+  | FOR LPAREN expr IN int_expr RANGE int_expr RPAREN stmt          { For($3, $5, $7, $9) }
 
 expr:
   | ID                                   { Id($1) }

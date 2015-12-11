@@ -72,6 +72,7 @@ type statement =
 	| Sstmt of expression * t
     | Sblock of statement list * t
     | Sif of expression * statement * statement * t
+    | Sfor of expression * expression * expression * statement * t
 
 let string_of_type = function
     | String -> "string"
@@ -274,6 +275,10 @@ let rec stmt = function
                          Sblock(l, Na)
     | Ast.If(e, s1, s2) -> let r = expr e in
                            Sif(Sexpr( (fst r), (snd r) ), stmt s1, stmt s2, Na)
+    | Ast.For(id, e1, e2, s) ->  let r1 = expr e1 in
+                             let r2 = expr e2 in
+                            let r3 = expr id in
+                            Sfor(Sexpr( (fst r3), (snd r3) ), Sexpr( (fst r1), (snd r1) ), Sexpr( (fst r2), (snd r2) ), stmt s, Na)
 
 let program program = 
 	List.map stmt program

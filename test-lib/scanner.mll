@@ -13,7 +13,10 @@
     | "false" as lit{ FALSE(bool_of_string lit) }
     | "if"          { IF }
     | "else"        { ELSE }
+    | "for"         { FOR }
+    | ":"           { RANGE }
     | "c("          { VECTSTART }
+    | "in"          { IN }
   	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
   	| ','           { COMMA }
   	| '('           { LPAREN }

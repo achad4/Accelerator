@@ -75,7 +75,11 @@ let rec compile_stmt = function
   | Cif(e, s1, s2, t) ->   "if(" ^ compile_expr e ^ ")" 
                            ^ (compile_stmt s1)  ^ 
                            "else" 
-                           ^  (compile_stmt s2) in
+                           ^  (compile_stmt s2)
+  (*for(int i = start; i < end; i++)*)
+  | Cfor(id, e1, e2, s, t) -> "for( int " ^ compile_expr id ^ "="  ^ compile_expr e1 ^ "; " ^ "i < " ^ 
+                          compile_expr e2 ^ "; i++)\n" ^
+                          compile_stmt s in
 
 let compile_func (f, t) = 
   let stmt_string_list = List.map compile_stmt (List.rev f.body) in
