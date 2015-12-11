@@ -1,7 +1,7 @@
 %{ open Ast %}
 
-%token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE
-%token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, EQ
+%token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE, NA
+%token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, EQ, VECTSTART
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -35,10 +35,19 @@ expr:
   | ID                                   { Id($1) }
   | int_expr                             { $1 }
   | bool_expr                            { $1 }
-  | float_expr                           { $1 }       
+  | float_expr                           { $1 }
+  | ID ASSIGN VECTSTART int_opt RPAREN   { IntVector($1, $4) }
   | ID LPAREN actuals_opt RPAREN         { FuncCall($1, $3) }
   | ID ASSIGN expr                       { Assign($1, $3) }
 
+int_opt:
+  | /* nothing */                        { [] }
+  | int_lits                             { List.rev $1 }
+
+int_lits:
+  | NA                                   { [Na] }
+  | int_expr                             { [$1] }
+  | int_lits COMMA int_expr              { $3 :: $1 }
 
 actuals_opt:
   | /* nothing */                        { [] }

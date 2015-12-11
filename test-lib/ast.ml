@@ -19,7 +19,9 @@ type expr =
  	| IntLit of int
     | BoolLit of bool
     | FloatLit of float
- 	| Add of expr * expr
+    | IntVector of string * expr list
+    | Na
+    | Add of expr * expr
     | Sub of expr * expr
     | Mult of expr * expr
     | Div of expr * expr
@@ -35,6 +37,7 @@ type expr =
     | Or of expr * expr
     | Not of expr
 
+
 type stmt = 
 	| Expr of expr
     | Block of stmt list
@@ -47,6 +50,9 @@ let rec string_of_expression = function
 	| IntLit(e) -> string_of_int e
     | BoolLit(b) -> string_of_bool b
     | FloatLit(f) -> string_of_float f
+    | IntVector(s, v) -> "vector<int> " ^ s ^ "(" ^
+                (String.concat ", " (List.map string_of_expression v)) ^ ")"
+    | Na -> "null"
 	| Add(e1, e2) -> (string_of_expression e1) ^ "+" ^ (string_of_expression e2)
     | Sub(e1, e2 ) -> (string_of_expression e1) ^ "-" ^ (string_of_expression e2)
     | Mult(e1, e2) -> (string_of_expression e1) ^ "*" ^ (string_of_expression e2)
@@ -72,5 +78,6 @@ let rec string_of_statement = function
                           "if(" ^ (string_of_expression e) ^ ")" ^ string_of_statement s1 ^ 
                           "else" ^ string_of_statement s2
 
+                
 let string_of_program program =
 	String.concat "\n" (List.map string_of_statement program)

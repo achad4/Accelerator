@@ -199,6 +199,20 @@ else
 	failures+=1
 fi
 
+<<COMMENT1
+# Testing int vectors
+./acc < sourceFiles/intVectorTest.acc > compiledCpp/intVectorTest.cpp
+g++ -o executables/intVectorTest compiledCpp/intVectorTest.cpp
+./executables/intVectorTest > output/intVectorTest.txt
+count+=1
+if diff "output/intVectorTest.txt" "expected/intVectorExpected.txt" > /dev/null; then
+	echo intVectorTest passed
+else
+	echo intVectorTest failed
+	failures+=1
+fi
+COMMENT1
+
 # Testing if statement
 ./acc < sourceFiles/ifElseTest.acc > compiledCpp/ifElseTest.cpp
 g++ -o executables/ifElseTest compiledCpp/ifElseTest.cpp
