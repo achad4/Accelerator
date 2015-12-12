@@ -2,7 +2,7 @@
 
 %token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE, NA
 %token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, VECTSTART
-%token EQ, FOR, IN, RANGE
+%token EQ, FOR, IN, RANGE, LBRAC, RBRAC
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -41,6 +41,8 @@ expr:
   | ID ASSIGN VECTSTART vect_opt RPAREN  { Vector($1, $4) }
   | ID LPAREN actuals_opt RPAREN         { FuncCall($1, $3) }
   | ID ASSIGN expr                       { Assign($1, $3) }
+  | ID LBRAC ID RBRAC                    { VectIdAcc($1, $3) }
+  | ID LBRAC int_expr RBRAC              { VectIntAcc($1, $3) }
 
 vect_opt:
   | /* nothing */                        { [] }

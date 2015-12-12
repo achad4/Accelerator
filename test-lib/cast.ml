@@ -23,9 +23,12 @@ type id =
 type cexpr_detail = 
    | IdLit of string
    | IntLit of int
+   | IntExpr of cexpr_detail * ct
    | FloatLit of float
    | BoolLit of bool
-   | Vector of string * cexpr_detail list * ct
+   | Vector of cexpr_detail * cexpr_detail list * ct
+   | VectIdAcc of cexpr_detail * cexpr_detail * ct
+   | VectIntAcc of cexpr_detail * cexpr_detail * ct
    | Na of string * ct
    | Add of cexpr_detail * cexpr_detail * ct
    | Sub of cexpr_detail * cexpr_detail * ct
@@ -106,8 +109,13 @@ let rec cexpr_detail = function
  | Sast.IntLit(i) -> IntLit(i)
  | Sast.FloatLit(i) -> FloatLit(i)
  | Sast.BoolLit(b) -> BoolLit(b)
+ | Sast.IntExpr(e,t) -> IntExpr(cexpr_detail e, type_match t)
  | Sast.Vector(s, v, t) -> let ct = type_match t in
-         Vector(s, List.map cexpr_detail v, ct)
+         Vector(cexpr_detail s, List.map cexpr_detail v, ct)
+ | Sast.VectIdAcc(e1, e2, t) ->
+        VectIdAcc(cexpr_detail e1, cexpr_detail e2, type_match t)
+ | Sast.VectIntAcc(e1, e2, t) ->
+        VectIntAcc(cexpr_detail e1, cexpr_detail e2, type_match t) 
  | Sast.Na(t) -> Na("Void", type_match t)
  (*Expand when you pull in Alan's Fadd etc.*)
  | Sast.Add(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Int)

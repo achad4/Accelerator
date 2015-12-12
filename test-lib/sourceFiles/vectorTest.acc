@@ -1,3 +1,12 @@
 a <- c(1, 2, 3, 4)
+for(i in 1:4){
+    print(a[i])
+}
 b <- c(true, false, false, true)
+for(i in 1:4){
+    print(b[i])
+}
 c <- c(1.2, 3.4, 5.6, 7.8)
+for(i in 1:4){
+    print(c[i])
+}

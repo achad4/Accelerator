@@ -13,16 +13,22 @@ let _ =
 let rec compile_detail = function
   | Cast.IdLit(s) -> s
   | Cast.IntLit(i) -> string_of_int i
+  | Cast.IntExpr(e, t) -> compile_detail e
   | Cast.FloatLit(f) -> string_of_float f
   | Cast.BoolLit(b) -> string_of_bool b
   | Cast.Vector(s, v, t) -> 
           let helper e = compile_detail e in
-          let holder = s ^ "holder" in
+          let holder = compile_detail s ^ "holder" in
           let ty = Cast.string_of_ctype t in
           ty ^ " " ^ holder ^ "[] = {" ^ 
           (String.concat ", " (List.map helper v)) ^ "};\n" ^
-          "vector<" ^ ty ^ "> " ^ s ^ " (" ^ holder ^ ", " ^ holder ^
-          " + sizeof(" ^ holder ^ ") / sizeof(" ^ ty ^"))"
+          "vector<" ^ ty ^ "> " ^ compile_detail s ^ 
+          " (" ^ holder ^ ", " ^ holder ^ " + sizeof(" ^ 
+          holder ^ ") / sizeof(" ^ ty ^"))"
+  | Cast.VectIdAcc(e1, e2, t) -> 
+          compile_detail e1 ^ "[" ^ compile_detail e2 ^ "-1]"
+  | Cast.VectIntAcc(e1, e2, t) ->
+          compile_detail e1 ^ "[" ^ compile_detail e2 ^ "-1]"
   | Cast.Na(s, t) -> s
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ 

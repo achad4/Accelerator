@@ -27,9 +27,12 @@ type id =
 type expr_detail = 
      | IdLit of string
 	 | IntLit of int
+     | IntExpr of expr_detail * t
      | BoolLit of bool
      | FloatLit of float
-     | Vector of string * expr_detail list * t
+     | Vector of expr_detail * expr_detail list * t
+     | VectIdAcc of expr_detail * expr_detail * t
+     | VectIntAcc of expr_detail * expr_detail * t
      | Na of t
 	 | Add of expr_detail * expr_detail * t
      | Sub of expr_detail * expr_detail  * t
@@ -93,7 +96,33 @@ let rec expr = function
           let head = List.hd vl in
           let _, vtype = expr head in
           let helper e = fst (expr e) in
-        Vector(s, (List.map helper vl), vtype), vtype
+        Vector(IdLit(s), (List.map helper vl), vtype), vtype
+    | Ast.VectIdAcc(v, ind) ->
+          let ve = expr (Ast.Id(v))
+          and inde = expr (Ast.Id(ind)) in
+          let _, idt = ve
+          and _, indt = inde in
+          if (idt == String && indt == String) then
+              (
+                VectIdAcc(IdLit(v),
+                          IdLit(ind),
+                          Na), Na
+              )
+          else
+              failwith "Type incompatibility"
+    | Ast.VectIntAcc(vid, indInt) ->
+          let vide = expr (Ast.Id(vid))
+          and inde = expr indInt in
+          let _, idT = vide
+          and _, indT = inde in
+          if (idT == String && indT == Int) then
+              (
+                  VectIntAcc(IdLit(vid),
+                             IntExpr(fst inde, snd inde),
+                             Na), Na
+              )
+          else
+              failwith "Type incompatibility"
     | Ast.Na -> Na(Na), Na
     | Ast.None -> Na(Na), Na
 	| Ast.Assign(id, e) -> 

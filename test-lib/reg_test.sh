@@ -204,7 +204,7 @@ fi
 g++ -o executables/vectorTest compiledCpp/vectorTest.cpp
 ./executables/vectorTest > output/vectorTest.txt
 count+=1
-if diff "output/vectorTest.txt" "expected/vectorExpected.txt" > /dev/null; then
+if diff "output/vectorTest.txt" "expected/vectorTestExpected.txt" > /dev/null; then
 	echo vectorTest passed
 else
 	echo vectorTest failed
