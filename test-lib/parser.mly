@@ -45,6 +45,8 @@ expr:
   | ID ASSIGN expr                                           { Assign($1, $3) }
   | ID LBRAC ID RBRAC                                        { VectIdAcc($1, $3) }
   | ID LBRAC int_expr RBRAC                                  { VectIntAcc($1, $3) }
+  | ID LBRAC ID RBRAC LBRAC ID RBRAC                         { MatrixIdAcc($1, $3, $6) }
+  | ID LBRAC int_expr RBRAC LBRAC int_expr RBRAC             { MatrixIntAcc($1, $3, $6) }
 
 vect_opt:
   | /* nothing */                        { [] }

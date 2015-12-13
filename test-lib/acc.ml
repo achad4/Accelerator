@@ -22,7 +22,7 @@ let rec compile_detail = function
           let holder = compile_detail s ^ "holder" in
           let ty = Cast.string_of_ctype t in
           ty ^ " " ^ holder ^ "[] = {" ^ 
-          (String.concat ", " (List.map helper v)) ^ "}\n" ^
+          (String.concat ", " (List.map helper v)) ^ "};\n" ^
           "vector<" ^ ty ^ "> " ^ compile_detail s ^ 
           " (" ^ holder ^ ", " ^ holder ^ " + sizeof(" ^ 
           holder ^ ") / sizeof(" ^ ty ^"))"
@@ -34,21 +34,24 @@ let rec compile_detail = function
           let helper e = compile_detail e in
           let holder = compile_detail s ^ "Holder" in
           let nr_str = compile_detail nr in
-          let nc_str = compile_detail nc in
-          let matrix = compile_detail s in
+          let nc_str = compile_detail nc in 
+          let matrix = compile_detail s in 
           let ty = Cast.string_of_ctype t in
           ty ^ " " ^ holder ^ "[] = {" ^ 
           (String.concat ", " (List.map helper v)) ^ "};\n" ^
           "vector<" ^ ty ^ "> " ^ matrix ^ "Vector" ^
-          " (" ^ holder ^ ", " ^ holder ^ " + sizeof(" ^ 
-          holder ^ ") / sizeof(" ^ ty ^"))\n" ^
-          "vector<vector<" ^ ty ^ ">> " ^ matrix ^ " (" ^ nr_str ^ ");\n" ^
+          " (" ^ holder ^ ", " ^ holder ^ " + " ^
+          nc_str ^ " / sizeof(" ^ ty ^ "));\n" ^
+          "vector<vector<" ^ ty ^ "> > " ^ matrix ^ " (" ^ nr_str ^ ");\n" ^
+          "int count=0;\n" ^
           "for(int i=0; i<" ^ nr_str ^ "; i++) { \n" ^
-          matrix ^ "[i].resize(" ^ nc_str ^ ");\n" ^ 
-          "for(int j=0; i<" ^ nc_str ^ "; j++) { \n" ^
-          matrix ^ "[i][j] = " ^ holder ^ "[(" ^ nr_str ^ "* i) + j];\n}\n}"
+          matrix ^ "[i].resize(" ^ nc_str ^ ");\n" ^
+          "for(int j=0; j<" ^ nc_str ^ "; j++) { \n" ^
+          matrix ^ "[i][j] = " ^ holder ^ "[count++];\n}\n}"
+  | Cast.MatrixIdAcc(m, r, c, t) -> 
+          compile_detail m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
   | Cast.MatrixIntAcc(m, r, c, t) ->
-          compile_detail m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail r ^ "]\n"
+          compile_detail m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ 
         "; cout << endl"
@@ -108,9 +111,9 @@ let rec compile_stmt = function
                            "else" 
                            ^  (compile_stmt s2)
   (*for(int i = start; i < end; i++)*)
-  | Cfor(id, e1, e2, s, t) -> "for( int " ^ compile_expr id ^ "="  ^ compile_expr e1 ^ "; " ^ "i <= " ^ 
-                          compile_expr e2 ^ "; i++)\n" ^
-                          compile_stmt s in
+  | Cfor(id, e1, e2, s, t) -> "for( int " ^ compile_expr id ^ "="  ^ compile_expr e1 ^ "; " ^ 
+                          compile_expr id ^" <= " ^ compile_expr e2 ^ "; " ^ compile_expr id ^
+                          "++)\n" ^ compile_stmt s in
 
 let compile_func (f, t) = 
   let stmt_string_list = List.map compile_stmt (List.rev f.body) in

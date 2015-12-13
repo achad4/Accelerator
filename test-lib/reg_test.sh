@@ -235,6 +235,18 @@ else
 	failures+=1
 fi
 
+# Testing for matrices
+./acc < sourceFiles/matrixTest.acc > compiledCpp/matrixTest.cpp
+g++ -o executables/matrixTest compiledCpp/matrixTest.cpp
+./executables/matrixTest > output/matrixTest.txt
+count+=1
+if diff "output/matrixTest.txt" "expected/matrixTestExpected.txt" > /dev/null; then
+	echo matrixTest passed
+else
+	echo matrixTest failed
+	failures+=1
+fi
+
 echo ====================================================
 echo Results
 echo ====================================================

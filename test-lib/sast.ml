@@ -35,6 +35,7 @@ type expr_detail =
   | VectIdAcc of expr_detail * expr_detail * t
   | VectIntAcc of expr_detail * expr_detail * t
   | Matrix of expr_detail * expr_detail list * expr_detail * expr_detail * t
+  | MatrixIdAcc of expr_detail * expr_detail * expr_detail * t
   | MatrixIntAcc of expr_detail * expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
@@ -136,15 +137,30 @@ let rec expr = function
         else
           (
             Matrix(IdLit(s), (List.map helper v), helper nr , helper nc, vtype), vtype
-          )       
+          )  
+  | Ast.MatrixIdAcc(v, ind1, ind2) ->
+        let ve = expr (Ast.Id(v))
+        and inde1 = expr (Ast.Id(ind1)) 
+        and inde2 = expr (Ast.Id(ind2)) in
+        let _, idt = ve
+        and _, indt1 = inde1 
+        and _, indt2 = inde2 in
+        if (idt == String && indt1 == String && indt2 == String) then
+            (
+              MatrixIdAcc(IdLit(v),
+                        IdLit(ind1),
+                        IdLit(ind2),
+                        Na), Na
+            )
+        else
+            failwith "Type incompatibility" 
   | MatrixIntAcc(vid, indInt1, indInt2) ->
         let vide = expr (Ast.Id(vid))
         and inde1 = expr indInt1
         and inde2 = expr indInt2 in
         let _, idT = vide
         and _, indT1 = inde1
-        and _, indT2 = inde2
-        in
+        and _, indT2 = inde2 in
         if (idT == String && indT1 == Int && indT2 == Int) then
             (
                 MatrixIntAcc(IdLit(vid),
@@ -154,7 +170,6 @@ let rec expr = function
             )
         else
             failwith "Type incompatibility"
-
   | Ast.Na -> Na(Na), Na
   | Ast.None -> Na(Na), Na
   | Ast.Assign(id, e) -> 
