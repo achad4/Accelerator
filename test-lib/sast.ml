@@ -35,6 +35,7 @@ type expr_detail =
   | VectIdAcc of expr_detail * expr_detail * t
   | VectIntAcc of expr_detail * expr_detail * t
   | Matrix of expr_detail * expr_detail list * expr_detail * expr_detail * t
+  | MatrixIntAcc of expr_detail * expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
@@ -124,11 +125,22 @@ let rec expr = function
             )
         else
             failwith "Type incompatibility"
-  | Ast.Matrix(s, vl, nc, nr) ->
-        let head = List.hd vl in
+  | Ast.Matrix(s, v, nr, nc) ->
+        let head = List.hd v in
         let _, vtype = expr head in
+        let _, nrt = nr in
+        let _, nct = nc in
         let helper e = fst (expr e) in
-        Matrix(IdLit(s), (List.map helper vl), vtype, IntLit(nc), IntLit(nr)), vtype
+        if (List.length v 1= nr * nc) then
+          failwith "Invalid size"
+        else if (nr != )
+        else
+          (
+            Matrix(IdLit(s), (List.map helper v), helper nr , helper nc, vtype), vtype
+          )
+       
+  | MatrixIntAcc(vid, indInt1, indInt2) ->
+
   | Ast.Na -> Na(Na), Na
   | Ast.None -> Na(Na), Na
   | Ast.Assign(id, e) -> 

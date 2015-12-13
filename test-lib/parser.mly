@@ -2,7 +2,7 @@
 
 %token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE, NA
 %token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, VECTSTART
-%token EQ, FOR, IN, RANGE, LBRAC, RBRAC
+%token MATRIXSTART, NROW, NCOL, EQSING, EQ, FOR, IN, RANGE, LBRAC, RBRAC
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -39,8 +39,8 @@ expr:
   | bool_expr                                                { $1 }
   | float_expr                                               { $1 }
   | ID ASSIGN VECTSTART vect_opt RPAREN                      { Vector($1, $4) }
-  | ID ASSIGN MATRIXSTART vector_opt COMMA 
-    NROW EQSING expr COMMA NCOL EQSING expr RPAREN           { Matrix($1, $4, $8, $12) }
+  | ID ASSIGN MATRIXSTART VECTSTART vect_opt RPAREN COMMA 
+    NROW EQSING expr COMMA NCOL EQSING expr RPAREN           { Matrix($1, $5, $10, $14) }
   | ID LPAREN actuals_opt RPAREN                             { FuncCall($1, $3) }
   | ID ASSIGN expr                                           { Assign($1, $3) }
   | ID LBRAC ID RBRAC                                        { VectIdAcc($1, $3) }

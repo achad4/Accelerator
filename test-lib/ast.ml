@@ -22,9 +22,10 @@ type expr =
   | Na
   | None
   | Vector of string * expr list
-  | Matrix of string * expr list * expr * expr
   | VectIdAcc of string * string
   | VectIntAcc of string * expr
+  | Matrix of string * expr list * expr * expr
+  | MatrixIntAcc of string * expr * expr
   | Add of expr * expr
   | Sub of expr * expr
   | Mult of expr * expr
@@ -56,9 +57,11 @@ let rec string_of_expression = function
   | BoolLit(b) -> string_of_bool b
   | FloatLit(f) -> string_of_float f
   | Vector(s, vl) -> "vector<type> " ^ s ^ "(" ^ (String.concat ", " (List.map string_of_expression vl)) ^ ")"
-  | Matrix(s, vl, nr, nc) -> 
   | VectIdAcc(s, accid) -> s ^ "[" ^  accid ^ "]"
   | VectIntAcc(s, ind) -> s ^ "[" ^ string_of_expression ind ^ "]"
+  | Matrix(s, v, nr, nc) -> "vector<vector<type>>" ^ s ^ "("  ^ (String.concat ", " (List.map string_of_expression v)) ^ ")" ^
+    " with nrow=" ^ string_of_expression nr ^ " and ncol=" ^ string_of_expression nc
+  | MatrixIntAcc(s, ind1, ind2) -> s ^ "[" ^ string_of_expression ind1 ^ "]" ^ "[" ^ string_of_expression ind2 ^ "]"
   | Add(e1, e2) -> (string_of_expression e1) ^ "+" ^ (string_of_expression e2)
   | Sub(e1, e2 ) -> (string_of_expression e1) ^ "-" ^ (string_of_expression e2)
   | Mult(e1, e2) -> (string_of_expression e1) ^ "*" ^ (string_of_expression e2)

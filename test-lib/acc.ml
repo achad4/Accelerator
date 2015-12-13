@@ -11,6 +11,7 @@ let _ =
   let cast = Cast.program sast in
 
 let rec compile_detail = function
+  | Cast.Na(s, t) -> s
   | Cast.IdLit(s) -> s
   | Cast.IntLit(i) -> string_of_int i
   | Cast.IntExpr(e, t) -> compile_detail e
@@ -29,7 +30,23 @@ let rec compile_detail = function
           compile_detail e1 ^ "[" ^ compile_detail e2 ^ "-1]"
   | Cast.VectIntAcc(e1, e2, t) ->
           compile_detail e1 ^ "[" ^ compile_detail e2 ^ "-1]"
-  | Cast.Na(s, t) -> s
+  | Cast.Matrix(s, v, nr, nc, t) ->
+          let helper e = compile_detail e in
+          let holder = compile_detail s ^ "Holder" in
+          let nr_str = compile_detail nr in
+          let nc_str = compile_detail nc in
+          let matrix = compile_detail s in
+          let ty = Cast.string_of_ctype t in
+          ty ^ " " ^ holder ^ "[] = {" ^ 
+          (String.concat ", " (List.map helper v)) ^ "};\n" ^
+          "vector<" ^ ty ^ "> " ^ matrix ^ "Vector" ^
+          " (" ^ holder ^ ", " ^ holder ^ " + sizeof(" ^ 
+          holder ^ ") / sizeof(" ^ ty ^"))\n" ^
+          "vector<vector<" ^ ty ^ ">> " ^ matrix ^ " (" ^ nr_str ^ ");\n" ^
+          "for(int i=0; i<" ^ nr_str ^ "; i++) { \n" ^
+          matrix ^ "[i].resize(" ^ nc_str ^ ");\n" ^ 
+          "for(int j=0; i<" ^ nc_str ^ "; j++) { \n" ^
+          matrix ^ "[i][j] = " ^ holder ^ "[(" ^ nr_str ^ "* i) + j];\n}\n}"
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ 
         "; cout << endl"
