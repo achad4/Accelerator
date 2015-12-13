@@ -2,7 +2,7 @@
 	open Parser
 }
 
-  let dig = ['0'-'9']
+  let dig = ['-']+['0'-'9']
   let frac = '.' dig*
   let whitespace = [' ' '\t']
   let flt = dig* frac
