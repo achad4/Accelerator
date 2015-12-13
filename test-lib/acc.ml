@@ -22,7 +22,7 @@ let rec compile_detail = function
           let holder = compile_detail s ^ "holder" in
           let ty = Cast.string_of_ctype t in
           ty ^ " " ^ holder ^ "[] = {" ^ 
-          (String.concat ", " (List.map helper v)) ^ "};\n" ^
+          (String.concat ", " (List.map helper v)) ^ "}\n" ^
           "vector<" ^ ty ^ "> " ^ compile_detail s ^ 
           " (" ^ holder ^ ", " ^ holder ^ " + sizeof(" ^ 
           holder ^ ") / sizeof(" ^ ty ^"))"
@@ -47,6 +47,8 @@ let rec compile_detail = function
           matrix ^ "[i].resize(" ^ nc_str ^ ");\n" ^ 
           "for(int j=0; i<" ^ nc_str ^ "; j++) { \n" ^
           matrix ^ "[i][j] = " ^ holder ^ "[(" ^ nr_str ^ "* i) + j];\n}\n}"
+  | Cast.MatrixIntAcc(m, r, c, t) ->
+          compile_detail m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail r ^ "]\n"
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ 
         "; cout << endl"

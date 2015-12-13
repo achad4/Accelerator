@@ -128,18 +128,32 @@ let rec expr = function
   | Ast.Matrix(s, v, nr, nc) ->
         let head = List.hd v in
         let _, vtype = expr head in
-        let _, nrt = nr in
-        let _, nct = nc in
+        let nrv, nrt = expr nr in
+        let ncv, nct = expr nc in
         let helper e = fst (expr e) in
-        if (List.length v 1= nr * nc) then
-          failwith "Invalid size"
-        else if (nr != )
+        if (nrt != Int || nct != Int) then
+          failwith "nrow and ncol must be integers"
         else
           (
             Matrix(IdLit(s), (List.map helper v), helper nr , helper nc, vtype), vtype
-          )
-       
+          )       
   | MatrixIntAcc(vid, indInt1, indInt2) ->
+        let vide = expr (Ast.Id(vid))
+        and inde1 = expr indInt1
+        and inde2 = expr indInt2 in
+        let _, idT = vide
+        and _, indT1 = inde1
+        and _, indT2 = inde2
+        in
+        if (idT == String && indT1 == Int && indT2 == Int) then
+            (
+                MatrixIntAcc(IdLit(vid),
+                           IntExpr(fst inde1, snd inde2),
+                           IntExpr(fst inde2, snd inde2),
+                           Na), Na
+            )
+        else
+            failwith "Type incompatibility"
 
   | Ast.Na -> Na(Na), Na
   | Ast.None -> Na(Na), Na

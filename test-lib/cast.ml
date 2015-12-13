@@ -31,6 +31,7 @@ type cexpr_detail =
    | VectIdAcc of cexpr_detail * cexpr_detail * ct
    | VectIntAcc of cexpr_detail * cexpr_detail * ct
    | Matrix of cexpr_detail * cexpr_detail list * cexpr_detail * cexpr_detail * ct
+   | MatrixIntAcc of cexpr_detail * cexpr_detail * cexpr_detail * ct
    | Add of cexpr_detail * cexpr_detail * ct
    | Sub of cexpr_detail * cexpr_detail * ct
    | Mult of cexpr_detail * cexpr_detail * ct
@@ -119,6 +120,8 @@ let rec cexpr_detail = function
  | Sast.Na(t) -> Na("Void", type_match t)
  | Sast.Matrix(s, v, nr, nc, t) -> let ct = type_match t in
         Matrix(cexpr_detail s, List.map cexpr_detail v, cexpr_detail nr, cexpr_detail nc, ct)
+ | Sast.MatrixIntAcc(s, i1, i2, t) ->
+        MatrixIntAcc(cexpr_detail s, cexpr_detail i1, cexpr_detail i2, type_match t)
  (*Expand when you pull in Alan's Fadd etc.*)
  | Sast.Add(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Int)
  | Sast.Sub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Int)
