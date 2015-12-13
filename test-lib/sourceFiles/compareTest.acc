@@ -62,3 +62,13 @@ else
 {
 	print("fail")
 }
+i <- 1
+if(i == 1)
+{
+	print("pass")
+}
+else
+{
+	print("fail")
+}
+

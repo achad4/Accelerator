@@ -25,7 +25,11 @@ type id =
 	| Id of string
 
 type expr_detail = 
-  | Na of t
+  | String
+  | Int
+  | Float
+  | Bool
+  | Na
   | IdLit of string
   | IntLit of int
   | IntExpr of expr_detail * t
@@ -53,13 +57,9 @@ type expr_detail =
   | And of expr_detail * expr_detail * t
   | Or of expr_detail * expr_detail * t
   | Not of expr_detail * t
-  | IntEq of expr_detail * expr_detail * t
-  | FloatEq of expr_detail * expr_detail * t
-  | BoolEq of expr_detail * expr_detail * t
+  | Eq of expr_detail * expr_detail * t
+  | NEq of expr_detail * expr_detail * t
   | StringEq of expr_detail * expr_detail * t
-  | IntNEq of expr_detail * expr_detail * t
-  | FloatNEq of expr_detail * expr_detail * t
-  | BoolNEq of expr_detail * expr_detail * t
   | StringNEq of expr_detail * expr_detail * t
 
 type detail = 
@@ -100,7 +100,7 @@ let string_of_id = function
 	Id(s) -> s 
 
 let rec expr = function
-  | Ast.Id (s) -> IdLit(s), String
+  | Ast.Id (s) -> IdLit(s), Na
   | Ast.IntLit(c) -> IntLit(c), Int
   | Ast.FloatLit(f) -> FloatLit(f), Float
   | Ast.BoolLit(b) -> BoolLit(b), Bool
@@ -268,45 +268,39 @@ let rec expr = function
                   Not((fst b1), Bool), Bool
           else
               failwith "Type incompatibility"
-  | Ast.IntEq (e1, e2) ->
+  | Ast.Eq (e1, e2) ->
           let b1 = expr e1 
           and b2 = expr e2 in
-          IntEq((fst b1), (fst b2), Int), Int
-  | Ast.FloatEq (e1, e2) ->
+          let _, t1 = b1
+          and _, t2 = b2 in
+          if ((t1 = Na) || (t2 = Na)) then
+            Eq((fst b1), (fst b2), t1), Bool
+          else if ( t1 != t2 ) then
+            failwith "Type incompatability"
+          (* C++ compares strings using strcmp *)
+          else if ( t1 = String ) then
+            StringEq((fst b1), (fst b2), t1), Bool
+          else
+            Eq((fst b1), (fst b2), t1), Bool
+
+  | Ast.NEq (e1, e2) ->
           let b1 = expr e1 
           and b2 = expr e2 in
-          FloatEq((fst b1), (fst b2), Float), Float
-  | Ast.BoolEq (e1, e2) ->
-          let b1 = expr e1 
-          and b2 = expr e2 in
-          BoolEq((fst b1), (fst b2), Int), Int
-  | Ast.StringEq (e1, e2) ->
-          let b1 = expr e1 
-          and b2 = expr e2 in
-          StringEq((fst b1), (fst b2), Int), Int
-  | Ast.IntNEq (e1, e2) ->
-          let b1 = expr e1 
-          and b2 = expr e2 in
-          IntNEq((fst b1), (fst b2), Int), Int
-  | Ast.FloatNEq (e1, e2) ->
-          let b1 = expr e1 
-          and b2 = expr e2 in
-          FloatNEq((fst b1), (fst b2), Int), Int
-  | Ast.BoolNEq (e1, e2) ->
-          let b1 = expr e1 
-          and b2 = expr e2 in
-          BoolNEq((fst b1), (fst b2), Int), Int
-  | Ast.StringNEq (e1, e2) ->
-          let b1 = expr e1 
-          and b2 = expr e2 in
-          StringNEq((fst b1), (fst b2), Int), Int
+          let _, t1 = b1
+          and _, t2 = b2 in
+          if ( t1 != t2 ) then
+            failwith "Type incompatability"
+          else if ( t1 = String ) then
+            StringNEq((fst b1), (fst b2), t1), Bool
+          else
+            NEq((fst b1), (fst b2), t1), Bool
 	| Ast.FAdd( e1, e2) ->
       		let e1 = expr e1
       		and e2 = expr e2 in
       		let _, t1 = e1
       		and _, t2 = e2 in
       		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
-      				FAdd((fst e1), (fst e2), Float), Float
+      		  FAdd((fst e1), (fst e2), Float), Float
       		else
       			failwith "Type incompatibility"
 	| Ast.FSub( e1, e2) ->

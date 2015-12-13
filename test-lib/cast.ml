@@ -31,7 +31,8 @@ type cexpr_detail =
    | Vector of cexpr_detail * cexpr_detail list * ct
    | VectIdAcc of cexpr_detail * cexpr_detail * ct
    | VectIntAcc of cexpr_detail * cexpr_detail * ct
-   | Matrix of cexpr_detail * cexpr_detail list * cexpr_detail * cexpr_detail * ct
+   | Matrix of cexpr_detail * cexpr_detail list * cexpr_detail 
+             * cexpr_detail * ct
    | MatrixIntAcc of cexpr_detail * cexpr_detail * cexpr_detail * ct
    | MatrixIdAcc of cexpr_detail * cexpr_detail * cexpr_detail * ct
    | Add of cexpr_detail * cexpr_detail * ct
@@ -49,13 +50,9 @@ type cexpr_detail =
    | And of cexpr_detail * cexpr_detail * ct
    | Or of cexpr_detail * cexpr_detail * ct
    | Not of cexpr_detail * ct
-   | IntEq of cexpr_detail * cexpr_detail * ct
-   | FloatEq of cexpr_detail * cexpr_detail * ct
-   | BoolEq of cexpr_detail * cexpr_detail * ct
+   | Eq of cexpr_detail * cexpr_detail * ct
+   | NEq of cexpr_detail * cexpr_detail * ct
    | StringEq of cexpr_detail * cexpr_detail * ct
-   | IntNEq of cexpr_detail * cexpr_detail * ct
-   | FloatNEq of cexpr_detail * cexpr_detail * ct
-   | BoolNEq of cexpr_detail * cexpr_detail * ct
    | StringNEq of cexpr_detail * cexpr_detail * ct
 
 type cexpression = 
@@ -130,12 +127,14 @@ let rec cexpr_detail = function
         VectIntAcc(cexpr_detail e1, cexpr_detail e2, type_match t) 
  | Sast.Na(t) -> Na("Void", type_match t)
  | Sast.Matrix(s, v, nr, nc, t) -> let ct = type_match t in
-        Matrix(cexpr_detail s, List.map cexpr_detail v, cexpr_detail nr, cexpr_detail nc, ct)
+        Matrix(cexpr_detail s, List.map cexpr_detail v, cexpr_detail nr, 
+        cexpr_detail nc, ct)
  | Sast.MatrixIdAcc(s, id1, id2, t) ->
-        MatrixIdAcc(cexpr_detail s, cexpr_detail id1, cexpr_detail id2, type_match t)
+        MatrixIdAcc(cexpr_detail s, cexpr_detail id1, cexpr_detail id2,
+        type_match t)
  | Sast.MatrixIntAcc(s, i1, i2, t) ->
-        MatrixIntAcc(cexpr_detail s, cexpr_detail i1, cexpr_detail i2, type_match t)
- (*Expand when you pull in Alan's Fadd etc.*)
+        MatrixIntAcc(cexpr_detail s, cexpr_detail i1, cexpr_detail i2, 
+        type_match t)
  | Sast.Add(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Int)
  | Sast.Sub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.Mult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, Int)
@@ -157,20 +156,12 @@ let rec cexpr_detail = function
                           Or(cexpr_detail e1, cexpr_detail e2, ct)
  | Sast.Not(e, t) -> let ct = type_match t in
                       Not(cexpr_detail e, ct)
- | Sast.IntEq(e1, e2, t) -> let ct = type_match t in
-                            IntEq(cexpr_detail e1, cexpr_detail e2, ct)
- | Sast.FloatEq(e1, e2, t) -> let ct = type_match t in
-                            FloatEq(cexpr_detail e1, cexpr_detail e2, ct)
- | Sast.BoolEq(e1, e2, t) -> let ct = type_match t in
-                            BoolEq(cexpr_detail e1, cexpr_detail e2, ct)
+ | Sast.Eq(e1, e2, t) -> let ct = type_match t in
+                            Eq(cexpr_detail e1, cexpr_detail e2, ct)
+ | Sast.NEq(e1, e2, t) -> let ct = type_match t in
+                            NEq(cexpr_detail e1, cexpr_detail e2, ct)
  | Sast.StringEq(e1, e2, t) -> let ct = type_match t in
                             StringEq(cexpr_detail e1, cexpr_detail e2, ct)
- | Sast.IntNEq(e1, e2, t) -> let ct = type_match t in
-                            IntNEq(cexpr_detail e1, cexpr_detail e2, ct)
- | Sast.FloatNEq(e1, e2, t) -> let ct = type_match t in
-                            FloatNEq(cexpr_detail e1, cexpr_detail e2, ct)
- | Sast.BoolNEq(e1, e2, t) -> let ct = type_match t in
-                            BoolNEq(cexpr_detail e1, cexpr_detail e2, ct)
  | Sast.StringNEq(e1, e2, t) -> let ct = type_match t in
                             StringNEq(cexpr_detail e1, cexpr_detail e2, ct)
 
@@ -199,7 +190,8 @@ let rec stmt = function
                         Cblock(l, type_match t)
   | Sast.Sif(e, s1, s2, t) -> let r = cexpr e in
                               Cif(r, stmt s1, stmt s2, type_match t)
-  | Sast.Sfor(id, e1, e2, s, t) -> Cfor(cexpr id, cexpr e1, cexpr e2, stmt s, Void)
+  | Sast.Sfor(id, e1, e2, s, t) -> Cfor(cexpr id, cexpr e1, cexpr e2, stmt s, 
+                                        Void)
  
  (*return a c program in the form of a single *)
 let program sast = 

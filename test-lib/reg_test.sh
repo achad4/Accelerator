@@ -20,6 +20,7 @@ runTest() {
 	fi
 }
 
+# ./reg_test.sh <test_name> will run one given test
 if [ $# -eq 1 ]
   then
     runTest $1

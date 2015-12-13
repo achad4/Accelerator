@@ -13,8 +13,11 @@
 %left PLUS MINUS 
 %left MULT DIV
 %left MOD
-%left AND OR
-%right ASSIGN NOT EXPO
+%left EQ NEQ
+%right NOT
+%left AND
+%left OR
+%right ASSIGN EXPO
 
 %start program
 
@@ -33,6 +36,7 @@ stmt:
   | expr DLIN                                                { Expr($1) }
   | LBRACE DLIN stmt_list RBRACE DLIN                        { Block(List.rev $3) }
   | IF LPAREN bool_expr RPAREN DLIN stmt ELSE DLIN stmt      { If($3, $6, $9) }
+  | IF LPAREN compare_expr RPAREN DLIN stmt ELSE DLIN stmt   { If($3, $6, $9) }
   | FOR LPAREN expr IN int_expr RANGE int_expr RPAREN stmt   { For($3, $5, $7, $9) }
 
 expr:
@@ -101,11 +105,26 @@ bool_expr:
   | bool_expr AND bool_expr        { And($1, $3) }
   | bool_expr OR bool_expr         { Or($1, $3) }
   | NOT bool_expr                  { Not($2) }
-  | expr EQ expr                   { Eq($1, $3) }
-  | expr NEQ expr                  { NEq($1, $3) }
 
 string_expr:
-  | string_data   { $1 }
+  | string_data                    { $1 }
+
+compare_expr:
+  | compare                        { $1 }
+  | compare AND compare            { And($1, $3) }
+  | compare OR compare             { Or($1, $3) }
+  | NOT compare_expr               { Not($2) }
+
+compare:
+  | comparable EQ comparable       { Eq($1, $3) }
+  | comparable NEQ comparable      { NEq($1, $3) }
+
+comparable:
+  | int_data                       { $1 }
+  | bool_data                      { $1 }
+  | float_data                     { $1 }
+  | string_data                    { $1 }
+  | ID                             { Id($1) }
 
 int_data:
   | INT           { IntLit($1) }
