@@ -49,6 +49,14 @@ type cexpr_detail =
    | And of cexpr_detail * cexpr_detail * ct
    | Or of cexpr_detail * cexpr_detail * ct
    | Not of cexpr_detail * ct
+   | IntEq of cexpr_detail * cexpr_detail * ct
+   | FloatEq of cexpr_detail * cexpr_detail * ct
+   | BoolEq of cexpr_detail * cexpr_detail * ct
+   | StringEq of cexpr_detail * cexpr_detail * ct
+   | IntNEq of cexpr_detail * cexpr_detail * ct
+   | FloatNEq of cexpr_detail * cexpr_detail * ct
+   | BoolNEq of cexpr_detail * cexpr_detail * ct
+   | StringNEq of cexpr_detail * cexpr_detail * ct
 
 type cexpression = 
   | Cexpr of cexpr_detail * ct
@@ -149,6 +157,22 @@ let rec cexpr_detail = function
                           Or(cexpr_detail e1, cexpr_detail e2, ct)
  | Sast.Not(e, t) -> let ct = type_match t in
                       Not(cexpr_detail e, ct)
+ | Sast.IntEq(e1, e2, t) -> let ct = type_match t in
+                            IntEq(cexpr_detail e1, cexpr_detail e2, ct)
+ | Sast.FloatEq(e1, e2, t) -> let ct = type_match t in
+                            FloatEq(cexpr_detail e1, cexpr_detail e2, ct)
+ | Sast.BoolEq(e1, e2, t) -> let ct = type_match t in
+                            BoolEq(cexpr_detail e1, cexpr_detail e2, ct)
+ | Sast.StringEq(e1, e2, t) -> let ct = type_match t in
+                            StringEq(cexpr_detail e1, cexpr_detail e2, ct)
+ | Sast.IntNEq(e1, e2, t) -> let ct = type_match t in
+                            IntNEq(cexpr_detail e1, cexpr_detail e2, ct)
+ | Sast.FloatNEq(e1, e2, t) -> let ct = type_match t in
+                            FloatNEq(cexpr_detail e1, cexpr_detail e2, ct)
+ | Sast.BoolNEq(e1, e2, t) -> let ct = type_match t in
+                            BoolNEq(cexpr_detail e1, cexpr_detail e2, ct)
+ | Sast.StringNEq(e1, e2, t) -> let ct = type_match t in
+                            StringNEq(cexpr_detail e1, cexpr_detail e2, ct)
 
 let rec cexpr = function
   | Sast.Sexpr(e, t) -> Cexpr(cexpr_detail e, type_match t)

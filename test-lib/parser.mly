@@ -3,7 +3,7 @@
 %token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE, NA
 %token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, VECTSTART
 %token MATRIXSTART, NROW, NCOL, EQSING, EQ, FOR, IN, RANGE, LBRAC, RBRAC
-%token DOUBLEQT
+%token DOUBLEQT, NEQ
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -97,10 +97,12 @@ float_expr:
   | float_expr DIV float_expr      { FDiv($1,$3) }
 
 bool_expr:
-  | bool_data                 { $1 }
-  | bool_expr AND bool_expr   { And($1, $3) }
-  | bool_expr OR bool_expr    { Or($1, $3) }
-  | NOT bool_expr             { Not($2) }
+  | bool_data                      { $1 }
+  | bool_expr AND bool_expr        { And($1, $3) }
+  | bool_expr OR bool_expr         { Or($1, $3) }
+  | NOT bool_expr                  { Not($2) }
+  | expr EQ expr                   { Eq($1, $3) }
+  | expr NEQ expr                  { NEq($1, $3) }
 
 string_expr:
   | string_data   { $1 }

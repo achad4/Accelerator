@@ -47,6 +47,7 @@ runTest "ifElseTest"
 runTest "forTest"
 runTest "matrixTest"
 runTest "stringTest"
+runTest "compareTest"
 
 echo ====================================================
 echo Results

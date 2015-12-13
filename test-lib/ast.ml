@@ -43,6 +43,14 @@ type expr =
   | And of expr * expr
   | Or of expr * expr
   | Not of expr
+  | IntEq of expr * expr
+  | FloatEq of expr * expr
+  | BoolEq of expr * expr
+  | StringEq of expr * expr
+  | IntNEq of expr * expr
+  | FloatNEq of expr * expr
+  | BoolNEq of expr * expr
+  | StringNEq of expr * expr
 
 type stmt = 
 	| Expr of expr
@@ -55,6 +63,7 @@ type program = stmt list
 let rec string_of_expression = function
   | Id(s) -> s
   | Na -> "null"
+  | None -> "None"
   | IntLit(e) -> string_of_int e
   | BoolLit(b) -> string_of_bool b
   | FloatLit(f) -> string_of_float f
@@ -81,7 +90,14 @@ let rec string_of_expression = function
   | And( b1, b2) -> (string_of_expression b1) ^ " && " ^ (string_of_expression b2)
   | Or( b1, b2) -> (string_of_expression b1) ^ " || " ^ (string_of_expression b2)
   | Not( b1 ) -> "!" ^ (string_of_expression b1)
-  | None -> "None"
+  | IntEq(e1, e2) -> (string_of_expression e1) ^ "==" ^ (string_of_expression e2)
+  | FloatEq(e1, e2) -> (string_of_expression e1) ^ "==" ^ (string_of_expression e2)
+  | BoolEq(e1, e2) -> (string_of_expression e1) ^ "==" ^ (string_of_expression e2)
+  | StringEq(e1, e2) -> (string_of_expression e1) ^ "==" ^ (string_of_expression e2)
+  | IntNEq(e1, e2) -> (string_of_expression e1) ^ "!=" ^ (string_of_expression e2)
+  | FloatNEq(e1, e2) -> (string_of_expression e1) ^ "!=" ^ (string_of_expression e2)
+  | BoolNEq(e1, e2) -> (string_of_expression e1) ^ "!=" ^ (string_of_expression e2)
+  | StringNEq(e1, e2) -> (string_of_expression e1) ^ "!=" ^ (string_of_expression e2)
     
 let rec string_of_statement = function
   | Expr(e) -> string_of_expression e

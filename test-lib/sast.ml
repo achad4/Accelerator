@@ -53,6 +53,14 @@ type expr_detail =
   | And of expr_detail * expr_detail * t
   | Or of expr_detail * expr_detail * t
   | Not of expr_detail * t
+  | IntEq of expr_detail * expr_detail * t
+  | FloatEq of expr_detail * expr_detail * t
+  | BoolEq of expr_detail * expr_detail * t
+  | StringEq of expr_detail * expr_detail * t
+  | IntNEq of expr_detail * expr_detail * t
+  | FloatNEq of expr_detail * expr_detail * t
+  | BoolNEq of expr_detail * expr_detail * t
+  | StringNEq of expr_detail * expr_detail * t
 
 type detail = 
 	| ExprDet of expr_detail
@@ -108,11 +116,7 @@ let rec expr = function
         let _, idt = ve
         and _, indt = inde in
         if (idt == String && indt == String) then
-            (
-              VectIdAcc(IdLit(v),
-                        IdLit(ind),
-                        Na), Na
-            )
+              VectIdAcc(IdLit(v), IdLit(ind), Na), Na
         else
             failwith "Type incompatibility"
   | Ast.VectIntAcc(vid, indInt) ->
@@ -121,11 +125,7 @@ let rec expr = function
         let _, idT = vide
         and _, indT = inde in
         if (idT == String && indT == Int) then
-            (
-                VectIntAcc(IdLit(vid),
-                           IntExpr(fst inde, snd inde),
-                           Na), Na
-            )
+                VectIntAcc(IdLit(vid), IntExpr(fst inde, snd inde), Na), Na
         else
             failwith "Type incompatibility"
   | Ast.Matrix(s, v, nr, nc) ->
@@ -137,9 +137,7 @@ let rec expr = function
         if (nrt != Int || nct != Int) then
           failwith "nrow and ncol must be integers"
         else
-          (
             Matrix(IdLit(s), (List.map helper v), helper nr , helper nc, vtype), vtype
-          )  
   | Ast.MatrixIdAcc(v, ind1, ind2) ->
         let ve = expr (Ast.Id(v))
         and inde1 = expr (Ast.Id(ind1)) 
@@ -148,12 +146,7 @@ let rec expr = function
         and _, indt1 = inde1 
         and _, indt2 = inde2 in
         if (idt == String && indt1 == String && indt2 == String) then
-            (
-              MatrixIdAcc(IdLit(v),
-                        IdLit(ind1),
-                        IdLit(ind2),
-                        Na), Na
-            )
+              MatrixIdAcc(IdLit(v), IdLit(ind1), IdLit(ind2), Na), Na
         else
             failwith "Type incompatibility" 
   | Ast.MatrixIntAcc(vid, indInt1, indInt2) ->
@@ -164,12 +157,8 @@ let rec expr = function
         and _, indT1 = inde1
         and _, indT2 = inde2 in
         if (idT == String && indT1 == Int && indT2 == Int) then
-            (
-                MatrixIntAcc(IdLit(vid),
-                           IntExpr(fst inde1, snd inde2),
-                           IntExpr(fst inde2, snd inde2),
-                           Na), Na
-            )
+                MatrixIntAcc(IdLit(vid), IntExpr(fst inde1, snd inde2),
+                IntExpr(fst inde2, snd inde2), Na), Na
         else
             failwith "Type incompatibility"
   | Ast.Na -> Na(Na), Na
@@ -189,9 +178,7 @@ let rec expr = function
 		and _, t2 = e2 in
 
 		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
-			(
 				Add((fst e1), (fst e2), Int), Int
-			)
 		else
 			failwith "Type incompatibility"
   | Ast.Sub( e1, e2 ) ->
@@ -202,9 +189,7 @@ let rec expr = function
           and _, t2 = e2 in
 
  		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
-              (
               Sub((fst e1),(fst e2), Int), Int
-              )
           else
               failwith "Type incompatability"
   | Ast.Mult( e1, e2 ) ->
@@ -215,9 +200,7 @@ let rec expr = function
           and _, t2 = e2 in
           
 	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
-              (
               Mult((fst e1),(fst e2), Int), Int
-              )
           else
               failwith "Type incompatability"
 
@@ -229,9 +212,7 @@ let rec expr = function
           and _, t2 = e2 in
 
       if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
-              (
               Div((fst e1),(fst e2), Int), Int
-              )
           else
               failwith "Type incompatability"
 
@@ -243,9 +224,7 @@ let rec expr = function
           and _, t2 = e2 in
 
 	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
-              (
               Expo((fst e1),(fst e2), Int), Int
-              )
           else
               failwith "Type incompatability"
 
@@ -257,9 +236,7 @@ let rec expr = function
           and _, t2 = e2 in
 
 	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
-              (
               Mod((fst e1),(fst e2), Int), Int
-              )
           else
               failwith "Type incompatability"
   | Ast.And( b1, b2) ->
@@ -270,9 +247,7 @@ let rec expr = function
           and _, t2 = b2 in
 
 	if ((t1 = t2) && (t1 = Bool) && (t2 = Bool)) then
-              (
                  And((fst b1),(fst b2), Bool), Bool
-              )
           else
               failwith "Type incompatibility"
   | Ast.Or( b1, b2) ->
@@ -283,33 +258,57 @@ let rec expr = function
           and _, t2 = b2 in
 
 	if ((t1 = t2) && (t1 = Bool) && (t2 = Bool)) then
-              (
                  Or((fst b1),(fst b2), Bool), Bool
-              )
           else
               failwith "Type incompatibility"
   | Ast.Not( b1 ) ->
           let b1 = expr b1 in
           let _, t1 = b1 in
           if t1 = Bool then
-              (
                   Not((fst b1), Bool), Bool
-              )
           else
               failwith "Type incompatibility"
+  | Ast.IntEq (e1, e2) ->
+          let b1 = expr e1 
+          and b2 = expr e2 in
+          IntEq((fst b1), (fst b2), Int), Int
+  | Ast.FloatEq (e1, e2) ->
+          let b1 = expr e1 
+          and b2 = expr e2 in
+          FloatEq((fst b1), (fst b2), Float), Float
+  | Ast.BoolEq (e1, e2) ->
+          let b1 = expr e1 
+          and b2 = expr e2 in
+          BoolEq((fst b1), (fst b2), Int), Int
+  | Ast.StringEq (e1, e2) ->
+          let b1 = expr e1 
+          and b2 = expr e2 in
+          StringEq((fst b1), (fst b2), Int), Int
+  | Ast.IntNEq (e1, e2) ->
+          let b1 = expr e1 
+          and b2 = expr e2 in
+          IntNEq((fst b1), (fst b2), Int), Int
+  | Ast.FloatNEq (e1, e2) ->
+          let b1 = expr e1 
+          and b2 = expr e2 in
+          FloatNEq((fst b1), (fst b2), Int), Int
+  | Ast.BoolNEq (e1, e2) ->
+          let b1 = expr e1 
+          and b2 = expr e2 in
+          BoolNEq((fst b1), (fst b2), Int), Int
+  | Ast.StringNEq (e1, e2) ->
+          let b1 = expr e1 
+          and b2 = expr e2 in
+          StringNEq((fst b1), (fst b2), Int), Int
 	| Ast.FAdd( e1, e2) ->
-		let e1 = expr e1
-		and e2 = expr e2 in
-
-		let _, t1 = e1
-		and _, t2 = e2 in
-
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
-			(
-				FAdd((fst e1), (fst e2), Float), Float
-			)
-		else
-			failwith "Type incompatibility"
+      		let e1 = expr e1
+      		and e2 = expr e2 in
+      		let _, t1 = e1
+      		and _, t2 = e2 in
+      		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+      				FAdd((fst e1), (fst e2), Float), Float
+      		else
+      			failwith "Type incompatibility"
 	| Ast.FSub( e1, e2) ->
 		let e1 = expr e1
 		and e2 = expr e2 in
@@ -318,9 +317,7 @@ let rec expr = function
 		and _, t2 = e2 in
 
 		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
-			(
 				FSub((fst e1), (fst e2), Float), Float
-			)
 		else
 			failwith "Type incompatibility"
 	| Ast.FMult( e1, e2) ->
@@ -331,9 +328,7 @@ let rec expr = function
 		and _, t2 = e2 in
 
 		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
-			(
 				FMult((fst e1), (fst e2), Float), Float
-			)
 		else
 			failwith "Type incompatibility"
 	| Ast.FDiv( e1, e2) ->
@@ -344,9 +339,7 @@ let rec expr = function
 		and _, t2 = e2 in
 
 		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
-			(
 				FDiv((fst e1), (fst e2), Float), Float
-			)
 		else
 			failwith "Type incompatibility"
 
@@ -365,11 +358,8 @@ let rec stmt = function
           let re = expr e
           and rie1 = expr ie1
           and rie2 = expr ie2 in
-          Sfor(Sexpr(fst(re),snd(re)), 
-               Sexpr(fst(rie1),snd(rie1)), 
-               Sexpr(fst(rie2),snd(rie2)), 
-               stmt sl,
-               Na)
+          Sfor(Sexpr(fst(re),snd(re)), Sexpr(fst(rie1),snd(rie1)), 
+          Sexpr(fst(rie2),snd(rie2)), stmt sl, Na)
 
 let program program = 
 	List.map stmt program

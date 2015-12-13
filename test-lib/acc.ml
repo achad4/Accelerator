@@ -61,28 +61,26 @@ let rec compile_detail = function
   | Cast.Or(b1, b2, t) -> (compile_detail b1) ^ " || " ^ 
                           (compile_detail b2)
   | Cast.Not(b1, t) -> "! " ^ (compile_detail b1)
+  | Cast.IntEq(e1, e2, t) -> (compile_detail e1) ^ " == " ^ (compile_detail e2)
+  | Cast.FloatEq(e1, e2, t) -> (compile_detail e1) ^ " == " ^ (compile_detail e2)
+  | Cast.BoolEq(e1, e2, t) -> (compile_detail e1) ^ " == " ^ (compile_detail e2)
+  | Cast.StringEq(e1, e2, t) -> "!strcmp(" ^ (compile_detail e1) ^ ", " ^ (compile_detail e2) ^ ")"
+  | Cast.IntNEq(e1, e2, t) -> (compile_detail e1) ^ " != " ^ (compile_detail e2)
+  | Cast.FloatNEq(e1, e2, t) -> (compile_detail e1) ^ " != " ^ (compile_detail e2)
+  | Cast.BoolNEq(e1, e2, t) -> (compile_detail e1) ^ " != " ^ (compile_detail e2)
+  | Cast.StringNEq(e1, e2, t) -> "strcmp(" ^ (compile_detail e1) ^ ", " ^ (compile_detail e2) ^ ")"
   | Cast.Assign(id, e, t) -> string_of_ctype t ^ " " ^ (string_of_id id) ^ " = " ^ 
                              (compile_detail e)
-  | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ 
-                           (compile_detail e2) 
-  | Cast.Expo(e1, e2, t) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ 
-                            (compile_detail e2) ^ ")"
-  | Cast.Div(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
-                           (compile_detail e2)
-  | Cast.Mult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ 
-                            (compile_detail e2)
-  | Cast.Sub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ 
-                           (compile_detail e2) 
-  | Cast.Add(e1, e2, t) -> (compile_detail e1) ^ " + " ^
-                           (compile_detail e2)
-  | Cast.FAdd(e1, e2, t) -> (compile_detail e1) ^ " + " ^ 
-                            (compile_detail e2)
-  | Cast.FSub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ 
-                            (compile_detail e2)
-  | Cast.FMult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ 
-                             (compile_detail e2)
-  | Cast.FDiv(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
-                            (compile_detail e2) in
+  | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ (compile_detail e2) 
+  | Cast.Expo(e1, e2, t) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ (compile_detail e2) ^ ")"
+  | Cast.Div(e1, e2, t) -> (compile_detail e1) ^ " / " ^ (compile_detail e2)
+  | Cast.Mult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ (compile_detail e2)
+  | Cast.Sub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ (compile_detail e2) 
+  | Cast.Add(e1, e2, t) -> (compile_detail e1) ^ " + " ^ (compile_detail e2)
+  | Cast.FAdd(e1, e2, t) -> (compile_detail e1) ^ " + " ^ (compile_detail e2)
+  | Cast.FSub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ (compile_detail e2)
+  | Cast.FMult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ (compile_detail e2)
+  | Cast.FDiv(e1, e2, t) -> (compile_detail e1) ^ " / " ^ (compile_detail e2) in
 
 let rec compile_expr = function
 	| Cexpr(e, t) -> compile_detail e 
