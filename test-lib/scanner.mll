@@ -1,8 +1,9 @@
 { 
 	open Parser
+  open Lexing
 }
 
-  let dig = ['-']+['0'-'9']
+  let dig = ['-']?['0'-'9']
   let frac = '.' dig*
   let whitespace = [' ' '\t']
   let flt = dig* frac
@@ -22,6 +23,8 @@
     | "="           { EQSING }
     | "in"          { IN }
   	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
+    | '\"' [^'\"']* '\"' { let str = lexeme lexbuf in
+                           STRING (String.sub str 1 (String.length str - 2)) }
   	| ','           { COMMA }
   	| '('           { LPAREN }
 	  | ')'           { RPAREN }
@@ -29,7 +32,6 @@
     | '}'           { RBRACE }
   	| dig+ as lit   { INT(int_of_string lit) }
     | flt as lit    { FLOAT(float_of_string lit) }
-    | eof           { EOF }
     | '\n'          { DLIN }
     | '+'           { PLUS }
     | '-'           { MINUS }
@@ -44,3 +46,5 @@
     | "=="          { EQ }
     | '['           { LBRAC }
     | ']'           { RBRAC }
+    | '"'           { DOUBLEQT }
+    | eof           { EOF } 

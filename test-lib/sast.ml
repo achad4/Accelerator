@@ -31,6 +31,7 @@ type expr_detail =
   | IntExpr of expr_detail * t
   | BoolLit of bool
   | FloatLit of float
+  | StringLit of string
   | Vector of expr_detail * expr_detail list * t
   | VectIdAcc of expr_detail * expr_detail * t
   | VectIntAcc of expr_detail * expr_detail * t
@@ -91,10 +92,11 @@ let string_of_id = function
 	Id(s) -> s 
 
 let rec expr = function
-  | Ast.Id ( s ) -> IdLit(s), String
-  | Ast.IntLit( c ) -> IntLit(c), Int
-  | Ast.FloatLit( f ) -> FloatLit(f), Float
+  | Ast.Id (s) -> IdLit(s), String
+  | Ast.IntLit(c) -> IntLit(c), Int
+  | Ast.FloatLit(f) -> FloatLit(f), Float
   | Ast.BoolLit(b) -> BoolLit(b), Bool
+  | Ast.StringLit(s) -> StringLit(s), String
   | Ast.Vector(s, vl) ->
         let head = List.hd vl in
         let _, vtype = expr head in

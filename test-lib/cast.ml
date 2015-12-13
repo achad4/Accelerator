@@ -27,6 +27,7 @@ type cexpr_detail =
    | IntExpr of cexpr_detail * ct
    | FloatLit of float
    | BoolLit of bool
+   | StringLit of string
    | Vector of cexpr_detail * cexpr_detail list * ct
    | VectIdAcc of cexpr_detail * cexpr_detail * ct
    | VectIntAcc of cexpr_detail * cexpr_detail * ct
@@ -111,6 +112,7 @@ let rec cexpr_detail = function
  | Sast.IntLit(i) -> IntLit(i)
  | Sast.FloatLit(i) -> FloatLit(i)
  | Sast.BoolLit(b) -> BoolLit(b)
+ | Sast.StringLit(s) -> StringLit(s)
  | Sast.IntExpr(e,t) -> IntExpr(cexpr_detail e, type_match t)
  | Sast.Vector(s, v, t) -> let ct = type_match t in
          Vector(cexpr_detail s, List.map cexpr_detail v, ct)

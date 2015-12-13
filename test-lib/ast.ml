@@ -15,12 +15,13 @@ type op =
   | FDiv
 
 type expr =
+  | Na
+  | None
   | Id of string
 	| IntLit of int
   | BoolLit of bool
   | FloatLit of float
-  | Na
-  | None
+  | StringLit of string
   | Vector of string * expr list
   | VectIdAcc of string * string
   | VectIntAcc of string * expr
@@ -57,6 +58,7 @@ let rec string_of_expression = function
   | IntLit(e) -> string_of_int e
   | BoolLit(b) -> string_of_bool b
   | FloatLit(f) -> string_of_float f
+  | StringLit(s) -> s
   | Vector(s, vl) -> "vector<type> " ^ s ^ "(" ^ (String.concat ", " (List.map string_of_expression vl)) ^ ")"
   | VectIdAcc(s, accid) -> s ^ "[" ^  accid ^ "]"
   | VectIntAcc(s, ind) -> s ^ "[" ^ string_of_expression ind ^ "]"

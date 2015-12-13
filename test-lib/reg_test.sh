@@ -247,6 +247,18 @@ else
 	failures+=1
 fi
 
+# Testing for strings
+./acc < sourceFiles/stringTest.acc > compiledCpp/stringTest.cpp
+g++ -o executables/stringTest compiledCpp/stringTest.cpp
+./executables/stringTest > output/stringTest.txt
+count+=1
+if diff "output/stringTest.txt" "expected/stringTestExpected.txt" > /dev/null; then
+	echo stringTest passed
+else
+	echo stringTest failed
+	failures+=1
+fi
+
 echo ====================================================
 echo Results
 echo ====================================================

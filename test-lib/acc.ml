@@ -17,6 +17,7 @@ let rec compile_detail = function
   | Cast.IntExpr(e, t) -> compile_detail e
   | Cast.FloatLit(f) -> string_of_float f
   | Cast.BoolLit(b) -> string_of_bool b
+  | Cast.StringLit(s) -> " \"" ^ s ^ "\" "
   | Cast.Vector(s, v, t) -> 
           let helper e = compile_detail e in
           let holder = compile_detail s ^ "holder" in
@@ -60,7 +61,7 @@ let rec compile_detail = function
   | Cast.Or(b1, b2, t) -> (compile_detail b1) ^ " || " ^ 
                           (compile_detail b2)
   | Cast.Not(b1, t) -> "! " ^ (compile_detail b1)
-  | Cast.Assign(id, e, t) -> "int " ^ (string_of_id id) ^ "=" ^ 
+  | Cast.Assign(id, e, t) -> string_of_ctype t ^ " " ^ (string_of_id id) ^ " = " ^ 
                              (compile_detail e)
   | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ 
                            (compile_detail e2) 
@@ -101,7 +102,6 @@ let rec compile_expr = function
   | Cor(b1, b2, t) -> compile_expr b1 ^ compile_expr b2
   | Cnot(b1, t) -> (compile_expr b1) in
 
-
 let rec compile_stmt = function
   | Cstmt(e, t) -> compile_expr e ^ ";\n"
   | Cblock(sl, t) -> let string_list l = List.map compile_stmt l in
@@ -110,7 +110,6 @@ let rec compile_stmt = function
                            ^ (compile_stmt s1)  ^ 
                            "else" 
                            ^  (compile_stmt s2)
-  (*for(int i = start; i < end; i++)*)
   | Cfor(id, e1, e2, s, t) -> "for( int " ^ compile_expr id ^ "="  ^ compile_expr e1 ^ "; " ^ 
                           compile_expr id ^" <= " ^ compile_expr e2 ^ "; " ^ compile_expr id ^
                           "++)\n" ^ compile_stmt s in
@@ -131,6 +130,7 @@ let compile cast =
   "#include<stdio.h>\n" ^
   "#include<math.h>\n" ^
   "#include<vector>\n" ^
+  "#include<string>\n" ^
   "using namespace std;\n" in
 
 print_endline ( c_begin ^ (compile cast))

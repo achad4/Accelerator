@@ -3,9 +3,11 @@
 %token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE, NA
 %token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, VECTSTART
 %token MATRIXSTART, NROW, NCOL, EQSING, EQ, FOR, IN, RANGE, LBRAC, RBRAC
+%token DOUBLEQT
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
+%token <string> STRING
 %token <bool> TRUE FALSE
 
 %left PLUS MINUS 
@@ -38,6 +40,7 @@ expr:
   | int_expr                                                 { $1 }
   | bool_expr                                                { $1 }
   | float_expr                                               { $1 }
+  | string_expr                                              { $1 }
   | ID ASSIGN VECTSTART vect_opt RPAREN                      { Vector($1, $4) }
   | ID ASSIGN MATRIXSTART VECTSTART vect_opt RPAREN COMMA 
     NROW EQSING expr COMMA NCOL EQSING expr RPAREN           { Matrix($1, $5, $10, $14) }
@@ -99,6 +102,9 @@ bool_expr:
   | bool_expr OR bool_expr    { Or($1, $3) }
   | NOT bool_expr             { Not($2) }
 
+string_expr:
+  | string_data   { $1 }
+
 int_data:
   | INT           { IntLit($1) }
 
@@ -108,3 +114,7 @@ bool_data:
 
 float_data:
   | FLOAT         { FloatLit($1) }
+
+string_data:
+  | STRING        { StringLit($1) }
+
