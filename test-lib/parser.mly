@@ -28,21 +28,23 @@ stmt_list:
   | stmt_list stmt                       { $2 :: $1 }
 
 stmt:
-  | expr DLIN                                  { Expr($1) }
-  | LBRACE DLIN stmt_list RBRACE DLIN          { Block(List.rev $3) }
-  | IF LPAREN bool_expr RPAREN DLIN stmt ELSE DLIN stmt    { If($3, $6, $9) }
-  | FOR LPAREN expr IN int_expr RANGE int_expr RPAREN stmt { For($3, $5, $7, $9) }
+  | expr DLIN                                                { Expr($1) }
+  | LBRACE DLIN stmt_list RBRACE DLIN                        { Block(List.rev $3) }
+  | IF LPAREN bool_expr RPAREN DLIN stmt ELSE DLIN stmt      { If($3, $6, $9) }
+  | FOR LPAREN expr IN int_expr RANGE int_expr RPAREN stmt   { For($3, $5, $7, $9) }
 
 expr:
-  | ID                                   { Id($1) }
-  | int_expr                             { $1 }
-  | bool_expr                            { $1 }
-  | float_expr                           { $1 }
-  | ID ASSIGN VECTSTART vect_opt RPAREN  { Vector($1, $4) }
-  | ID LPAREN actuals_opt RPAREN         { FuncCall($1, $3) }
-  | ID ASSIGN expr                       { Assign($1, $3) }
-  | ID LBRAC ID RBRAC                    { VectIdAcc($1, $3) }
-  | ID LBRAC int_expr RBRAC              { VectIntAcc($1, $3) }
+  | ID                                                       { Id($1) }
+  | int_expr                                                 { $1 }
+  | bool_expr                                                { $1 }
+  | float_expr                                               { $1 }
+  | ID ASSIGN VECTSTART vect_opt RPAREN                      { Vector($1, $4) }
+  | ID ASSIGN MATRIXSTART vector_opt COMMA 
+    NROW EQSING expr COMMA NCOL EQSING expr RPAREN           { Matrix($1, $4, $8, $12) }
+  | ID LPAREN actuals_opt RPAREN                             { FuncCall($1, $3) }
+  | ID ASSIGN expr                                           { Assign($1, $3) }
+  | ID LBRAC ID RBRAC                                        { VectIdAcc($1, $3) }
+  | ID LBRAC int_expr RBRAC                                  { VectIntAcc($1, $3) }
 
 vect_opt:
   | /* nothing */                        { [] }

@@ -16,11 +16,15 @@
     | "for"         { FOR }
     | ":"           { RANGE }
     | "c("          { VECTSTART }
+    | "matrix("     { MATRIXSTART }
+    | "nrow"        { NROW }
+    | "ncol"        { NCOL }
+    | "="           { EQSING }
     | "in"          { IN }
   	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
   	| ','           { COMMA }
   	| '('           { LPAREN }
-	| ')'           { RPAREN }
+	  | ')'           { RPAREN }
     | '{'           { LBRACE }
     | '}'           { RBRACE }
   	| dig+ as lit   { INT(int_of_string lit) }
