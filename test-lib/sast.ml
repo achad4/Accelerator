@@ -156,7 +156,7 @@ let rec expr = function
             )
         else
             failwith "Type incompatibility" 
-  | MatrixIntAcc(vid, indInt1, indInt2) ->
+  | Ast.MatrixIntAcc(vid, indInt1, indInt2) ->
         let vide = expr (Ast.Id(vid))
         and inde1 = expr indInt1
         and inde2 = expr indInt2 in
