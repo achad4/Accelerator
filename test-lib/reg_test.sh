@@ -20,6 +20,12 @@ runTest() {
 	fi
 }
 
+if [ $# -eq 1 ]
+  then
+    runTest $1
+    exit
+fi
+
 runTest "addTest"
 runTest "subTest"
 runTest "multTest"
