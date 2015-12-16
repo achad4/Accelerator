@@ -18,7 +18,7 @@ type expr =
   | Na
   | None
   | Id of string
-	| IntLit of int
+  | IntLit of int
   | BoolLit of bool
   | FloatLit of float
   | StringLit of string
@@ -38,17 +38,18 @@ type expr =
   | FSub of expr * expr
   | FMult of expr * expr
   | FDiv of expr * expr
- 	| FuncCall of string * expr list 
- 	| Assign of string * expr
+  | FuncCall of string * expr list 
+  | Assign of string * expr
   | And of expr * expr
   | Or of expr * expr
   | Not of expr
 
 type stmt = 
-	| Expr of expr
+  | Expr of expr
   | Block of stmt list
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
+  | Csv of string * string * bool
 
 type program = stmt list
 
@@ -82,7 +83,7 @@ let rec string_of_expression = function
   | Or( b1, b2) -> (string_of_expression b1) ^ " || " ^ (string_of_expression b2)
   | Not( b1 ) -> "!" ^ (string_of_expression b1)
   | None -> "None"
-    
+
 let rec string_of_statement = function
   | Expr(e) -> string_of_expression e
   | Block(sl) -> let string_list l = List.map string_of_statement l in
@@ -95,6 +96,8 @@ let rec string_of_statement = function
           " in " ^ string_of_expression ie1 ^
           ":" ^ string_of_expression ie2 ^
           "){\n" ^ string_of_statement sl
-                
+  | Csv(id, s, b) -> id ^ " <- read.csv(\"" ^ s ^ "\", " ^
+          string_of_bool b ^ ")\n"
+                     
 let string_of_program program =
 	String.concat "\n" (List.map string_of_statement program)

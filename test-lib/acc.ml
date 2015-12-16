@@ -112,7 +112,8 @@ let rec compile_stmt = function
                            ^  (compile_stmt s2)
   | Cfor(id, e1, e2, s, t) -> "for( int " ^ compile_expr id ^ "="  ^ compile_expr e1 ^ "; " ^ 
                           compile_expr id ^" <= " ^ compile_expr e2 ^ "; " ^ compile_expr id ^
-                          "++)\n" ^ compile_stmt s in
+                          "++)\n" ^ compile_stmt s 
+  | Ccsv()in
 
 let compile_func (f, t) = 
   let stmt_string_list = List.map compile_stmt (List.rev f.body) in

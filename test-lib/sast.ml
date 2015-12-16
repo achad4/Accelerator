@@ -80,6 +80,7 @@ type statement =
   | Sblock of statement list * t
   | Sif of expression * statement * statement * t
   | Sfor of expression * expression * expression * statement * t
+  | Scsv of string * string * bool
 
 let string_of_type = function
   | String -> "string"
@@ -370,6 +371,8 @@ let rec stmt = function
                Sexpr(fst(rie2),snd(rie2)), 
                stmt sl,
                Na)
+  | Ast.Csv(id, fl, b) -> Scsv(id,fl,b)
+
 
 let program program = 
 	List.map stmt program

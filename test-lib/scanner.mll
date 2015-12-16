@@ -7,6 +7,10 @@
   let frac = '.' dig*
   let whitespace = [' ' '\t']
   let flt = dig* frac
+  let sing_char = ['a'-'z''A'-'Z']
+  let mult_alphanum = ['a'-'z''A'-'Z''0'-'9']*
+  let csv = '.'"csv"
+  let filename = sing_char mult_alphanum csv
   rule token = parse
   	| whitespace    { token lexbuf } 
     | "NA"          { NA }
@@ -20,6 +24,12 @@
     | "matrix("     { MATRIXSTART }
     | "nrow"        { NROW }
     | "ncol"        { NCOL }
+    | "read.csv"    { CSV }
+    | "file="       { FILE }
+    | "header="     { HEAD }
+    | "TRUE"        { TRUEOPT }
+    | "FALSE"       { FALSEOPT }
+  	| filename as file { FILENAME(file) } 
     | "="           { EQSING }
     | "in"          { IN }
   	| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
@@ -27,7 +37,7 @@
                            STRING (String.sub str 1 (String.length str - 2)) }
   	| ','           { COMMA }
   	| '('           { LPAREN }
-	  | ')'           { RPAREN }
+	| ')'           { RPAREN }
     | '{'           { LBRACE }
     | '}'           { RBRACE }
   	| dig+ as lit   { INT(int_of_string lit) }
