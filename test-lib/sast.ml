@@ -127,13 +127,13 @@ let rec expr = function
                 This means we can return a literal of the correct type after
                 we find the value
                 *)
-                match (snd var) with
+                (match (snd var) with
                     | Int -> let val = StringMap.find (fst var) intMap in
                                 IntLit(val), Int
                     | Bool -> let val = StringMap.find (fst var) boolMap in
                                 BoolLit(val), Bool
                     | Float -> let val = StringMap.find (fst var) floatMap in
-                                IntLit(val), Float
+                                IntLit(val), Float)
 
                    
   | Ast.IntLit(c) -> IntLit(c), Int
