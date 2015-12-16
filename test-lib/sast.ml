@@ -1,5 +1,5 @@
 open Map
-module StringMap = Map.Make (String);;
+module StringMap = Map.Make (String)
 
 
 type op = 
@@ -121,21 +121,21 @@ let string_of_id = function
 	Id(s) -> s 
 
 let rec expr = function
-  | Ast.Id (s) -> (*IdLit(s), String*)
-                let var = find_var s st in
+  | Ast.Id(s) -> let var = find_var s st in
+                let t  = snd var in
                 (*now we know the variable is there and its type.
                 This means we can return a literal of the correct type after
-                we find the value
+                we find the vue
                 *)
-                (match (snd var) with
-                    | Int -> let val = StringMap.find (fst var) intMap in
-                                IntLit(val), Int
-                    | Bool -> let val = StringMap.find (fst var) boolMap in
-                                BoolLit(val), Bool
-                    | Float -> let val = StringMap.find (fst var) floatMap in
-                                IntLit(val), Float)
-
-                   
+                (
+                    match t with 
+                    | Int -> let v = StringMap.find s intMap in
+                            IntLit(v), Int
+                    | Bool -> let v = StringMap.find (fst var) boolMap in
+                                BoolLit(v), Bool
+                    | Float -> let v = StringMap.find (fst var) floatMap in
+                                IntLit(v), Float 
+                )
   | Ast.IntLit(c) -> IntLit(c), Int
   | Ast.FloatLit(f) -> FloatLit(f), Float
   | Ast.BoolLit(b) -> BoolLit(b), Bool
@@ -220,6 +220,11 @@ let rec expr = function
   | Ast.Assign(id, e) -> 
     		let e1 = expr e in
             (Id(id), snd e1) :: st.variables;
+            (match fst e1 with 
+                | IntLit(i) -> let intMap = StringMap.add id i intMap in
+                | BoolLit(b) -> let boolMap = StringMap.add id b boolMap in
+                | FloatLit(f) -> let floatMap = StringMap.add id f floatMap in
+            );
     		Assign(Id(id), fst e1, snd e1), snd e1
 	| Ast.FuncCall(id, el) -> 		
     		(*iterate over list of expressions and pull out the expression_detail from each one*)
