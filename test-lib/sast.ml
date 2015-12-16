@@ -1,5 +1,5 @@
 open Map
-module StringMap = Map.Make (String)
+module VarMap = Map.Make (String)
 
 
 type op = 
@@ -95,19 +95,20 @@ type symbol_table = {
 }
 
 
-let find_var id symbol_table =
+let find_var (id, symbol_table) =
     try
         List.find ( fun var -> (fst var = id) ) symbol_table.variables
     with Not_found ->
+        print_endline "find_var";
         raise Not_found
 
 let st : symbol_table = { 
                             variables = [] 
                         } 
 
-let intMap = StringMap.empty
-let floatMap = StringMap.empty
-let boolMap = StringMap.empty
+let intMap = VarMap.empty
+let floatMap = VarMap.empty
+let boolMap = VarMap.empty
 
 
 let string_of_type = function
@@ -121,19 +122,20 @@ let string_of_id = function
 	Id(s) -> s 
 
 let rec expr = function
-  | Ast.Id(s) -> let var = find_var s st in
-                let t  = snd var in
+  | Ast.Id(s) -> let var = find_var (Id(s), st) in
+                 let t  = snd var in
                 (*now we know the variable is there and its type.
                 This means we can return a literal of the correct type after
                 we find the vue
                 *)
                 (
                     match t with 
-                    | Int -> let v = StringMap.find s intMap in
+                    | Int -> let v = VarMap.find s intMap in
+                            print_endline "match expr";
                             IntLit(v), Int
-                    | Bool -> let v = StringMap.find (fst var) boolMap in
+                    | Bool -> let v = VarMap.find s boolMap in
                                 BoolLit(v), Bool
-                    | Float -> let v = StringMap.find (fst var) floatMap in
+                    | Float -> let v = VarMap.find s floatMap in
                                 IntLit(v), Float 
                 )
   | Ast.IntLit(c) -> IntLit(c), Int
@@ -218,14 +220,22 @@ let rec expr = function
   | Ast.Na -> Na(Na), Na
   | Ast.None -> Na(Na), Na
   | Ast.Assign(id, e) -> 
-    		let e1 = expr e in
-            (Id(id), snd e1) :: st.variables;
-            (match fst e1 with 
-                | IntLit(i) -> let intMap = StringMap.add id i intMap in
-                | BoolLit(b) -> let boolMap = StringMap.add id b boolMap in
-                | FloatLit(f) -> let floatMap = StringMap.add id f floatMap in
-            );
-    		Assign(Id(id), fst e1, snd e1), snd e1
+		let e1 = expr e in
+        print_endline "assign";
+        let st = { variables = st.variables@[(Id(id), snd e1)] } in
+
+      let print_var v = 
+                print_endline (string_of_id (fst v)) in
+        List.iter print_var st.variables;
+        ( match fst e1 with 
+            | IntLit(i) -> let intMap = VarMap.add id i intMap in
+                            Assign(Id(id), fst e1, snd e1), snd e1
+            | BoolLit(b) -> let boolMap = VarMap.add id b boolMap in
+                            Assign(Id(id), fst e1, snd e1), snd e1
+            | FloatLit(f) -> let floatMap = VarMap.add id f floatMap in
+                             Assign(Id(id), fst e1, snd e1), snd e1
+        )
+    		
 	| Ast.FuncCall(id, el) -> 		
     		(*iterate over list of expressions and pull out the expression_detail from each one*)
     		let helper e = fst (expr e) in

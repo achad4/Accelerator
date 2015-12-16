@@ -82,6 +82,7 @@ actuals_opt:
 
 int_expr:
   | int_data                { $1 }
+  | ID                      { Id($1) }
   | int_expr MULT int_expr  { Mult($1, $3) }
   | int_expr PLUS int_expr  { Add($1, $3) }
   | int_expr MINUS int_expr { Sub($1, $3) }
