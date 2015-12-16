@@ -1,3 +1,7 @@
+open Map
+module StringMap = Map.Make (String);;
+
+
 type op = 
   | Add
   | Sub
@@ -81,6 +85,31 @@ type statement =
   | Sif of expression * statement * statement * t
   | Sfor of expression * expression * expression * statement * t
 
+(* type variable = 
+  | Var of id * t *)
+
+
+
+type symbol_table = {
+    variables : (id * t) list
+}
+
+
+let find_var id symbol_table =
+    try
+        List.find ( fun var -> (fst var = id) ) symbol_table.variables
+    with Not_found ->
+        raise Not_found
+
+let st : symbol_table = { 
+                            variables = [] 
+                        } 
+
+let intMap = StringMap.empty
+let floatMap = StringMap.empty
+let boolMap = StringMap.empty
+
+
 let string_of_type = function
   | String -> "string"
   | Int -> "int"
@@ -92,7 +121,21 @@ let string_of_id = function
 	Id(s) -> s 
 
 let rec expr = function
-  | Ast.Id (s) -> IdLit(s), String
+  | Ast.Id (s) -> (*IdLit(s), String*)
+                let var = find_var s st in
+                (*now we know the variable is there and its type.
+                This means we can return a literal of the correct type after
+                we find the value
+                *)
+                match (snd var) with
+                    | Int -> let val = StringMap.find (fst var) intMap in
+                                IntLit(val), Int
+                    | Bool -> let val = StringMap.find (fst var) boolMap in
+                                BoolLit(val), Bool
+                    | Float -> let val = StringMap.find (fst var) floatMap in
+                                IntLit(val), Float
+
+                   
   | Ast.IntLit(c) -> IntLit(c), Int
   | Ast.FloatLit(f) -> FloatLit(f), Float
   | Ast.BoolLit(b) -> BoolLit(b), Bool
@@ -176,6 +219,7 @@ let rec expr = function
   | Ast.None -> Na(Na), Na
   | Ast.Assign(id, e) -> 
     		let e1 = expr e in
+            (Id(id), snd e1) :: st.variables;
     		Assign(Id(id), fst e1, snd e1), snd e1
 	| Ast.FuncCall(id, el) -> 		
     		(*iterate over list of expressions and pull out the expression_detail from each one*)
@@ -199,7 +243,9 @@ let rec expr = function
           and e2 = expr e2 in
 
           let _, t1 = e1
-          and _, t2 = e2 in
+          and _, t2 = e2 
+
+        in
 
  		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
               (
