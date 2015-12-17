@@ -35,8 +35,8 @@ stmt:
   | LBRACE DLIN stmt_list RBRACE DLIN                        { Block(List.rev $3) }
   | IF LPAREN bool_expr RPAREN DLIN stmt ELSE DLIN stmt      { If($3, $6, $9) }
   | FOR LPAREN expr IN int_expr RANGE int_expr RPAREN stmt   { For($3, $5, $7, $9) }
-  | ID ASSIGN CSV LPAREN FILE FILENAME COMMA HEAD TRUEOPT RPAREN  { Csv($1, $6, true) }
-  | ID ASSIGN CSV LPAREN FILE FILENAME COMMA HEAD FALSEOPT RPAREN { Csv($1, $6, false) }
+  | ID ASSIGN CSV LPAREN FILE DOUBLEQT FILENAME DOUBLEQT COMMA HEAD TRUEOPT RPAREN  { Csv($1, $7, true) }
+  | ID ASSIGN CSV LPAREN FILE DOUBLEQT FILENAME DOUBLEQT COMMA HEAD FALSEOPT RPAREN { Csv($1, $7, false) }
   
 expr:
   | ID                                                       { Id($1) }
