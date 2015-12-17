@@ -371,7 +371,48 @@ let rec stmt = function
                Sexpr(fst(rie2),snd(rie2)), 
                stmt sl,
                Na)
-  | Ast.Csv(id, fl, b) -> Scsv(id,fl,b)
+  | Ast.Csv(id, fl, b) -> 
+          (* get the first line, type of 1st elem, number of elements *)
+          (* iterate across all newline sep rows, checking length and
+           * type *)
+
+          let read_csv_channel chan =
+              let buf = Buffer.create 4096 in
+                let rec loop () =
+                  let line = input_line chan in
+                  Buffer.add_string buf line;
+                  Buffer.add_char buf '\n';
+                  loop () in
+                try
+                  loop ()
+                with
+                  End_of_file -> Buffer.contents buf 
+                  
+          let read_csv_file filename =
+              let channel = open_in filename in
+              read_csv_channel channel in
+            
+          (* get csv as a string, using above file reading functions*)
+          let csv_str = read_csv_file fl in
+          let nl_split = Str.split (Str.regexp "\n") in
+          let comma_split = Str.split (Str.regexp ",") in
+          
+          (* split csv string into a list, separated by newline *)
+          let row_list = nl_split csv_str in
+          (* get number of rows, for c++ matrix building *)
+          let num_row = List.length row_list in
+          let first_row = List.hd row_list in
+          let first_row_list = comma_split first_row in
+          (* get number of elements in first row *)
+          let row_len = List.length first_row_list in
+          
+          let string_to_type input =
+              if
+
+          let first_elem = List.hd first_row in
+
+
+          Scsv(id,fl,b)
 
 
 let program program = 
