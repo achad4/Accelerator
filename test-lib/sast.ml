@@ -23,14 +23,14 @@ type t =
   | Int
   | Float
   | Bool
+  | Vector
   | Na
 
 type id = 
 	| Id of string
 
 type expr_detail = 
-  | Na of t
-  | IdLit of string
+  | NaLit of t 
   | IntLit of int
   | IntExpr of expr_detail * t
   | BoolLit of bool
@@ -90,7 +90,7 @@ type statement =
 
 
 
-type symbol_table = {
+(* type symbol_table = {
     variables : (id * t) list
 }
 
@@ -104,11 +104,14 @@ let find_var (id, symbol_table) =
 
 let st : symbol_table = { 
                             variables = [] 
-                        } 
+                        }  *)
 
+
+let symbol_table = VarMap.empty
 let intMap = VarMap.empty
 let floatMap = VarMap.empty
 let boolMap = VarMap.empty
+let vectorMap = VarMap.empty
 
 
 let string_of_type = function
@@ -121,9 +124,23 @@ let string_of_type = function
 let string_of_id = function
 	Id(s) -> s 
 
+
+let type_match t = function
+  | NaLit(n) -> ();
+  | IntLit(i) -> if (t != Int) then raise "Vector type incompatibility";
+  | FloatLit(f) -> if(t != Float) then raise "Vector type incompatibility";
+  | BoolLit(b) -> if(t != Bool) then raise "Vector type incompatibility";
+  | StringLit(s) -> if(t != String) then raise "Vector type incompatibility";
+
+
+
+let check_vector_type v t =
+  List.iter (type_match t) v in
+    
+
 let rec expr = function
-  | Ast.Id(s) -> let var = find_var (Id(s), st) in
-                 let t  = snd var in
+  | Ast.Id(s) -> let t = VarMap.find s symbol_table in
+                print_endline "ID alone: " + (string_of_type t);
                 (*now we know the variable is there and its type.
                 This means we can return a literal of the correct type after
                 we find the vue
@@ -136,25 +153,25 @@ let rec expr = function
                     | Bool -> let v = VarMap.find s boolMap in
                                 BoolLit(v), Bool
                     | Float -> let v = VarMap.find s floatMap in
-                                IntLit(v), Float 
+                                FloatLit(v), Float 
                 )
   | Ast.IntLit(c) -> IntLit(c), Int
   | Ast.FloatLit(f) -> FloatLit(f), Float
   | Ast.BoolLit(b) -> BoolLit(b), Bool
   | Ast.StringLit(s) -> StringLit(s), String
   | Ast.Vector(s, vl) ->
-        let head = List.hd vl in
+(*         let head = List.hd vl in
         let _, vtype = expr head in
-        let helper e = fst (expr e) in
-        Vector(IdLit(s), (List.map helper vl), vtype), vtype
-  | Ast.VectIdAcc(v, ind) ->
-        let ve = expr (Ast.Id(v))
-        and inde = expr (Ast.Id(ind)) in
-        let _, idt = ve
-        and _, indt = inde in
-        if (idt == String && indt == String) then
+        let helper e = fst (expr e) in *)
+        Vector(IdLit(s), (List.map helper vl), vtype), Vector
+  | Ast.VectAcc(v, ind) ->
+
+        let e1 = expr ind in
+        let t = snd e1 in
+
+        if (t = Int) then
             (
-              VectIdAcc(IdLit(v),
+              VectAcc(Id(v),
                         IdLit(ind),
                         Na), Na
             )
@@ -221,12 +238,16 @@ let rec expr = function
   | Ast.None -> Na(Na), Na
   | Ast.Assign(id, e) -> 
 		let e1 = expr e in
-        print_endline "assign";
-        let st = { variables = st.variables@[(Id(id), snd e1)] } in
+(*         let st = { variables = st.variables@[(Id(id), snd e1)] } in
+ *)
+      let symbol_table  = VarMap.add id (snd e1) symbol_table in
 
+      let t = VarMap.find id symbol_table in
+      print_endline "assign: " ^ (string_of_type t);
+(*    
       let print_var v = 
                 print_endline (string_of_id (fst v)) in
-        List.iter print_var st.variables;
+        List.iter print_var st.variables; *)
         ( match fst e1 with 
             | IntLit(i) -> let intMap = VarMap.add id i intMap in
                             Assign(Id(id), fst e1, snd e1), snd e1
@@ -234,6 +255,10 @@ let rec expr = function
                             Assign(Id(id), fst e1, snd e1), snd e1
             | FloatLit(f) -> let floatMap = VarMap.add id f floatMap in
                              Assign(Id(id), fst e1, snd e1), snd e1
+            | Vector(e, el, t) -> let vector_type = type_of (hd el) in
+                                  check_vector_type vector_type el;
+                                  let vectorMap = VarMap.add id (el * vector_type) in
+                                  Assign(Id(id), fst e1, snd e1), snd e1
         )
     		
 	| Ast.FuncCall(id, el) -> 		

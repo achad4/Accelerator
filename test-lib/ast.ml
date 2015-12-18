@@ -23,11 +23,9 @@ type expr =
   | FloatLit of float
   | StringLit of string
   | Vector of string * expr list
-  | VectIdAcc of string * string
-  | VectIntAcc of string * expr
+  | VectAcc of string * expr
   | Matrix of string * expr list * expr * expr
-  | MatrixIdAcc of string * string * string
-  | MatrixIntAcc of string * expr * expr
+  | MatrixAcc of string * expr * expr
   | Add of expr * expr
   | Sub of expr * expr
   | Mult of expr * expr
@@ -52,7 +50,7 @@ type stmt =
 
 type program = stmt list
 
-let rec string_of_expression = function
+(* let rec string_of_expression = function
   | Id(s) -> s
   | Na -> "null"
   | IntLit(e) -> string_of_int e
@@ -60,7 +58,7 @@ let rec string_of_expression = function
   | FloatLit(f) -> string_of_float f
   | StringLit(s) -> s
   | Vector(s, vl) -> "vector<type> " ^ s ^ "(" ^ (String.concat ", " (List.map string_of_expression vl)) ^ ")"
-  | VectIdAcc(s, accid) -> s ^ "[" ^  accid ^ "]"
+  | VectAcc(s, accid) -> s ^ "[" ^  accid ^ "]"
   | VectIntAcc(s, ind) -> s ^ "[" ^ string_of_expression ind ^ "]"
   | Matrix(s, v, nr, nc) -> "vector<vector<type>>" ^ s ^ "("  ^ (String.concat ", " (List.map string_of_expression v)) ^ ")" ^
     " with nrow=" ^ string_of_expression nr ^ " and ncol=" ^ string_of_expression nc
@@ -97,4 +95,4 @@ let rec string_of_statement = function
           "){\n" ^ string_of_statement sl
                 
 let string_of_program program =
-	String.concat "\n" (List.map string_of_statement program)
+	String.concat "\n" (List.map string_of_statement program) *)
