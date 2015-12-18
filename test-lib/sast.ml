@@ -386,7 +386,7 @@ let rec stmt = function
                 try
                   loop ()
                 with
-                  End_of_file -> Buffer.contents buf 
+                  End_of_file -> Buffer.contents buf in 
                   
           let read_csv_file filename =
               let channel = open_in filename in
@@ -406,10 +406,25 @@ let rec stmt = function
           (* get number of elements in first row *)
           let row_len = List.length first_row_list in
           
-          let string_to_type input =
-              if
+          (* need method of going from string to type *) 
+          let string_to_type input = function
+              | (Str.regexp "['-']?['0'-'9']+") input -> Int
+              | (Str.regexp "['-']?['0'-'9']+['.']['0'-'9']+") input -> Float 
+              | (Str.regexp "['\"'][.]*['\"']") input -> String
+              | (Str.regexp "true") input -> Bool
+              | (Str.regexp "false") input -> Bool
 
+          let elem_check elem ty =
+              let curr_type = string_to_type elem in
+              if curr_type != fst_type then
+                  (* raise exception *)
+                  else
+                      (* don't raise *) in
+          let row_type_check row fst_type =
+              List.iter (elem_check   
+                      
           let first_elem = List.hd first_row in
+          let first_elem_type = string_to_type first_elem in
 
 
           Scsv(id,fl,b)
