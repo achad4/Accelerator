@@ -33,7 +33,7 @@ stmt:
   | expr DLIN                                                { Expr($1) }
   | LBRACE DLIN stmt_list RBRACE DLIN                        { Block(List.rev $3) }
   | IF LPAREN bool_expr RPAREN DLIN stmt ELSE DLIN stmt      { If($3, $6, $9) }
-  | FOR LPAREN expr IN expr RANGE expr RPAREN stmt           { For($3, $5, $7, $9) }
+  | FOR LPAREN ID IN expr RANGE expr RPAREN stmt           { For($3, $5, $7, $9) }
 
 expr:
   | ID                                                       { Id($1) }

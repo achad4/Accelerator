@@ -161,12 +161,12 @@ let rec expr = function
   | Ast.MatrixAcc(s, e1, e2) ->
         let ed1 = expr e1 in
         let ed2 = expr e2 in
-        MatrixIdAcc(v,
+        MatrixAcc(s,
                         ed1,
                         ed2,
                         Na), Na
   | Ast.Na -> Na(Na), Na
-  | Ast.None -> Na(Na), Na
+  | Ast.Na -> Na(Na), Na
 	| Ast.FuncCall(id, el) -> 		
     		(*iterate over list of expressions and pull out the expression_detail from each one*)
     		let helper e = fst (expr e) in
