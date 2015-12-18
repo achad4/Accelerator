@@ -20,6 +20,7 @@ type t =
   | Float
   | Bool
   | Na
+  | IdType
 
 type id = 
 	| Id of string
@@ -87,12 +88,16 @@ let string_of_type = function
   | Bool -> "bool"
   | Float -> "float"
   | Na -> "Na"
+  | IdType -> "idtype"
 
 let string_of_id = function
 	Id(s) -> s 
 
 let rec expr = function
-  | Ast.Id (s) -> IdLit(s), String
+  | Ast.Id (s) -> IdLit(s), IdType
+  | Ast.Assign(id, e) -> 
+        let e1 = expr e in
+        Assign(Id(id), fst e1, snd e1), snd e1
   | Ast.IntLit(c) -> IntLit(c), Int
   | Ast.FloatLit(f) -> FloatLit(f), Float
   | Ast.BoolLit(b) -> BoolLit(b), Bool
@@ -107,7 +112,7 @@ let rec expr = function
         and inde = expr (Ast.Id(ind)) in
         let _, idt = ve
         and _, indt = inde in
-        if (idt == String && indt == String) then
+        if (idt == IdType && indt == IdType) then
             (
               VectIdAcc(IdLit(v),
                         IdLit(ind),
@@ -120,7 +125,7 @@ let rec expr = function
         and inde = expr indInt in
         let _, idT = vide
         and _, indT = inde in
-        if (idT == String && indT == Int) then
+        if (idT == IdType && indT == Int) then
             (
                 VectIntAcc(IdLit(vid),
                            IntExpr(fst inde, snd inde),
@@ -147,7 +152,7 @@ let rec expr = function
         let _, idt = ve
         and _, indt1 = inde1 
         and _, indt2 = inde2 in
-        if (idt == String && indt1 == String && indt2 == String) then
+        if (idt == IdType && indt1 == IdType && indt2 == IdType) then
             (
               MatrixIdAcc(IdLit(v),
                         IdLit(ind1),
@@ -163,7 +168,7 @@ let rec expr = function
         let _, idT = vide
         and _, indT1 = inde1
         and _, indT2 = inde2 in
-        if (idT == String && indT1 == Int && indT2 == Int) then
+        if (idT == IdType && indT1 == Int && indT2 == Int) then
             (
                 MatrixIntAcc(IdLit(vid),
                            IntExpr(fst inde1, snd inde2),
@@ -174,9 +179,6 @@ let rec expr = function
             failwith "Type incompatibility"
   | Ast.Na -> Na(Na), Na
   | Ast.None -> Na(Na), Na
-  | Ast.Assign(id, e) -> 
-    		let e1 = expr e in
-    		Assign(Id(id), fst e1, snd e1), snd e1
 	| Ast.FuncCall(id, el) -> 		
     		(*iterate over list of expressions and pull out the expression_detail from each one*)
     		let helper e = fst (expr e) in
@@ -188,7 +190,7 @@ let rec expr = function
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+		if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
 			(
 				Add((fst e1), (fst e2), Int), Int
 			)
@@ -201,7 +203,7 @@ let rec expr = function
           let _, t1 = e1
           and _, t2 = e2 in
 
- 		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+ 		if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
               (
               Sub((fst e1),(fst e2), Int), Int
               )
@@ -214,7 +216,7 @@ let rec expr = function
           let _, t1 = e1
           and _, t2 = e2 in
           
-	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+	if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
               (
               Mult((fst e1),(fst e2), Int), Int
               )
@@ -228,7 +230,7 @@ let rec expr = function
           let _, t1 = e1
           and _, t2 = e2 in
 
-      if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+      if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
               (
               Div((fst e1),(fst e2), Int), Int
               )
@@ -242,7 +244,7 @@ let rec expr = function
           let _, t1 = e1
           and _, t2 = e2 in
 
-	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+	if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
               (
               Expo((fst e1),(fst e2), Int), Int
               )
@@ -256,7 +258,7 @@ let rec expr = function
           let _, t1 = e1
           and _, t2 = e2 in
 
-	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+	if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
               (
               Mod((fst e1),(fst e2), Int), Int
               )
@@ -269,7 +271,7 @@ let rec expr = function
           let _, t1 = b1
           and _, t2 = b2 in
 
-	if ((t1 = t2) && (t1 = Bool) && (t2 = Bool)) then
+	if ((t1 == Bool || t1 == IdType) && (t2 == Bool || t2 == IdType)) then
               (
                  And((fst b1),(fst b2), Bool), Bool
               )
@@ -282,7 +284,7 @@ let rec expr = function
           let _, t1 = b1
           and _, t2 = b2 in
 
-	if ((t1 = t2) && (t1 = Bool) && (t2 = Bool)) then
+	if ((t1 == Bool || t1 == IdType) && (t2 == Bool || t2 == IdType)) then
               (
                  Or((fst b1),(fst b2), Bool), Bool
               )
@@ -291,7 +293,7 @@ let rec expr = function
   | Ast.Not( b1 ) ->
           let b1 = expr b1 in
           let _, t1 = b1 in
-          if t1 = Bool then
+          if (t1 == Bool || t1 == IdType) then
               (
                   Not((fst b1), Bool), Bool
               )
@@ -304,7 +306,7 @@ let rec expr = function
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+		if ((t1 == Float || t1 == IdType) && (t2 == Float || t2 == IdType)) then
 			(
 				FAdd((fst e1), (fst e2), Float), Float
 			)
@@ -317,7 +319,7 @@ let rec expr = function
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+		if ((t1 == Float || t1 == IdType) && (t2 == Float || t2 == IdType)) then
 			(
 				FSub((fst e1), (fst e2), Float), Float
 			)
@@ -330,7 +332,7 @@ let rec expr = function
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+		if ((t1 == Float || t1 == IdType) && (t2 == Float || t2 == IdType)) then
 			(
 				FMult((fst e1), (fst e2), Float), Float
 			)
@@ -343,7 +345,7 @@ let rec expr = function
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+		if ((t1 == Float || t1 == IdType) && (t2 == Float || t2 == IdType)) then
 			(
 				FDiv((fst e1), (fst e2), Float), Float
 			)

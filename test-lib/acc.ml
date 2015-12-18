@@ -1,13 +1,15 @@
 open Parser
 open Scanner
 open Ast
+open Enviornment
 open Sast
-open Cast
+open Cast 
 
 let _ =
   let lexbuf = Lexing.from_channel stdin in
   let program = Parser.program Scanner.token lexbuf in
-  let sast = Sast.program program in
+  let envr = Environment.program program in
+  let sast = Sast.program envr in
   let cast = Cast.program sast in
 
 let rec compile_detail = function
