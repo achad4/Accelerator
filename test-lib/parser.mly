@@ -50,7 +50,7 @@ expr:
   | ID ASSIGN MATRIXSTART VECTSTART vect_opt RPAREN COMMA 
     NROW EQSING expr COMMA NCOL EQSING expr RPAREN           { Matrix($1, $5, $10, $14) }
   | ID LPAREN actuals_opt RPAREN                             { FuncCall($1, $3) }
-  | ID ASSIGN expr                                           { print_endline "assign"; Assign($1, $3) }
+  | ID ASSIGN expr                                           { Assign($1, $3) }
   | ID LBRAC expr RBRAC                                     { VectAcc($1, $3) }
   | ID LBRAC expr RBRAC LBRAC expr RBRAC                    { MatrixAcc($1, $3, $6) }
 
