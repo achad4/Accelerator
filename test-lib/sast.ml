@@ -1,7 +1,3 @@
-open Map
-module VarMap = Map.Make (String)
-
-
 type op = 
   | Add
   | Sub
@@ -134,8 +130,6 @@ let type_match t = function
   | BoolLit(b) -> if(t != Bool) then raise "Vector type incompatibility";
   | StringLit(s) -> if(t != String) then raise "Vector type incompatibility";
 
-
-
 let check_vector_type v t =
   List.iter (type_match t) v in
     
@@ -168,19 +162,6 @@ let rec expr = function
             )
         else
             failwith "Type incompatibility"
-  | Ast.VectIntAcc(vid, indInt) ->
-        let vide = expr (Ast.Id(vid))
-        and inde = expr indInt in
-        let _, idT = vide
-        and _, indT = inde in
-        if (idT == IdType && indT == Int) then
-            (
-                VectIntAcc(vid,
-                           IntExpr(fst inde, snd inde),
-                           Na), Na
-            )
-        else
-            failwith "Type incompatibility"
   | Ast.Matrix(s, v, nr, nc) ->
         let head = List.hd v in
         let _, vtype = expr head in
@@ -209,22 +190,6 @@ let rec expr = function
             )
         else
             failwith "Type incompatibility" 
-  | Ast.MatrixIntAcc(vid, indInt1, indInt2) ->
-        let vide = expr (Ast.Id(vid))
-        and inde1 = expr indInt1
-        and inde2 = expr indInt2 in
-        let _, idT = vide
-        and _, indT1 = inde1
-        and _, indT2 = inde2 in
-        if (idT == IdType && indT1 == Int && indT2 == Int) then
-            (
-                MatrixIntAcc(vid,
-                           IntExpr(fst inde1, snd inde2),
-                           IntExpr(fst inde2, snd inde2),
-                           Na), Na
-            )
-        else
-            failwith "Type incompatibility"
   | Ast.Na -> Na(Na), Na
   | Ast.None -> Na(Na), Na
 	| Ast.FuncCall(id, el) -> 		

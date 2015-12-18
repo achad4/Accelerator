@@ -46,7 +46,7 @@ type stmt =
 	| Expr of expr
   | Block of stmt list
   | If of expr * stmt * stmt
-  | For of string * expr * expr * stmt
+  | For of expr * expr * expr * stmt
 
 type program = stmt list
 
