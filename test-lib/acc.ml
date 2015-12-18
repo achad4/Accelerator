@@ -22,23 +22,24 @@ let rec compile_detail = function
   | Cast.StringLit(s) -> " \"" ^ s ^ "\" "
   | Cast.Vector(s, v, t) -> 
           let helper e = compile_detail e in
-          let holder = compile_detail s ^ "holder" in
+          let holder = s ^ "holder" in
           let ty = Cast.string_of_ctype t in
           ty ^ " " ^ holder ^ "[] = {" ^ 
           (String.concat ", " (List.map helper v)) ^ "};\n" ^
-          "vector<" ^ ty ^ "> " ^ compile_detail s ^ 
+          "vector<" ^ ty ^ "> " ^ s ^ 
           " (" ^ holder ^ ", " ^ holder ^ " + sizeof(" ^ 
           holder ^ ") / sizeof(" ^ ty ^"))"
+  (* What is this minus 1 stuff and do we need it for vectors too? *)
   | Cast.VectIdAcc(e1, e2, t) -> 
-          compile_detail e1 ^ "[" ^ compile_detail e2 ^ "-1]"
+          e1 ^ "[" ^ e2 ^ "-1]"
   | Cast.VectIntAcc(e1, e2, t) ->
-          compile_detail e1 ^ "[" ^ compile_detail e2 ^ "-1]"
+          e1 ^ "[" ^ compile_detail e2 ^ "-1]"
   | Cast.Matrix(s, v, nr, nc, t) ->
           let helper e = compile_detail e in
-          let holder = compile_detail s ^ "Holder" in
+          let holder = s ^ "Holder" in
           let nr_str = compile_detail nr in
           let nc_str = compile_detail nc in 
-          let matrix = compile_detail s in 
+          let matrix = s in 
           let ty = Cast.string_of_ctype t in
           ty ^ " " ^ holder ^ "[] = {" ^ 
           (String.concat ", " (List.map helper v)) ^ "};\n" ^
@@ -52,9 +53,9 @@ let rec compile_detail = function
           "for(int j=0; j<" ^ nc_str ^ "; j++) { \n" ^
           matrix ^ "[i][j] = " ^ holder ^ "[count++];\n}\n}"
   | Cast.MatrixIdAcc(m, r, c, t) -> 
-          compile_detail m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
+          m ^ "[" ^ r ^ "][" ^ c ^ "]"
   | Cast.MatrixIntAcc(m, r, c, t) ->
-          compile_detail m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
+          m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ 
         "; cout << endl"
@@ -63,7 +64,7 @@ let rec compile_detail = function
   | Cast.Or(b1, b2, t) -> (compile_detail b1) ^ " || " ^ 
                           (compile_detail b2)
   | Cast.Not(b1, t) -> "! " ^ (compile_detail b1)
-  | Cast.Assign(id, e, t) -> string_of_ctype t ^ " " ^ (string_of_id id) ^ " = " ^ 
+  | Cast.Assign(id, e, t) -> string_of_ctype t ^ " " ^ id ^ " = " ^ 
                              (compile_detail e)
   | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ 
                            (compile_detail e2) 
