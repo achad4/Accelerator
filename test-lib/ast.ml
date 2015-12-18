@@ -16,7 +16,6 @@ type op =
 
 type expr =
   | Na
-  | None
   | Id of string
 	| IntLit of int
   | BoolLit of bool
