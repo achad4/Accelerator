@@ -21,12 +21,9 @@ type t =
   | Bool
   | Vector
   | Na
-  | IdType
-
-type id = 
-	| Id of string
 
 type expr_detail = 
+  | Id of string
   | NaLit of t 
   | IntLit of int
   | IntExpr of expr_detail * t
@@ -102,38 +99,29 @@ let st : symbol_table = {
                         }  *)
 
 
-let symbol_table = VarMap.empty
-let intMap = VarMap.empty
-let floatMap = VarMap.empty
-let boolMap = VarMap.empty
-let vectorMap = VarMap.empty
-
-
 let string_of_type = function
   | String -> "string"
   | Int -> "int"
   | Bool -> "bool"
   | Float -> "float"
   | Na -> "Na"
-  | IdType -> "idtype"
 
 let string_of_id = function
 	Id(s) -> s 
 
 
-let type_match t = function
+(* let type_match t = function
   | NaLit(n) -> ();
   | IntLit(i) -> if (t != Int) then raise "Vector type incompatibility";
   | FloatLit(f) -> if(t != Float) then raise "Vector type incompatibility";
   | BoolLit(b) -> if(t != Bool) then raise "Vector type incompatibility";
   | StringLit(s) -> if(t != String) then raise "Vector type incompatibility";
 
-let check_vector_type v t =
-  List.iter (type_match t) v in
+let check_vector_type v t = List.iter (type_match t) v; *)
     
 
 let rec expr = function
-  | Ast.Id (s) -> IdLit(s), IdType
+  | Ast.Id (s) -> Id(s), String
   | Ast.Assign(id, e) -> 
         let e1 = expr e in
         Assign(id, fst e1, snd e1), snd e1
@@ -144,16 +132,16 @@ let rec expr = function
   | Ast.Vector(s, vl) ->let head = List.hd vl in
                         let _, vtype = expr head in
                         let helper e = fst (expr e) in
-                        Vector(IdLit(s), (List.map helper vl), vtype), Vector
-  | Ast.VectAcc(v, ind) ->
+                        Vector(s, (List.map helper vl), vtype), Vector
+  | Ast.VectAcc(s, e) ->
 
-        let e1 = expr ind in
+        let e1 = expr e in
         let t = snd e1 in
 
         if (t = Int) then
             (
-              VectAcc(Id(v),
-                        IdLit(ind),
+              VectAcc(s,
+                        fst e1,
                         Na), Na
             )
         else
@@ -170,22 +158,13 @@ let rec expr = function
           (
             Matrix(s, (List.map helper v), helper nr , helper nc, vtype), vtype
           )  
-  | Ast.MatrixAcc(v, ind1, ind2) ->
-        let ve = expr (Ast.Id(v))
-        and inde1 = expr (Ast.Id(ind1)) 
-        and inde2 = expr (Ast.Id(ind2)) in
-        let _, idt = ve
-        and _, indt1 = inde1 
-        and _, indt2 = inde2 in
-        if (idt == IdType && indt1 == IdType && indt2 == IdType) then
-            (
-              MatrixIdAcc(v,
-                        ind1,
-                        ind2,
+  | Ast.MatrixAcc(s, e1, e2) ->
+        let ed1 = expr e1 in
+        let ed2 = expr e2 in
+        MatrixIdAcc(v,
+                        ed1,
+                        ed2,
                         Na), Na
-            )
-        else
-            failwith "Type incompatibility" 
   | Ast.Na -> Na(Na), Na
   | Ast.None -> Na(Na), Na
 	| Ast.FuncCall(id, el) -> 		
