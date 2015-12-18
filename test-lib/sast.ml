@@ -194,7 +194,7 @@ let rec expr = function
 
  		if (t1 == t2 && (t1 == Int || t1 == Float)) then
               (
-              Sub((fst e1),(fst e2), Int), Int
+              Sub((fst e1),(fst e2), t1), t1
               )
           else
               failwith "Type incompatability"
@@ -207,7 +207,7 @@ let rec expr = function
           
 	if (t1 == t2 && (t1 == Int || t1 == Float)) then
               (
-              Mult((fst e1),(fst e2), Int), Int
+              Mult((fst e1),(fst e2), t1), t1
               )
           else
               failwith "Type incompatability"
@@ -221,7 +221,7 @@ let rec expr = function
 
       if (t1 == t2 && (t1 == Int || t1 == Float)) then
               (
-              Div((fst e1),(fst e2), Int), Int
+              Div((fst e1),(fst e2), t1), t1
               )
           else
               failwith "Type incompatability"
@@ -235,7 +235,7 @@ let rec expr = function
 
 	if ((t1 == Int || t1 == Float) && (t2 == Int)) then
               (
-              Expo((fst e1),(fst e2), Int), Int
+              Expo((fst e1),(fst e2), t1), t1
               )
           else
               failwith "Type incompatability"

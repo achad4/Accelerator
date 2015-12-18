@@ -64,8 +64,8 @@ literal:
   | FLOAT                           { FloatLit($1) } 
 
 bool_literal:
-  | TRUE                            { BoolLit(false) } 
-  | FALSE                           { BoolLit(true) } 
+  | TRUE                            { BoolLit(true) } 
+  | FALSE                           { BoolLit(false) } 
 
 lits:  
   | literal                             { [$1] }
