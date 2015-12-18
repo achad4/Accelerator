@@ -113,8 +113,8 @@ let rec compile_stmt = function
                            ^ (compile_stmt s1)  ^ 
                            "else" 
                            ^  (compile_stmt s2)
-  | Cfor(id, e1, e2, s, t) -> "for( int " ^ compile_expr id ^ "="  ^ compile_expr e1 ^ "; " ^ 
-                          compile_expr id ^" <= " ^ compile_expr e2 ^ "; " ^ compile_expr id ^
+  | Cfor(id, e1, e2, s, t) -> "for( int " ^ id ^ "="  ^ compile_expr e1 ^ "; " ^ 
+                          id ^" <= " ^ compile_expr e2 ^ "; " ^ id ^
                           "++)\n" ^ compile_stmt s in
 
 let compile_func (f, t) = 

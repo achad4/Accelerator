@@ -80,7 +80,7 @@ type statement =
   | Sstmt of expression * t
   | Sblock of statement list * t
   | Sif of expression * statement * statement * t
-  | Sfor of expression * expression * expression * statement * t
+  | Sfor of string * expression * expression * statement * t
 
 let string_of_type = function
   | String -> "string"
@@ -363,11 +363,10 @@ let rec stmt = function
           let r = expr e in
           Sif(Sexpr( (fst r), (snd r) ), 
               stmt s1, stmt s2, Na)
-  | Ast.For(e, ie1, ie2, sl) ->
-          let re = expr e
-          and rie1 = expr ie1
+  | Ast.For(s, ie1, ie2, sl) ->
+          let rie1 = expr ie1
           and rie2 = expr ie2 in
-          Sfor(Sexpr(fst(re),snd(re)), 
+          Sfor(s, 
                Sexpr(fst(rie1),snd(rie1)), 
                Sexpr(fst(rie2),snd(rie2)), 
                stmt sl,

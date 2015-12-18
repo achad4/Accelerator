@@ -88,7 +88,7 @@ type statement =
   | Sstmt of expression * t
   | Sblock of statement list * t
   | Sif of expression * statement * statement * t
-  | Sfor of expression * expression * expression * statement * t
+  | Sfor of string * expression * expression * statement * t
 
 (* type dtype = 
   | String
@@ -255,11 +255,11 @@ let rec scope_stmt env = function
       Sblock(List.map helper blk, type_match t), env
   | Sast.Sif(expr,stmt1,stmt2,t) -> let i, v = scope_expr env expr in
       Sif(i, fst (scope_stmt env stmt1), fst (scope_stmt env stmt2), type_match t), env
-  | Sast.Sfor(expr1,expr2,expr3,stmt,t) -> 
-      let e1, v1 = scope_expr env expr1
-      and e2, v2 = scope_expr env expr2
-      and e3, v3 = scope_expr env expr3
-    in Sfor(e1, e2, e3, fst (scope_stmt env stmt), type_match t), env
+  | Sast.Sfor(str,expr2,expr3,stmt,t) ->
+      let new_env = assign_current_scope str Int env in
+      let e2, v2 = scope_expr new_env expr2
+      and e3, v3 = scope_expr new_env expr3
+    in Sfor(str, e2, e3, fst (scope_stmt new_env stmt), type_match t), new_env
 
 let run env stmts =
   let helper henv hstmts = snd (scope_stmt henv hstmts) in

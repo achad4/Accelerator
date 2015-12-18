@@ -48,7 +48,7 @@ type stmt =
 	| Expr of expr
   | Block of stmt list
   | If of expr * stmt * stmt
-  | For of expr * expr * expr * stmt
+  | For of string * expr * expr * stmt
 
 type program = stmt list
 
@@ -91,7 +91,7 @@ let rec string_of_statement = function
                      string_of_statement s1 ^ 
                      "else" ^ string_of_statement s2
   | For (e, ie1, ie2, sl) -> 
-          "for(" ^ string_of_expression e ^
+          "for(" ^ e ^
           " in " ^ string_of_expression ie1 ^
           ":" ^ string_of_expression ie2 ^
           "){\n" ^ string_of_statement sl
