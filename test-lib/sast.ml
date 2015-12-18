@@ -34,11 +34,9 @@ type expr_detail =
   | FloatLit of float
   | StringLit of string
   | Vector of string * expr_detail list * t
-  | VectIdAcc of string * string * t
-  | VectIntAcc of string * expr_detail * t
+  | VectAcc of string * expr_detail * t
   | Matrix of string * expr_detail list * expr_detail * expr_detail * t
-  | MatrixIdAcc of string * string * string * t
-  | MatrixIntAcc of string * expr_detail * expr_detail * t
+  | MatrixAcc of string * expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
@@ -143,12 +141,10 @@ let rec expr = function
   | Ast.FloatLit(f) -> FloatLit(f), Float
   | Ast.BoolLit(b) -> BoolLit(b), Bool
   | Ast.StringLit(s) -> StringLit(s), String
-  | Ast.Vector(s, vl) ->
-(*         let head = List.hd vl in
-        let _, vtype = expr head in
-<<<<<<< HEAD
-        let helper e = fst (expr e) in *)
-        Vector(IdLit(s), (List.map helper vl), vtype), Vector
+  | Ast.Vector(s, vl) ->let head = List.hd vl in
+                        let _, vtype = expr head in
+                        let helper e = fst (expr e) in
+                        Vector(IdLit(s), (List.map helper vl), vtype), Vector
   | Ast.VectAcc(v, ind) ->
 
         let e1 = expr ind in
@@ -174,7 +170,7 @@ let rec expr = function
           (
             Matrix(s, (List.map helper v), helper nr , helper nc, vtype), vtype
           )  
-  | Ast.MatrixIdAcc(v, ind1, ind2) ->
+  | Ast.MatrixAcc(v, ind1, ind2) ->
         let ve = expr (Ast.Id(v))
         and inde1 = expr (Ast.Id(ind1)) 
         and inde2 = expr (Ast.Id(ind2)) in
