@@ -33,12 +33,12 @@ type expr_detail =
   | BoolLit of bool
   | FloatLit of float
   | StringLit of string
-  | Vector of expr_detail * expr_detail list * t
-  | VectIdAcc of expr_detail * expr_detail * t
-  | VectIntAcc of expr_detail * expr_detail * t
-  | Matrix of expr_detail * expr_detail list * expr_detail * expr_detail * t
-  | MatrixIdAcc of expr_detail * expr_detail * expr_detail * t
-  | MatrixIntAcc of expr_detail * expr_detail * expr_detail * t
+  | Vector of string * expr_detail list * t
+  | VectIdAcc of string * string * t
+  | VectIntAcc of string * expr_detail * t
+  | Matrix of string * expr_detail list * expr_detail * expr_detail * t
+  | MatrixIdAcc of string * string * string * t
+  | MatrixIntAcc of string * expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
@@ -49,8 +49,8 @@ type expr_detail =
   | FDiv of expr_detail * expr_detail * t
   | Expo of expr_detail * expr_detail * t
   | Mod of expr_detail * expr_detail * t
-  | FuncCall of id * expr_detail list * t
-  | Assign of id * expr_detail * t
+  | FuncCall of string * expr_detail list * t
+  | Assign of string * expr_detail * t
   | And of expr_detail * expr_detail * t
   | Or of expr_detail * expr_detail * t
   | Not of expr_detail * t
@@ -97,7 +97,7 @@ let rec expr = function
   | Ast.Id (s) -> IdLit(s), IdType
   | Ast.Assign(id, e) -> 
         let e1 = expr e in
-        Assign(Id(id), fst e1, snd e1), snd e1
+        Assign(id, fst e1, snd e1), snd e1
   | Ast.IntLit(c) -> IntLit(c), Int
   | Ast.FloatLit(f) -> FloatLit(f), Float
   | Ast.BoolLit(b) -> BoolLit(b), Bool
@@ -106,7 +106,7 @@ let rec expr = function
         let head = List.hd vl in
         let _, vtype = expr head in
         let helper e = fst (expr e) in
-        Vector(IdLit(s), (List.map helper vl), vtype), vtype
+        Vector(s, (List.map helper vl), vtype), vtype
   | Ast.VectIdAcc(v, ind) ->
         let ve = expr (Ast.Id(v))
         and inde = expr (Ast.Id(ind)) in
@@ -114,8 +114,8 @@ let rec expr = function
         and _, indt = inde in
         if (idt == IdType && indt == IdType) then
             (
-              VectIdAcc(IdLit(v),
-                        IdLit(ind),
+              VectIdAcc(v,
+                        ind,
                         Na), Na
             )
         else
@@ -127,7 +127,7 @@ let rec expr = function
         and _, indT = inde in
         if (idT == IdType && indT == Int) then
             (
-                VectIntAcc(IdLit(vid),
+                VectIntAcc(vid,
                            IntExpr(fst inde, snd inde),
                            Na), Na
             )
@@ -143,7 +143,7 @@ let rec expr = function
           failwith "nrow and ncol must be integers"
         else
           (
-            Matrix(IdLit(s), (List.map helper v), helper nr , helper nc, vtype), vtype
+            Matrix(s, (List.map helper v), helper nr , helper nc, vtype), vtype
           )  
   | Ast.MatrixIdAcc(v, ind1, ind2) ->
         let ve = expr (Ast.Id(v))
@@ -154,9 +154,9 @@ let rec expr = function
         and _, indt2 = inde2 in
         if (idt == IdType && indt1 == IdType && indt2 == IdType) then
             (
-              MatrixIdAcc(IdLit(v),
-                        IdLit(ind1),
-                        IdLit(ind2),
+              MatrixIdAcc(v,
+                        ind1,
+                        ind2,
                         Na), Na
             )
         else
@@ -170,7 +170,7 @@ let rec expr = function
         and _, indT2 = inde2 in
         if (idT == IdType && indT1 == Int && indT2 == Int) then
             (
-                MatrixIntAcc(IdLit(vid),
+                MatrixIntAcc(vid,
                            IntExpr(fst inde1, snd inde2),
                            IntExpr(fst inde2, snd inde2),
                            Na), Na
@@ -182,7 +182,7 @@ let rec expr = function
 	| Ast.FuncCall(id, el) -> 		
     		(*iterate over list of expressions and pull out the expression_detail from each one*)
     		let helper e = fst (expr e) in
-    		FuncCall(Id(id), (List.map helper el), Na), Na
+    		FuncCall(id, (List.map helper el), Na), Na
 	| Ast.Add( e1, e2) ->
 		let e1 = expr e1
 		and e2 = expr e2 in
