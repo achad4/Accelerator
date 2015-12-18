@@ -1,3 +1,5 @@
+open Environment
+
 type op = 
   | Add
   | Sub
@@ -32,11 +34,9 @@ type cexpr_detail =
    | BoolLit of bool
    | StringLit of string
    | Vector of string * cexpr_detail list * ct
-   | VectIdAcc of string * string * ct
-   | VectIntAcc of string * cexpr_detail * ct
+   | VectAcc of string * cexpr_detail * ct
    | Matrix of string * cexpr_detail list * cexpr_detail * cexpr_detail * ct
-   | MatrixIntAcc of string * cexpr_detail * cexpr_detail * ct
-   | MatrixIdAcc of string * string * string * ct
+   | MatrixAcc of string * cexpr_detail * cexpr_detail * ct
    | Add of cexpr_detail * cexpr_detail * ct
    | Sub of cexpr_detail * cexpr_detail * ct
    | Mult of cexpr_detail * cexpr_detail * ct
@@ -103,20 +103,17 @@ let string_of_id = function
   Id(s) -> s 
 
 let rec type_match = function
-  | Sast.String -> String
-  | Sast.Int -> Int
-  | Sast.Float -> Float
-  | Sast.Bool -> Bool
-  | Sast.Na -> Void
-  | Sast.IdType -> IdType
-  | Sast.Vector(t) -> Vector(type_match t)
-  | Sast.Matrix(t) -> Vector(type_match t)
+  | Environment.String -> String
+  | Environment.Int -> Int
+  | Environment.Float -> Float
+  | Environment.Bool -> Bool
+  | Environment.Na -> Void
 
 let id_match = function
   | Sast.Id(s) -> Id(s)
 
 let rec cexpr_detail = function
- | Sast.IdLit(s, t) ->  IdLit(s, type_match t)
+ | Sast.Id(s) ->  Id(s, String)
  | Sast.IntLit(i) -> IntLit(i)
  | Sast.FloatLit(i) -> FloatLit(i)
  | Sast.BoolLit(b) -> BoolLit(b)
@@ -124,11 +121,11 @@ let rec cexpr_detail = function
  | Sast.IntExpr(e,t) -> IntExpr(cexpr_detail e, type_match t)
  | Sast.Vector(s, v, t) -> let ct = type_match t in
          Vector(s, List.map cexpr_detail v, ct)
- | Sast.VectIdAcc(e1, e2, t) ->
-        VectIdAcc(e1, e2, type_match t)
- | Sast.VectIntAcc(e1, e2, t) ->
-        VectIntAcc(e1, cexpr_detail e2, type_match t) 
- | Sast.NaExpr(t) -> Na("Void", type_match t)
+ | Sast.VectAcc(e1, e2, t) ->
+        let cexp1 = cexpr_detail e1 in
+         let cexp2 = cexpr_detail e2 in
+        VectAcc(fst e1, fst e2, type_match t)
+ | Sast.Na(t) -> Na("Void", type_match t)
  | Sast.Matrix(s, v, nr, nc, t) -> let ct = type_match t in
         Matrix(s, List.map cexpr_detail v, cexpr_detail nr, cexpr_detail nc, ct)
  | Sast.MatrixIdAcc(s, id1, id2, t) ->
