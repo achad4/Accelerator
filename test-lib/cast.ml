@@ -22,12 +22,10 @@ type ct =
   | Matrix of ct
   | IdType
 
-type id = 
-  | Id of string
 
 type cexpr_detail = 
    | Na of string * ct
-   | IdLit of string * ct
+   | Id of string * ct
    | IntLit of int
    | IntExpr of cexpr_detail * ct
    | FloatLit of float
@@ -100,7 +98,7 @@ let rec string_of_ctype = function
   | Matrix(t) -> "Matrix of " ^ string_of_ctype t
 
 let string_of_id = function
-  Id(s) -> s 
+  Id(s, ct) -> s 
 
 let rec type_match = function
   | Environment.String -> String
@@ -110,7 +108,7 @@ let rec type_match = function
   | Environment.Na -> Void
 
 let id_match = function
-  | Sast.Id(s) -> Id(s)
+  | Sast.Id(s) -> Id(s, String)
 
 let rec cexpr_detail = function
  | Sast.Id(s) ->  Id(s, String)
@@ -121,17 +119,16 @@ let rec cexpr_detail = function
  | Sast.IntExpr(e,t) -> IntExpr(cexpr_detail e, type_match t)
  | Sast.Vector(s, v, t) -> let ct = type_match t in
          Vector(s, List.map cexpr_detail v, ct)
- | Sast.VectAcc(e1, e2, t) ->
+ | Sast.VectAcc(s, e1, t) ->
         let cexp1 = cexpr_detail e1 in
-         let cexp2 = cexpr_detail e2 in
-        VectAcc(fst e1, fst e2, type_match t)
- | Sast.Na(t) -> Na("Void", type_match t)
+        VectAcc(s, cexp1, type_match t)
+ | Sast.NaLit(t) -> Na("Void", type_match t)
  | Sast.Matrix(s, v, nr, nc, t) -> let ct = type_match t in
         Matrix(s, List.map cexpr_detail v, cexpr_detail nr, cexpr_detail nc, ct)
- | Sast.MatrixIdAcc(s, id1, id2, t) ->
-        MatrixIdAcc(s, id1, id2, type_match t)
- | Sast.MatrixIntAcc(s, i1, i2, t) ->
-        MatrixIntAcc(s, cexpr_detail i1, cexpr_detail i2, type_match t)
+ | Sast.MatrixAcc(s, e1, e2, t) ->
+        let cexp1 = cexpr_detail e1 in
+         let cexp2 = cexpr_detail e2 in
+        MatrixAcc(s, cexp1, cexp2, type_match t)
  (*Expand when you pull in Alan's Fadd etc.*)
  | Sast.Add(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Int)
  | Sast.Sub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Int)
