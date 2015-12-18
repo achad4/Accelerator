@@ -14,7 +14,7 @@ let _ =
 
 let rec compile_detail = function
   | Cast.Na(s, t) -> s
-  | Cast.IdLit(s, t) -> s
+  | Cast.Id(s, t) -> s
   | Cast.IntLit(i) -> string_of_int i
   | Cast.IntExpr(e, t) -> compile_detail e
   | Cast.FloatLit(f) -> string_of_float f
@@ -30,9 +30,7 @@ let rec compile_detail = function
           " (" ^ holder ^ ", " ^ holder ^ " + sizeof(" ^ 
           holder ^ ") / sizeof(" ^ ty ^"))"
   (* What is this minus 1 stuff and do we need it for vectors too? *)
-  | Cast.VectIdAcc(e1, e2, t) -> 
-          e1 ^ "[" ^ e2 ^ "-1]"
-  | Cast.VectIntAcc(e1, e2, t) ->
+  | Cast.VectAcc(e1, e2, t) ->
           e1 ^ "[" ^ compile_detail e2 ^ "-1]"
   | Cast.Matrix(s, v, nr, nc, t) ->
           let helper e = compile_detail e in
@@ -52,9 +50,7 @@ let rec compile_detail = function
           matrix ^ "[i].resize(" ^ nc_str ^ ");\n" ^
           "for(int j=0; j<" ^ nc_str ^ "; j++) { \n" ^
           matrix ^ "[i][j] = " ^ holder ^ "[count++];\n}\n}"
-  | Cast.MatrixIdAcc(m, r, c, t) -> 
-          m ^ "[" ^ r ^ "][" ^ c ^ "]"
-  | Cast.MatrixIntAcc(m, r, c, t) ->
+  | Cast.MatrixAcc(m, r, c, t) ->
           m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
 		"cout << " ^ String.concat "" (List.map helper el) ^ 

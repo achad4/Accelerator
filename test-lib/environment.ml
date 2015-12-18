@@ -181,7 +181,7 @@ let run env stmts =
 let program program = 
   let program_rev = List.rev program in
   let new_env = run init_env program_rev in
-  let helper env e = fst(scope_stmt env e) in
+  let helper env e = (scope_stmt env e) in
   List.map (helper new_env) program
 
 (* 
