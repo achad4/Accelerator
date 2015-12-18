@@ -25,6 +25,7 @@ type t =
   | Bool
   | Vector
   | Na
+  | IdType
 
 type id = 
 	| Id of string
@@ -36,12 +37,12 @@ type expr_detail =
   | BoolLit of bool
   | FloatLit of float
   | StringLit of string
-  | Vector of expr_detail * expr_detail list * t
-  | VectIdAcc of expr_detail * expr_detail * t
-  | VectIntAcc of expr_detail * expr_detail * t
-  | Matrix of expr_detail * expr_detail list * expr_detail * expr_detail * t
-  | MatrixIdAcc of expr_detail * expr_detail * expr_detail * t
-  | MatrixIntAcc of expr_detail * expr_detail * expr_detail * t
+  | Vector of string * expr_detail list * t
+  | VectIdAcc of string * string * t
+  | VectIntAcc of string * expr_detail * t
+  | Matrix of string * expr_detail list * expr_detail * expr_detail * t
+  | MatrixIdAcc of string * string * string * t
+  | MatrixIntAcc of string * expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
@@ -52,8 +53,8 @@ type expr_detail =
   | FDiv of expr_detail * expr_detail * t
   | Expo of expr_detail * expr_detail * t
   | Mod of expr_detail * expr_detail * t
-  | FuncCall of id * expr_detail list * t
-  | Assign of id * expr_detail * t
+  | FuncCall of string * expr_detail list * t
+  | Assign of string * expr_detail * t
   | And of expr_detail * expr_detail * t
   | Or of expr_detail * expr_detail * t
   | Not of expr_detail * t
@@ -83,7 +84,7 @@ type statement =
   | Sstmt of expression * t
   | Sblock of statement list * t
   | Sif of expression * statement * statement * t
-  | Sfor of expression * expression * expression * statement * t
+  | Sfor of string * expression * expression * statement * t
 
 (* type variable = 
   | Var of id * t *)
@@ -120,6 +121,7 @@ let string_of_type = function
   | Bool -> "bool"
   | Float -> "float"
   | Na -> "Na"
+  | IdType -> "idtype"
 
 let string_of_id = function
 	Id(s) -> s 
@@ -139,22 +141,10 @@ let check_vector_type v t =
     
 
 let rec expr = function
-  | Ast.Id(s) -> let t = VarMap.find s symbol_table in
-                print_endline "ID alone: " + (string_of_type t);
-                (*now we know the variable is there and its type.
-                This means we can return a literal of the correct type after
-                we find the vue
-                *)
-                (
-                    match t with 
-                    | Int -> let v = VarMap.find s intMap in
-                            print_endline "match expr";
-                            IntLit(v), Int
-                    | Bool -> let v = VarMap.find s boolMap in
-                                BoolLit(v), Bool
-                    | Float -> let v = VarMap.find s floatMap in
-                                FloatLit(v), Float 
-                )
+  | Ast.Id (s) -> IdLit(s), IdType
+  | Ast.Assign(id, e) -> 
+        let e1 = expr e in
+        Assign(id, fst e1, snd e1), snd e1
   | Ast.IntLit(c) -> IntLit(c), Int
   | Ast.FloatLit(f) -> FloatLit(f), Float
   | Ast.BoolLit(b) -> BoolLit(b), Bool
@@ -162,6 +152,7 @@ let rec expr = function
   | Ast.Vector(s, vl) ->
 (*         let head = List.hd vl in
         let _, vtype = expr head in
+<<<<<<< HEAD
         let helper e = fst (expr e) in *)
         Vector(IdLit(s), (List.map helper vl), vtype), Vector
   | Ast.VectAcc(v, ind) ->
@@ -182,9 +173,9 @@ let rec expr = function
         and inde = expr indInt in
         let _, idT = vide
         and _, indT = inde in
-        if (idT == String && indT == Int) then
+        if (idT == IdType && indT == Int) then
             (
-                VectIntAcc(IdLit(vid),
+                VectIntAcc(vid,
                            IntExpr(fst inde, snd inde),
                            Na), Na
             )
@@ -200,7 +191,7 @@ let rec expr = function
           failwith "nrow and ncol must be integers"
         else
           (
-            Matrix(IdLit(s), (List.map helper v), helper nr , helper nc, vtype), vtype
+            Matrix(s, (List.map helper v), helper nr , helper nc, vtype), vtype
           )  
   | Ast.MatrixIdAcc(v, ind1, ind2) ->
         let ve = expr (Ast.Id(v))
@@ -209,11 +200,11 @@ let rec expr = function
         let _, idt = ve
         and _, indt1 = inde1 
         and _, indt2 = inde2 in
-        if (idt == String && indt1 == String && indt2 == String) then
+        if (idt == IdType && indt1 == IdType && indt2 == IdType) then
             (
-              MatrixIdAcc(IdLit(v),
-                        IdLit(ind1),
-                        IdLit(ind2),
+              MatrixIdAcc(v,
+                        ind1,
+                        ind2,
                         Na), Na
             )
         else
@@ -225,9 +216,9 @@ let rec expr = function
         let _, idT = vide
         and _, indT1 = inde1
         and _, indT2 = inde2 in
-        if (idT == String && indT1 == Int && indT2 == Int) then
+        if (idT == IdType && indT1 == Int && indT2 == Int) then
             (
-                MatrixIntAcc(IdLit(vid),
+                MatrixIntAcc(vid,
                            IntExpr(fst inde1, snd inde2),
                            IntExpr(fst inde2, snd inde2),
                            Na), Na
@@ -236,35 +227,10 @@ let rec expr = function
             failwith "Type incompatibility"
   | Ast.Na -> Na(Na), Na
   | Ast.None -> Na(Na), Na
-  | Ast.Assign(id, e) -> 
-		let e1 = expr e in
-(*         let st = { variables = st.variables@[(Id(id), snd e1)] } in
- *)
-      let symbol_table  = VarMap.add id (snd e1) symbol_table in
-
-      let t = VarMap.find id symbol_table in
-      print_endline "assign: " ^ (string_of_type t);
-(*    
-      let print_var v = 
-                print_endline (string_of_id (fst v)) in
-        List.iter print_var st.variables; *)
-        ( match fst e1 with 
-            | IntLit(i) -> let intMap = VarMap.add id i intMap in
-                            Assign(Id(id), fst e1, snd e1), snd e1
-            | BoolLit(b) -> let boolMap = VarMap.add id b boolMap in
-                            Assign(Id(id), fst e1, snd e1), snd e1
-            | FloatLit(f) -> let floatMap = VarMap.add id f floatMap in
-                             Assign(Id(id), fst e1, snd e1), snd e1
-            | Vector(e, el, t) -> let vector_type = type_of (hd el) in
-                                  check_vector_type vector_type el;
-                                  let vectorMap = VarMap.add id (el * vector_type) in
-                                  Assign(Id(id), fst e1, snd e1), snd e1
-        )
-    		
 	| Ast.FuncCall(id, el) -> 		
     		(*iterate over list of expressions and pull out the expression_detail from each one*)
     		let helper e = fst (expr e) in
-    		FuncCall(Id(id), (List.map helper el), Na), Na
+    		FuncCall(id, (List.map helper el), Na), Na
 	| Ast.Add( e1, e2) ->
 		let e1 = expr e1
 		and e2 = expr e2 in
@@ -272,7 +238,7 @@ let rec expr = function
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+		if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
 			(
 				Add((fst e1), (fst e2), Int), Int
 			)
@@ -287,7 +253,7 @@ let rec expr = function
 
         in
 
- 		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+ 		if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
               (
               Sub((fst e1),(fst e2), Int), Int
               )
@@ -300,7 +266,7 @@ let rec expr = function
           let _, t1 = e1
           and _, t2 = e2 in
           
-	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+	if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
               (
               Mult((fst e1),(fst e2), Int), Int
               )
@@ -314,7 +280,7 @@ let rec expr = function
           let _, t1 = e1
           and _, t2 = e2 in
 
-      if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+      if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
               (
               Div((fst e1),(fst e2), Int), Int
               )
@@ -328,7 +294,7 @@ let rec expr = function
           let _, t1 = e1
           and _, t2 = e2 in
 
-	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+	if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
               (
               Expo((fst e1),(fst e2), Int), Int
               )
@@ -342,7 +308,7 @@ let rec expr = function
           let _, t1 = e1
           and _, t2 = e2 in
 
-	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+	if ((t1 == Int || t1 == IdType) && (t2 == Int || t2 == IdType)) then
               (
               Mod((fst e1),(fst e2), Int), Int
               )
@@ -355,7 +321,7 @@ let rec expr = function
           let _, t1 = b1
           and _, t2 = b2 in
 
-	if ((t1 = t2) && (t1 = Bool) && (t2 = Bool)) then
+	if ((t1 == Bool || t1 == IdType) && (t2 == Bool || t2 == IdType)) then
               (
                  And((fst b1),(fst b2), Bool), Bool
               )
@@ -368,7 +334,7 @@ let rec expr = function
           let _, t1 = b1
           and _, t2 = b2 in
 
-	if ((t1 = t2) && (t1 = Bool) && (t2 = Bool)) then
+	if ((t1 == Bool || t1 == IdType) && (t2 == Bool || t2 == IdType)) then
               (
                  Or((fst b1),(fst b2), Bool), Bool
               )
@@ -377,7 +343,7 @@ let rec expr = function
   | Ast.Not( b1 ) ->
           let b1 = expr b1 in
           let _, t1 = b1 in
-          if t1 = Bool then
+          if (t1 == Bool || t1 == IdType) then
               (
                   Not((fst b1), Bool), Bool
               )
@@ -390,7 +356,7 @@ let rec expr = function
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+		if ((t1 == Float || t1 == IdType) && (t2 == Float || t2 == IdType)) then
 			(
 				FAdd((fst e1), (fst e2), Float), Float
 			)
@@ -403,7 +369,7 @@ let rec expr = function
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+		if ((t1 == Float || t1 == IdType) && (t2 == Float || t2 == IdType)) then
 			(
 				FSub((fst e1), (fst e2), Float), Float
 			)
@@ -416,7 +382,7 @@ let rec expr = function
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+		if ((t1 == Float || t1 == IdType) && (t2 == Float || t2 == IdType)) then
 			(
 				FMult((fst e1), (fst e2), Float), Float
 			)
@@ -429,7 +395,7 @@ let rec expr = function
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
+		if ((t1 == Float || t1 == IdType) && (t2 == Float || t2 == IdType)) then
 			(
 				FDiv((fst e1), (fst e2), Float), Float
 			)
@@ -447,11 +413,10 @@ let rec stmt = function
           let r = expr e in
           Sif(Sexpr( (fst r), (snd r) ), 
               stmt s1, stmt s2, Na)
-  | Ast.For(e, ie1, ie2, sl) ->
-          let re = expr e
-          and rie1 = expr ie1
+  | Ast.For(s, ie1, ie2, sl) ->
+          let rie1 = expr ie1
           and rie2 = expr ie2 in
-          Sfor(Sexpr(fst(re),snd(re)), 
+          Sfor(s, 
                Sexpr(fst(rie1),snd(rie1)), 
                Sexpr(fst(rie2),snd(rie2)), 
                stmt sl,
