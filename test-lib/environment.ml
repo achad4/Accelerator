@@ -15,10 +15,6 @@ type op =
   | And
   | Or
   | Not
-  | FMult
-  | FAdd
-  | FSub
-  | FDiv
 
 type t = 
   | String
@@ -149,22 +145,6 @@ let rec scope_expr_detail env = function
       let e1, v1 = scope_expr_detail env expr1
       and e2, v2 = scope_expr_detail env expr2 in
       Mod(e1, e2), env
-  | Ast.FAdd(expr1,expr2) ->
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
-      FAdd(e1, e2), env
-  | Ast.FSub(expr1,expr2) ->
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
-      FSub(e1, e2), env
-  | Ast.FMult(expr1,expr2) ->
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
-      FMult(e1, e2), env
-  | Ast.FDiv(expr1,expr2) ->
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
-      FDiv(e1, e2), env
   | Ast.And(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1
       and e2, v2 = scope_expr_detail env expr2 in
