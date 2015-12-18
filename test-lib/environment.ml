@@ -229,7 +229,7 @@ let rec scope_expr_detail env = function
       FuncCall(s, List.map helper el, type_match t), env
 
 let rec scope_expr env = function
-  | Sast.Sexpr(e, t) -> Sexpr(fst(scope_expr_detail env e), type_match t), env
+  | Sast.Sexpr(e, t) -> let e1, v1 = scope_expr_detail env e in Sexpr(e1, type_match t), v1
   | Sast.Sadd(e1, e2, t) -> Sadd(fst (scope_expr env e1), fst (scope_expr env e2), type_match t), env
   | Sast.Ssub(e1, e2, t) -> Ssub(fst (scope_expr env e1), fst (scope_expr env e2), type_match t), env
   | Sast.Smult(e1, e2, t) -> Smult(fst (scope_expr env e1), fst (scope_expr env e2), type_match t), env
@@ -249,7 +249,7 @@ let rec scope_expr env = function
   | Sast.Snot(e, t) -> Snot(fst (scope_expr env e), type_match t), env
 
 let rec scope_stmt env = function
-  | Sast.Sstmt(expr,t) -> let e, v = scope_expr env expr in Sstmt(e, type_match t), env
+  | Sast.Sstmt(expr,t) -> let e, v = scope_expr env expr in Sstmt(e, type_match t), v
   | Sast.Sblock(blk,t) -> 
       let helper e = fst (scope_stmt env e) in
       Sblock(List.map helper blk, type_match t), env
@@ -261,9 +261,14 @@ let rec scope_stmt env = function
       and e3, v3 = scope_expr env expr3
     in Sfor(e1, e2, e3, fst (scope_stmt env stmt), type_match t), env
 
+let run env stmts =
+  let helper henv hstmts = snd (scope_stmt henv hstmts) in
+  List.fold_left helper env stmts
+
 let program program = 
-  let helper e = fst (scope_stmt init_env e) in
-  List.map helper program
+  let new_env = run init_env program in
+  let helper env e = fst(scope_stmt env e) in
+  List.map (helper new_env) program
 
 (* 
 let push_scope env =  
