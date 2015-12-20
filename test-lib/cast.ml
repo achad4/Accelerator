@@ -104,6 +104,8 @@ let rec type_match = function
   | Environment.Float -> Float
   | Environment.Bool -> Bool
   | Environment.Na -> Void
+  | Environment.Vector -> Vector
+  | Environment.Matrix -> Matrix
 
 
 let rec cexpr_detail = function

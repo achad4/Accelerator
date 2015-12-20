@@ -113,9 +113,13 @@ let rec scope_expr_detail env = function
     Assign(s, fst(scope_expr_detail env e)), new_env
   | Ast.Vector(s, el) ->
 (*       let new_env = assign_current_scope s (type_match t) env in
- *)      
+ *)   
+      let head = List.hd el in
+      let e1 = scope_expr_detail env head in
+      let t = type_match (fst e1) in
+      let new_env = assign_current_scope s t env in
       let helper e = fst (scope_expr_detail env e) in
-      Vector(s, List.map helper el), env
+      Vector(s, List.map helper el), new_env
   | Ast.VectAcc(s, expr) -> VectAcc(s, fst(scope_expr_detail env expr)), env
   | Ast.Matrix(s, el, e1, e2) -> 
       let helper e = fst (scope_expr_detail env e) in
