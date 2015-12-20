@@ -148,7 +148,7 @@ let compile_func = function
 let compile cast = 
   let string_list = List.map compile_func cast in
 
-  String.concat "" string_list in
+  String.concat ""  string_list in
 
   let c_begin = 
   "#include<iostream>\n"^
