@@ -22,6 +22,7 @@ type t =
   | Float
   | Bool
   | Vector
+  | Matrix
   | Na
 
 type expr =
@@ -75,6 +76,10 @@ let type_match = function
   | FloatLit(f) -> Float
   | BoolLit(b) -> Bool
   | Na -> Na
+  | Matrix(a,b,c,d) -> Matrix
+  | Vector(a,b) -> Vector
+  | Id(id) -> String
+  | _ -> Na
 
 let reassign_symb_tbl_stk stk = {
     symb_tbl_stk = stk;
