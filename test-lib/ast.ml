@@ -9,51 +9,48 @@ type op =
   | And
   | Or
   | Not
-  | FMult
-  | FAdd
-  | FSub
-  | FDiv
 
 type expr =
   | Na
-  | None
   | Id of string
   | IntLit of int
   | BoolLit of bool
   | FloatLit of float
   | StringLit of string
   | Vector of string * expr list
-  | VectIdAcc of string * string
-  | VectIntAcc of string * expr
+  | VectAcc of string * expr
   | Matrix of string * expr list * expr * expr
-  | MatrixIdAcc of string * string * string
-  | MatrixIntAcc of string * expr * expr
+  | MatrixAcc of string * expr * expr
   | Add of expr * expr
   | Sub of expr * expr
   | Mult of expr * expr
   | Div of expr * expr
   | Expo of expr * expr
   | Mod of expr * expr
-  | FAdd of expr * expr
-  | FSub of expr * expr
-  | FMult of expr * expr
-  | FDiv of expr * expr
-  | FuncCall of string * expr list 
-  | Assign of string * expr
+ 	| FuncCall of string * expr list 
+ 	| Assign of string * expr
   | And of expr * expr
   | Or of expr * expr
   | Not of expr
+  | FormalDef of string * expr
 
 type stmt = 
   | Expr of expr
   | Block of stmt list
+(*   | ReturnBlock of stmt list * stmt *)
   | If of expr * stmt * stmt
-  | For of expr * expr * expr * stmt
   | Csv of string * string * bool
+  | For of string * expr * expr * stmt
+  | Return of expr
 
-type program = stmt list
+type func_def = 
+  | FunctionDef of string * expr list * stmt
 
-let rec string_of_expression = function
+
+
+type program = func_def list * stmt list
+
+(* let rec string_of_expression = function
   | Id(s) -> s
   | Na -> "null"
   | IntLit(e) -> string_of_int e
@@ -61,7 +58,7 @@ let rec string_of_expression = function
   | FloatLit(f) -> string_of_float f
   | StringLit(s) -> s
   | Vector(s, vl) -> "vector<type> " ^ s ^ "(" ^ (String.concat ", " (List.map string_of_expression vl)) ^ ")"
-  | VectIdAcc(s, accid) -> s ^ "[" ^  accid ^ "]"
+  | VectAcc(s, accid) -> s ^ "[" ^  accid ^ "]"
   | VectIntAcc(s, ind) -> s ^ "[" ^ string_of_expression ind ^ "]"
   | Matrix(s, v, nr, nc) -> "vector<vector<type>>" ^ s ^ "("  ^ (String.concat ", " (List.map string_of_expression v)) ^ ")" ^
     " with nrow=" ^ string_of_expression nr ^ " and ncol=" ^ string_of_expression nc
@@ -92,7 +89,7 @@ let rec string_of_statement = function
                      string_of_statement s1 ^ 
                      "else" ^ string_of_statement s2
   | For (e, ie1, ie2, sl) -> 
-          "for(" ^ string_of_expression e ^
+          "for(" ^ e ^
           " in " ^ string_of_expression ie1 ^
           ":" ^ string_of_expression ie2 ^
           "){\n" ^ string_of_statement sl
@@ -100,4 +97,4 @@ let rec string_of_statement = function
           string_of_bool b ^ ")\n"
                      
 let string_of_program program =
-	String.concat "\n" (List.map string_of_statement program)
+	String.concat "\n" (List.map string_of_statement program) *)

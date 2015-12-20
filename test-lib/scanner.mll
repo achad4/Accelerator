@@ -20,8 +20,10 @@
     | "else"        { ELSE }
     | "for"         { FOR }
     | ":"           { RANGE }
-    | "c("          { VECTSTART }
-    | "matrix("     { MATRIXSTART }
+    | "function"    { FUNCTION }
+    | "return"      { RETURN }
+    | "c("           { VECTSTART }
+    | "matrix("      { MATRIXSTART }
     | "nrow"        { NROW }
     | "ncol"        { NCOL }
     | "read.csv"    { CSV }

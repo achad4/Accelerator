@@ -1,3 +1,5 @@
+open Environment
+
 type op = 
   | Add
   | Sub
@@ -16,24 +18,22 @@ type ct =
   | Float
   | Bool
   | Void
-
-type id = 
-  | Id of string
+  | Vector
+  | Matrix
+  | IdType
 
 type cexpr_detail = 
    | Na of string * ct
-   | IdLit of string
+   | Id of string * ct
    | IntLit of int
    | IntExpr of cexpr_detail * ct
    | FloatLit of float
    | BoolLit of bool
    | StringLit of string
-   | Vector of cexpr_detail * cexpr_detail list * ct
-   | VectIdAcc of cexpr_detail * cexpr_detail * ct
-   | VectIntAcc of cexpr_detail * cexpr_detail * ct
-   | Matrix of cexpr_detail * cexpr_detail list * cexpr_detail * cexpr_detail * ct
-   | MatrixIntAcc of cexpr_detail * cexpr_detail * cexpr_detail * ct
-   | MatrixIdAcc of cexpr_detail * cexpr_detail * cexpr_detail * ct
+   | Vector of string * cexpr_detail list * ct
+   | VectAcc of string * cexpr_detail * ct
+   | Matrix of string * cexpr_detail list * cexpr_detail * cexpr_detail * ct
+   | MatrixAcc of string * cexpr_detail * cexpr_detail * ct
    | Add of cexpr_detail * cexpr_detail * ct
    | Sub of cexpr_detail * cexpr_detail * ct
    | Mult of cexpr_detail * cexpr_detail * ct
@@ -44,11 +44,12 @@ type cexpr_detail =
    | FDiv of cexpr_detail * cexpr_detail * ct
    | Expo of cexpr_detail * cexpr_detail * ct
    | Mod of cexpr_detail * cexpr_detail * ct
-   | FuncCall of id * cexpr_detail list * ct
-   | Assign of id * cexpr_detail * ct
+   | FuncCall of string * cexpr_detail list * ct
+   | Assign of string * cexpr_detail * ct
    | And of cexpr_detail * cexpr_detail * ct
    | Or of cexpr_detail * cexpr_detail * ct
    | Not of cexpr_detail * ct
+   | FormalDef of string * cexpr_detail * ct
 
 type cexpression = 
   | Cexpr of cexpr_detail * ct
@@ -71,63 +72,63 @@ type cexpression =
 type statement = 
   | Cstmt of cexpression * ct
   | Cblock of statement list * ct
+(*   | CReturnBlock of statement list * statement * ct *)
   | Cif of cexpression * statement * statement * ct
-  | Cfor of cexpression * cexpression * cexpression * statement * ct
   | Ccsv of string * string * bool
+  | Cfor of string * cexpression * cexpression * statement * ct
+  | Creturn of cexpression * ct
 
 type func_decl_detail = {
     fname : string;
-    formals : string list;
-    body : statement list;
+    formals : cexpr_detail list;
+    body : statement;
 }
 
 type func_decl = 
-  func_decl_detail * ct
+  | CFunctionDef of func_decl_detail * ct
 
 type program = 
   func_decl list
 
-
-let string_of_ctype = function
+let rec string_of_ctype = function
   | String -> "string"
   | Float -> "float"
   | Int -> "int"
   | Bool -> "bool"
   | Void -> "Na"
+  | IdType -> "IdType"
+  | Vector -> "Vector"
+  | Matrix -> "Matrix"
 
-let string_of_id = function
-  Id(s) -> s 
 
-let type_match = function
-  | Sast.String -> String
-  | Sast.Int -> Int
-  | Sast.Float -> Float
-  | Sast.Bool -> Bool
-  | Sast.Na -> Void
-
-let id_match = function
-  | Sast.Id(s) -> Id(s)
+let rec type_match = function
+  | Environment.String -> String
+  | Environment.Int -> Int
+  | Environment.Float -> Float
+  | Environment.Bool -> Bool
+  | Environment.Na -> Void
+  | Environment.Vector -> Vector
+  | Environment.Matrix -> Matrix
 
 let rec cexpr_detail = function
- | Sast.IdLit(s) ->  IdLit(s)
+ | Sast.Id(s) ->  Id(s, String)
  | Sast.IntLit(i) -> IntLit(i)
  | Sast.FloatLit(i) -> FloatLit(i)
  | Sast.BoolLit(b) -> BoolLit(b)
  | Sast.StringLit(s) -> StringLit(s)
  | Sast.IntExpr(e,t) -> IntExpr(cexpr_detail e, type_match t)
  | Sast.Vector(s, v, t) -> let ct = type_match t in
-         Vector(cexpr_detail s, List.map cexpr_detail v, ct)
- | Sast.VectIdAcc(e1, e2, t) ->
-        VectIdAcc(cexpr_detail e1, cexpr_detail e2, type_match t)
- | Sast.VectIntAcc(e1, e2, t) ->
-        VectIntAcc(cexpr_detail e1, cexpr_detail e2, type_match t) 
- | Sast.Na(t) -> Na("Void", type_match t)
+         Vector(s, List.map cexpr_detail v, ct)
+ | Sast.VectAcc(s, e1, t) ->
+        let cexp1 = cexpr_detail e1 in
+        VectAcc(s, cexp1, type_match t)
+ | Sast.NaLit(t) -> Na("Void", type_match t)
  | Sast.Matrix(s, v, nr, nc, t) -> let ct = type_match t in
-        Matrix(cexpr_detail s, List.map cexpr_detail v, cexpr_detail nr, cexpr_detail nc, ct)
- | Sast.MatrixIdAcc(s, id1, id2, t) ->
-        MatrixIdAcc(cexpr_detail s, cexpr_detail id1, cexpr_detail id2, type_match t)
- | Sast.MatrixIntAcc(s, i1, i2, t) ->
-        MatrixIntAcc(cexpr_detail s, cexpr_detail i1, cexpr_detail i2, type_match t)
+        Matrix(s, List.map cexpr_detail v, cexpr_detail nr, cexpr_detail nc, ct)
+ | Sast.MatrixAcc(s, e1, e2, t) ->
+        let cexp1 = cexpr_detail e1 in
+         let cexp2 = cexpr_detail e2 in
+        MatrixAcc(s, cexp1, cexp2, type_match t)
  (*Expand when you pull in Alan's Fadd etc.*)
  | Sast.Add(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Int)
  | Sast.Sub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Int)
@@ -140,16 +141,20 @@ let rec cexpr_detail = function
  | Sast.Expo(e1, e2, t) -> Expo(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.Mod(e1, e2, t) -> Mod(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.FuncCall(id, el, t) -> let ct = type_match t in
-                               FuncCall(id_match id, 
+                               FuncCall(id, 
                                List.map cexpr_detail el, ct)
  | Sast.Assign(id, e, t) -> let ct = type_match t in
-                             Assign(id_match id, cexpr_detail e, ct)
+                             Assign(id, cexpr_detail e, ct)
  | Sast.And(e1, e, t) -> let ct = type_match t in 
                           And(cexpr_detail e1, cexpr_detail e, ct)
  | Sast.Or(e1, e2, t) ->  let ct = type_match t in
                           Or(cexpr_detail e1, cexpr_detail e2, ct)
  | Sast.Not(e, t) -> let ct = type_match t in
                       Not(cexpr_detail e, ct)
+ | Sast.FormalDef(id, e, t, env) -> 
+      let t = Environment.find_type id env in
+      FormalDef(id, cexpr_detail e, type_match t)
+  
 
 let rec cexpr = function
   | Sast.Sexpr(e, t) -> Cexpr(cexpr_detail e, type_match t)
@@ -174,16 +179,42 @@ let rec stmt = function
                         Cstmt(r, type_match t)
   | Sast.Sblock(sl, t) -> let l = List.map stmt sl in
                         Cblock(l, type_match t)
+(*   | Sast.SReturnBlock(sl, s, t) -> 
+                          let l = List.map stmt sl in
+                          CReturnBlock(l, stmt s, type_match t) *)
   | Sast.Sif(e, s1, s2, t) -> let r = cexpr e in
                               Cif(r, stmt s1, stmt s2, type_match t)
-  | Sast.Sfor(id, e1, e2, s, t) -> Cfor(cexpr id, cexpr e1, cexpr e2, stmt s, Void)
   | Sast.Scsv(id, fl, b) -> Ccsv(id, fl, b)
+  | Sast.Sfor(id, e1, e2, s, t) -> Cfor(id, cexpr e1, cexpr e2, stmt s, Void)
+  | Sast.Sreturn(e, t) -> let r = cexpr e in
+                         Creturn(r, type_match t)
+
+let func_def = function
+  | Sast.FunctionDef(s, frmls, b, t) -> let block = stmt b in
+                                        let func_det = 
+                                                      {
+                                                        fname = s;
+                                                        formals = List.map cexpr_detail frmls;
+                                                        body = block
+                                                      } in
+                                        CFunctionDef(func_det, type_match t)
  
- (*return a c program in the form of a single *)
+ 
 let program sast = 
+  let functions = List.map func_def (fst sast) in
+  let main = CFunctionDef({
+                fname = "main";
+                 formals = [];
+                  body = Cblock(List.map stmt (List.rev(snd sast)), Void)
+              }, Int) in
+  functions@[main]
+
+
+ (*return a c program in the form of a single *)
+(* let program sast = 
   [({
     fname = "main";
     formals = [];
     body = List.map stmt sast
-  }, Int)]
+  }, Int)] *)
 

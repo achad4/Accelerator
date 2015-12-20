@@ -1,3 +1,5 @@
+open Environment
+
 type op = 
   | Add
   | Sub
@@ -14,30 +16,18 @@ type op =
   | Or
   | Not
 
-type t = 
-  | String
-  | Int
-  | Float
-  | Bool
-  | Na
-
-type id = 
-	| Id of string
-
 type expr_detail = 
-  | Na of t
-  | IdLit of string
+  | Id of string
+  | NaLit of t 
   | IntLit of int
   | IntExpr of expr_detail * t
   | BoolLit of bool
   | FloatLit of float
   | StringLit of string
-  | Vector of expr_detail * expr_detail list * t
-  | VectIdAcc of expr_detail * expr_detail * t
-  | VectIntAcc of expr_detail * expr_detail * t
-  | Matrix of expr_detail * expr_detail list * expr_detail * expr_detail * t
-  | MatrixIdAcc of expr_detail * expr_detail * expr_detail * t
-  | MatrixIntAcc of expr_detail * expr_detail * expr_detail * t
+  | Vector of string * expr_detail list * t
+  | VectAcc of string * expr_detail * t
+  | Matrix of string * expr_detail list * expr_detail * expr_detail * t
+  | MatrixAcc of string * expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
@@ -48,11 +38,12 @@ type expr_detail =
   | FDiv of expr_detail * expr_detail * t
   | Expo of expr_detail * expr_detail * t
   | Mod of expr_detail * expr_detail * t
-  | FuncCall of id * expr_detail list * t
-  | Assign of id * expr_detail * t
+  | FuncCall of string * expr_detail list * t
+  | Assign of string * expr_detail * t
   | And of expr_detail * expr_detail * t
   | Or of expr_detail * expr_detail * t
   | Not of expr_detail * t
+  | FormalDef of string * expr_detail * t * environment
 
 type detail = 
 	| ExprDet of expr_detail
@@ -78,298 +69,236 @@ type expression =
 type statement = 
   | Sstmt of expression * t
   | Sblock of statement list * t
+(*   | SReturnBlock of statement list * statement * t *)
   | Sif of expression * statement * statement * t
-  | Sfor of expression * expression * expression * statement * t
   | Scsv of string * string * bool
+  | Sfor of string * expression * expression * statement * t
+  | Sreturn of expression * t
 
-let string_of_type = function
-  | String -> "string"
-  | Int -> "int"
-  | Bool -> "bool"
-  | Float -> "float"
-  | Na -> "Na"
+type function_definition =
+  | FunctionDef of string * expr_detail list * statement * t
 
-let string_of_id = function
-	Id(s) -> s 
+let csv_string_type input =
+  if ((Str.regexp "['-']?['0'-'9']+") input) then Int
+  else if (Str.regexp "['-']?['0'-'9']+['.']['0'-'9']+") input then Float 
+  else if (Str.regexp "['\"'][.]*['\"']") input then String
+  else if (Str.regexp "true") input then Bool
+  else if (Str.regexp "false") input then Bool
+  else Na
+
+let rec type_of_stmt = function
+  | Sstmt(e,t) -> t
+  | Sblock(sl, t) -> let last_stmt = List.nth sl (List.length sl - 1) in
+                     type_of_stmt last_stmt
+  | Sif(e,s1,s2,t) -> t
+  | Sfor(s1,e1,e2,s2,t) -> t
+  | Sreturn(e, t) -> t
+
 
 let rec expr = function
-  | Ast.Id (s) -> IdLit(s), String
-  | Ast.IntLit(c) -> IntLit(c), Int
-  | Ast.FloatLit(f) -> FloatLit(f), Float
-  | Ast.BoolLit(b) -> BoolLit(b), Bool
-  | Ast.StringLit(s) -> StringLit(s), String
-  | Ast.Vector(s, vl) ->
-        let head = List.hd vl in
-        let _, vtype = expr head in
-        let helper e = fst (expr e) in
-        Vector(IdLit(s), (List.map helper vl), vtype), vtype
-  | Ast.VectIdAcc(v, ind) ->
-        let ve = expr (Ast.Id(v))
-        and inde = expr (Ast.Id(ind)) in
-        let _, idt = ve
-        and _, indt = inde in
-        if (idt == String && indt == String) then
+  | Environment.Id (s), env -> Id(s), Environment.find_type s env
+  | Environment.Assign(id, e), env -> 
+        let e1 = expr (e, env) in
+        Assign(id, fst e1, snd e1), snd e1
+  | Environment.IntLit(c), env -> IntLit(c), Int
+  | Environment.FloatLit(f), env -> FloatLit(f), Float
+  | Environment.BoolLit(b), env -> BoolLit(b), Bool
+  | Environment.StringLit(s), env -> StringLit(s), String
+  | Environment.Vector(s, vl), env ->let head = List.hd vl in
+                        let _, vtype = expr (head, env) in
+                        let helper e = fst (expr (e, env)) in
+                        Vector(s, (List.map helper vl), vtype), Vector
+  | Environment.VectAcc(s, e), env ->
+
+        let e1 = expr (e, env) in
+        let t = snd e1 in
+
+        if (t = Int) then
             (
-              VectIdAcc(IdLit(v),
-                        IdLit(ind),
-                        Na), Na
+              let v_type = Environment.find_type s env in 
+              VectAcc(s,
+                        fst e1,
+                        v_type), v_type
             )
         else
             failwith "Type incompatibility"
-  | Ast.VectIntAcc(vid, indInt) ->
-        let vide = expr (Ast.Id(vid))
-        and inde = expr indInt in
-        let _, idT = vide
-        and _, indT = inde in
-        if (idT == String && indT == Int) then
-            (
-                VectIntAcc(IdLit(vid),
-                           IntExpr(fst inde, snd inde),
-                           Na), Na
-            )
-        else
-            failwith "Type incompatibility"
-  | Ast.Matrix(s, v, nr, nc) ->
+  | Environment.Matrix(s, v, nr, nc), env ->
         let head = List.hd v in
-        let _, vtype = expr head in
-        let nrv, nrt = expr nr in
-        let ncv, nct = expr nc in
-        let helper e = fst (expr e) in
+        let _, vtype = expr (head, env) in
+        let nrv, nrt = expr (nr, env) in
+        let ncv, nct = expr (nc, env) in
+        let helper e = fst (expr (e, env)) in
         if (nrt != Int || nct != Int) then
           failwith "nrow and ncol must be integers"
         else
           (
-            Matrix(IdLit(s), (List.map helper v), helper nr , helper nc, vtype), vtype
+            Matrix(s, (List.map helper v), helper nr , helper nc, vtype), vtype
           )  
-  | Ast.MatrixIdAcc(v, ind1, ind2) ->
-        let ve = expr (Ast.Id(v))
-        and inde1 = expr (Ast.Id(ind1)) 
-        and inde2 = expr (Ast.Id(ind2)) in
-        let _, idt = ve
-        and _, indt1 = inde1 
-        and _, indt2 = inde2 in
-        if (idt == String && indt1 == String && indt2 == String) then
-            (
-              MatrixIdAcc(IdLit(v),
-                        IdLit(ind1),
-                        IdLit(ind2),
-                        Na), Na
-            )
-        else
-            failwith "Type incompatibility" 
-  | Ast.MatrixIntAcc(vid, indInt1, indInt2) ->
-        let vide = expr (Ast.Id(vid))
-        and inde1 = expr indInt1
-        and inde2 = expr indInt2 in
-        let _, idT = vide
-        and _, indT1 = inde1
-        and _, indT2 = inde2 in
-        if (idT == String && indT1 == Int && indT2 == Int) then
-            (
-                MatrixIntAcc(IdLit(vid),
-                           IntExpr(fst inde1, snd inde2),
-                           IntExpr(fst inde2, snd inde2),
-                           Na), Na
-            )
+  | Environment.MatrixAcc(s, e1, e2), env ->
+        let ed1 = expr (e1, env) in
+        let ed2 = expr (e2, env) in
+        let t1 = snd ed1 in
+        let t2 = snd ed2 in
+        if (t1 = Int && t2 = Int) then
+        (
+          let m_type = Environment.find_type s env in 
+          MatrixAcc(s,
+                          fst ed1,
+                          fst ed2,
+                          m_type), m_type
+        )
         else
             failwith "Type incompatibility"
-  | Ast.Na -> Na(Na), Na
-  | Ast.None -> Na(Na), Na
-  | Ast.Assign(id, e) -> 
-    		let e1 = expr e in
-    		Assign(Id(id), fst e1, snd e1), snd e1
-	| Ast.FuncCall(id, el) -> 		
+  | Environment.Na, env -> NaLit(Na), Na
+	| Environment.FuncCall(id, el), env -> 		
     		(*iterate over list of expressions and pull out the expression_detail from each one*)
-    		let helper e = fst (expr e) in
-    		FuncCall(Id(id), (List.map helper el), Na), Na
-	| Ast.Add( e1, e2) ->
-		let e1 = expr e1
-		and e2 = expr e2 in
+    		let helper e = fst (expr (e, env)) in
+    		FuncCall(id, (List.map helper el), Na), Na
+	| Environment.Add( e1, e2), env ->
+		let e1 = expr (e1, env)
+		and e2 = expr (e2, env) in
 
 		let _, t1 = e1
 		and _, t2 = e2 in
 
-		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+		if (t1 == t2 && (t1 == Int || t1 == Float)) then
 			(
-				Add((fst e1), (fst e2), Int), Int
+				Add((fst e1), (fst e2), t1), t1
 			)
 		else
 			failwith "Type incompatibility"
-  | Ast.Sub( e1, e2 ) ->
-          let e1 = expr e1
-          and e2 = expr e2 in
+  | Environment.Sub( e1, e2 ), env ->
+          let e1 = expr (e1, env)
+          and e2 = expr (e2, env) in
 
           let _, t1 = e1
-          and _, t2 = e2 in
+          and _, t2 = e2 
 
- 		if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+        in
+
+ 		if (t1 == t2 && (t1 == Int || t1 == Float)) then
               (
-              Sub((fst e1),(fst e2), Int), Int
+              Sub((fst e1),(fst e2), t1), t1
               )
           else
               failwith "Type incompatability"
-  | Ast.Mult( e1, e2 ) ->
-          let e1 = expr e1
-          and e2 = expr e2 in
+  | Environment.Mult( e1, e2 ), env ->
+          let e1 = expr (e1, env)
+          and e2 = expr (e2, env) in
 
           let _, t1 = e1
           and _, t2 = e2 in
           
-	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+	if (t1 == t2 && (t1 == Int || t1 == Float)) then
               (
-              Mult((fst e1),(fst e2), Int), Int
+              Mult((fst e1),(fst e2), t1), t1
               )
           else
               failwith "Type incompatability"
 
-  | Ast.Div( e1, e2 ) ->
-          let e1 = expr e1
-          and e2 = expr e2 in
+  | Environment.Div( e1, e2 ), env ->
+          let e1 = expr (e1, env)
+          and e2 = expr (e2, env) in
 
           let _, t1 = e1
           and _, t2 = e2 in
 
-      if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+      if (t1 == t2 && (t1 == Int || t1 == Float)) then
               (
-              Div((fst e1),(fst e2), Int), Int
+              Div((fst e1),(fst e2), t1), t1
               )
           else
               failwith "Type incompatability"
 
-  | Ast.Expo( e1, e2 ) ->
-          let e1 = expr e1
-          and e2 = expr e2 in
+  | Environment.Expo( e1, e2 ), env ->
+          let e1 = expr (e1, env)
+          and e2 = expr (e2, env) in
 
           let _, t1 = e1
           and _, t2 = e2 in
 
-	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+	if ((t1 == Int || t1 == Float) && (t2 == Int)) then
               (
-              Expo((fst e1),(fst e2), Int), Int
+              Expo((fst e1),(fst e2), t1), t1
               )
           else
               failwith "Type incompatability"
 
-  | Ast.Mod( e1, e2 ) ->
-          let e1 = expr e1
-          and e2 = expr e2 in
+  | Environment.Mod( e1, e2 ), env ->
+          let e1 = expr (e1, env)
+          and e2 = expr (e2, env) in
 
           let _, t1 = e1
           and _, t2 = e2 in
 
-	if ((t1 = t2) && (t1 = Int) && (t2 = Int)) then
+	if (t1 == Int || t1 == Float && t2 == Int) then
               (
-              Mod((fst e1),(fst e2), Int), Int
+              Mod((fst e1),(fst e2), t1), Int
               )
           else
               failwith "Type incompatability"
-  | Ast.And( b1, b2) ->
-          let b1 = expr b1
-          and b2 = expr b2 in
+  | Environment.And( b1, b2), env ->
+          let b1 = expr (b1, env)
+          and b2 = expr (b2, env) in
 
           let _, t1 = b1
           and _, t2 = b2 in
 
-	if ((t1 = t2) && (t1 = Bool) && (t2 = Bool)) then
+	if (t1 == t2 && (t1 == Bool)) then
               (
                  And((fst b1),(fst b2), Bool), Bool
               )
           else
               failwith "Type incompatibility"
-  | Ast.Or( b1, b2) ->
-          let b1 = expr b1
-          and b2 = expr b2 in
+  | Environment.Or( b1, b2), env ->
+          let b1 = expr (b1, env)
+          and b2 = expr (b2, env) in
 
           let _, t1 = b1
           and _, t2 = b2 in
 
-	if ((t1 = t2) && (t1 = Bool) && (t2 = Bool)) then
+	if (t1 == t2 && (t1 == Bool)) then
               (
                  Or((fst b1),(fst b2), Bool), Bool
               )
           else
               failwith "Type incompatibility"
-  | Ast.Not( b1 ) ->
-          let b1 = expr b1 in
+  | Environment.Not( b1 ), env ->
+          let b1 = expr (b1, env) in
           let _, t1 = b1 in
-          if t1 = Bool then
+          if ( t1 == Bool) then
               (
                   Not((fst b1), Bool), Bool
               )
           else
               failwith "Type incompatibility"
-	| Ast.FAdd( e1, e2) ->
-		let e1 = expr e1
-		and e2 = expr e2 in
-
-		let _, t1 = e1
-		and _, t2 = e2 in
-
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
-			(
-				FAdd((fst e1), (fst e2), Float), Float
-			)
-		else
-			failwith "Type incompatibility"
-	| Ast.FSub( e1, e2) ->
-		let e1 = expr e1
-		and e2 = expr e2 in
-
-		let _, t1 = e1
-		and _, t2 = e2 in
-
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
-			(
-				FSub((fst e1), (fst e2), Float), Float
-			)
-		else
-			failwith "Type incompatibility"
-	| Ast.FMult( e1, e2) ->
-		let e1 = expr e1
-		and e2 = expr e2 in
-
-		let _, t1 = e1
-		and _, t2 = e2 in
-
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
-			(
-				FMult((fst e1), (fst e2), Float), Float
-			)
-		else
-			failwith "Type incompatibility"
-	| Ast.FDiv( e1, e2) ->
-		let e1 = expr e1
-		and e2 = expr e2 in
-
-		let _, t1 = e1
-		and _, t2 = e2 in
-
-		if ((t1 = t2) && (t1 = Float) && (t2 = Float)) then
-			(
-				FDiv((fst e1), (fst e2), Float), Float
-			)
-		else
-			failwith "Type incompatibility"
+  | Environment.FormalDef(id,e), env -> 
+          let e1 = expr (e, env) in
+          let _, t1 = e1 in
+          FormalDef(id, fst e1, t1, env), t1
 
 let rec stmt = function
-	| Ast.Expr( e ) -> 
-        let r = expr e in
-	      Sstmt(Sexpr( (fst r), (snd r) ), (snd r))
-  | Ast.Block( sl ) -> 
-          let l = List.map stmt sl in
-          Sblock(l, Na)
-  | Ast.If(e, s1, s2) -> 
-          let r = expr e in
+	| Environment.Expr( e ), env -> 
+        let r = expr (e, env) in
+	      Sstmt(Sexpr(fst r, snd r), (snd r))
+  | Environment.Block( sl ), env -> 
+          let helper s = stmt (s, env) in
+          let l = List.map helper sl in
+          let last_stmt = List.nth l (List.length l - 1) in
+          Sblock(l, type_of_stmt last_stmt)
+  | Environment.If(e, s1, s2), env -> 
+          let r = expr (e, env) in
+
           Sif(Sexpr( (fst r), (snd r) ), 
-              stmt s1, stmt s2, Na)
-  | Ast.For(e, ie1, ie2, sl) ->
-          let re = expr e
-          and rie1 = expr ie1
-          and rie2 = expr ie2 in
-          Sfor(Sexpr(fst(re),snd(re)), 
+              stmt (s1, env), stmt (s2, env), Na)
+  | Environment.For(s, ie1, ie2, sl), env -> 
+          let new_env = Environment.assign_current_scope s Int env
+          and rie1 = expr (ie1, env)
+          and rie2 = expr (ie2, env) in
+          Sfor(s, 
                Sexpr(fst(rie1),snd(rie1)), 
                Sexpr(fst(rie2),snd(rie2)), 
-               stmt sl,
+               stmt (sl, new_env),
                Na)
   | Ast.Csv(id, fl, b) -> 
           (* get the first line, type of 1st elem, number of elements *)
@@ -405,14 +334,9 @@ let rec stmt = function
           let first_row_list = comma_split first_row in
           (* get number of elements in first row *)
           let row_len = List.length first_row_list in
+          (* get type of first element *)
+          let fst_type =  
           
-          (* need method of going from string to type *) 
-          let string_to_type input = function
-              | (Str.regexp "['-']?['0'-'9']+") input -> Int
-              | (Str.regexp "['-']?['0'-'9']+['.']['0'-'9']+") input -> Float 
-              | (Str.regexp "['\"'][.]*['\"']") input -> String
-              | (Str.regexp "true") input -> Bool
-              | (Str.regexp "false") input -> Bool
 
           let elem_check elem ty =
               let curr_type = string_to_type elem in
@@ -429,6 +353,16 @@ let rec stmt = function
 
           Scsv(id,fl,b)
 
+  | Environment.Return(e), env -> 
+          let e1 = expr (e, env) in
+          Sreturn(Sexpr(fst e1, snd e1), snd e1)
+
+let func_def = function
+  | Environment.FunctionDef(s, ids, b), env ->
+          let helper2 e = fst (expr (e, env)) in
+          let forms = List.map helper2 ids in
+          let block = stmt (b, env) in
+          FunctionDef(s, forms, block, type_of_stmt block)
 
 let program program = 
-	List.map stmt program
+	List.map func_def (fst program), List.map stmt (snd program)
