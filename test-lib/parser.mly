@@ -53,7 +53,7 @@ func_def_list:
   | func_def_list func_def                       { $2 :: $1 }
 
 func_def:
-   | ID ASSIGN FUNCTION LPAREN formals_opt RPAREN func_block { print_endline "func def"; FunctionDef($1, $5, $7) }
+   | ID ASSIGN FUNCTION LPAREN formals_opt RPAREN func_block { FunctionDef($1, $5, $7) }
 
 func_stmt:
   | stmt                                          { $1 }
@@ -71,9 +71,9 @@ expr:
   | literal                                                  { $1 }
   | bool_expr                                                { $1 }
   | string_expr                                              { $1 }
-  | ID ASSIGN VECTSTART LPAREN vect_opt RPAREN               { Vector($1, $5) }
-  | ID ASSIGN MATRIXSTART LPAREN VECTSTART vect_opt RPAREN COMMA 
-    NROW EQSING expr COMMA NCOL EQSING expr RPAREN           { Matrix($1, $6, $11, $15) }
+  | ID ASSIGN VECTSTART vect_opt RPAREN               { Vector($1, $4) }
+  | ID ASSIGN MATRIXSTART VECTSTART vect_opt RPAREN COMMA 
+    NROW EQSING expr COMMA NCOL EQSING expr RPAREN           { Matrix($1, $5, $10, $14) }
   | ID LPAREN actuals_opt RPAREN                             { FuncCall($1, $3) }
   | ID ASSIGN expr                                           { Assign($1, $3) }
   | ID LBRAC expr RBRAC                                      { VectAcc($1, $3) }

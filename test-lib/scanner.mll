@@ -18,8 +18,8 @@
     | ":"           { RANGE }
     | "function"    { FUNCTION }
     | "return"      { RETURN }
-    | "c"           { VECTSTART }
-    | "matrix"      { MATRIXSTART }
+    | "c("           { VECTSTART }
+    | "matrix("      { MATRIXSTART }
     | "nrow"        { NROW }
     | "ncol"        { NCOL }
     | "="           { EQSING }
