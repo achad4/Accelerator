@@ -312,13 +312,14 @@ let rec stmt = function
 
           Sif(Sexpr( (fst r), (snd r) ), 
               stmt (s1, env), stmt (s2, env), Na)
-  | Environment.For(s, ie1, ie2, sl), env ->
-          let rie1 = expr (ie1, env)
+  | Environment.For(s, ie1, ie2, sl), env -> 
+          let new_env = Environment.assign_current_scope s Int env
+          and rie1 = expr (ie1, env)
           and rie2 = expr (ie2, env) in
           Sfor(s, 
                Sexpr(fst(rie1),snd(rie1)), 
                Sexpr(fst(rie2),snd(rie2)), 
-               stmt (sl, env),
+               stmt (sl, new_env),
                Na)
 
 let program program = 

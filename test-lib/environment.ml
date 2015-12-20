@@ -56,8 +56,6 @@ type stmt =
 
 type program = stmt list
 
-
-
 type environment = {
     symb_tbl_stk: t VarMap.t list; 
 }
@@ -121,9 +119,12 @@ let rec scope_expr_detail env = function
       let helper e = fst (scope_expr_detail env e) in
       Vector(s, List.map helper el), new_env
   | Ast.VectAcc(s, expr) -> VectAcc(s, fst(scope_expr_detail env expr)), env
-  | Ast.Matrix(s, el, e1, e2) -> 
+  | Ast.Matrix(s, el, e1, e2) ->
+      let head = List.hd el in
+      let mtype = type_match (fst (scope_expr_detail env head)) in
+      let new_env = assign_current_scope s mtype env in
       let helper e = fst (scope_expr_detail env e) in
-      Matrix(s, List.map helper el, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), env
+      Matrix(s, List.map helper el, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), new_env
   | Ast.MatrixAcc(s, e1, e2) -> 
       MatrixAcc(s, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), env
   | Ast.Add(expr1,expr2) ->
