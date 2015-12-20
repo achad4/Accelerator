@@ -84,7 +84,8 @@ let csv_string_type input =
   else if (Str.regexp "['\"'][.]*['\"']") input then String
   else if (Str.regexp "true") input then Bool
   else if (Str.regexp "false") input then Bool
-  else Na
+  else if (Str.regexp "Na") input then Na
+  else raise IncorrectTypeException
 
 let rec type_of_stmt = function
   | Sstmt(e,t) -> t
@@ -335,18 +336,6 @@ let rec stmt = function
           (* get number of elements in first row *)
           let row_len = List.length first_row_list in
           (* get type of first element *)
-          let fst_type =  
-          
-
-          let elem_check elem ty =
-              let curr_type = string_to_type elem in
-              if curr_type != fst_type then
-                  (* raise exception *)
-                  else
-                      (* don't raise *) in
-          let row_type_check row fst_type =
-              List.iter (elem_check   
-                      
           let first_elem = List.hd first_row in
           let first_elem_type = string_to_type first_elem in
 
