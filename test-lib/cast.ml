@@ -190,18 +190,18 @@ let rec stmt = function
 
 let rec add_return = function
   | Cblock(sl, t) -> let last_stmt = List.nth sl (List.length sl - 1) in
-                          let sl = List.rev sl in
-                          let sl = List.tl sl in
+(*                           let sl = List.rev sl in
+                          let sl = List.tl sl in *)
                           let return = match last_stmt with
                               | Cstmt(e,t) -> Creturn(e, t) 
                               | Cblock(sl, t) -> let last_stmt = List.nth sl (List.length sl - 1) in
                                                  add_return last_stmt
-                              | Cif(e, s1, s2, t) -> add_return s1; add_return s2
+                              | Cif(e, s1, s2, t) -> Cif(e, add_return s1, add_return s2, t)
                               | Cfor(s1, e1, e2, s2, t) -> add_return s2
                               | Creturn(e, t) -> Creturn(e, t)
                           in
                           Cblock(sl@[return], t)
-  | _ -> failwith "something"
+  | _ -> failwith "idk..."
 
 let func_def = function
   | Sast.FunctionDef(s, frmls, b, t) -> let block = 

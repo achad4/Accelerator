@@ -118,7 +118,7 @@ let rec compile_stmt = function
   | Cfor(id, e1, e2, s, t) -> "for( int " ^ id ^ "="  ^ compile_expr e1 ^ "; " ^ 
                           id ^" <= " ^ compile_expr e2 ^ "; " ^ id ^
                           "++)\n" ^ compile_stmt s 
-  | Creturn(e, t) -> "return " ^ (compile_expr e)
+  | Creturn(e, t) -> "return " ^ (compile_expr e) ^ ";\n"
 
       
   in
