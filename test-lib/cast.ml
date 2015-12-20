@@ -18,8 +18,8 @@ type ct =
   | Float
   | Bool
   | Void
-  | Vector of ct
-  | Matrix of ct
+  | Vector
+  | Matrix
   | IdType
 
 
@@ -94,8 +94,8 @@ let rec string_of_ctype = function
   | Bool -> "bool"
   | Void -> "Na"
   | IdType -> "IdType"
-  | Vector(t) -> "Vector of " ^ string_of_ctype t
-  | Matrix(t) -> "Matrix of " ^ string_of_ctype t
+  | Vector -> "Vector"
+  | Matrix -> "Matrix"
 
 
 let rec type_match = function
