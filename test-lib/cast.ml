@@ -22,7 +22,6 @@ type ct =
   | Matrix
   | IdType
 
-
 type cexpr_detail = 
    | Na of string * ct
    | Id of string * ct
@@ -50,6 +49,7 @@ type cexpr_detail =
    | And of cexpr_detail * cexpr_detail * ct
    | Or of cexpr_detail * cexpr_detail * ct
    | Not of cexpr_detail * ct
+   | Return of cexpr_detail * ct
 
 type cexpression = 
   | Cexpr of cexpr_detail * ct
@@ -72,8 +72,10 @@ type cexpression =
 type statement = 
   | Cstmt of cexpression * ct
   | Cblock of statement list * ct
+  | CReturnBlock of statement list * statement * ct
   | Cif of cexpression * statement * statement * ct
   | Cfor of string * cexpression * cexpression * statement * ct
+  | CFunctionDef of string * string list * statement * ct
 
 type func_decl_detail = {
     fname : string;
@@ -106,7 +108,6 @@ let rec type_match = function
   | Environment.Na -> Void
   | Environment.Vector -> Vector
   | Environment.Matrix -> Matrix
-
 
 let rec cexpr_detail = function
  | Sast.Id(s) ->  Id(s, String)
@@ -149,6 +150,8 @@ let rec cexpr_detail = function
                           Or(cexpr_detail e1, cexpr_detail e2, ct)
  | Sast.Not(e, t) -> let ct = type_match t in
                       Not(cexpr_detail e, ct)
+ | Sast.Return(e, t) -> let ct = type_match t in
+                      Return(cexpr_detail e, ct)
 
 let rec cexpr = function
   | Sast.Sexpr(e, t) -> Cexpr(cexpr_detail e, type_match t)
@@ -173,9 +176,13 @@ let rec stmt = function
                         Cstmt(r, type_match t)
   | Sast.Sblock(sl, t) -> let l = List.map stmt sl in
                         Cblock(l, type_match t)
+  | Sast.SReturnBlock(sl, s, t) -> 
+                          let l = List.map stmt sl in
+                          CReturnBlock(l, stmt s, type_match t)
   | Sast.Sif(e, s1, s2, t) -> let r = cexpr e in
                               Cif(r, stmt s1, stmt s2, type_match t)
   | Sast.Sfor(id, e1, e2, s, t) -> Cfor(id, cexpr e1, cexpr e2, stmt s, Void)
+  | Sast.FunctionDef(s, sl, stmt1, t) -> CFunctionDef(s, sl, stmt stmt1, type_match t)
  
  (*return a c program in the form of a single *)
 let program cast = 

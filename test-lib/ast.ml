@@ -32,12 +32,15 @@ type expr =
   | And of expr * expr
   | Or of expr * expr
   | Not of expr
+  | Return of expr
 
 type stmt = 
 	| Expr of expr
   | Block of stmt list
+  | ReturnBlock of stmt list * stmt
   | If of expr * stmt * stmt
   | For of string * expr * expr * stmt
+  | FunctionDef of string * string list * stmt
 
 type program = stmt list
 

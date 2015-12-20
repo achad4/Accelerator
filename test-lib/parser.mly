@@ -3,7 +3,7 @@
 %token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE, NA
 %token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, VECTSTART
 %token MATRIXSTART, NROW, NCOL, EQSING, EQ, FOR, IN, RANGE, LBRAC, RBRAC
-%token DOUBLEQT
+%token DOUBLEQT, FUNCTION, RETURN
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -32,8 +32,10 @@ stmt_list:
 stmt:
   | expr DLIN                                                { Expr($1) }
   | LBRACE DLIN stmt_list RBRACE DLIN                        { Block(List.rev $3) }
+  | LBRACE DLIN stmt_list stmt RBRACE DLIN                   { ReturnBlock(List.rev $3, $4) }
   | IF LPAREN bool_expr RPAREN DLIN stmt ELSE DLIN stmt      { If($3, $6, $9) }
-  | FOR LPAREN ID IN expr RANGE expr RPAREN stmt           { For($3, $5, $7, $9) }
+  | FOR LPAREN ID IN expr RANGE expr RPAREN stmt             { For($3, $5, $7, $9) }
+  | ID ASSIGN FUNCTION LPAREN formals_opt RPAREN stmt        { FunctionDef($1, $5, $7) }
 
 expr:
   | ID                                                       { Id($1) }
@@ -51,8 +53,9 @@ expr:
     NROW EQSING expr COMMA NCOL EQSING expr RPAREN           { Matrix($1, $5, $10, $14) }
   | ID LPAREN actuals_opt RPAREN                             { FuncCall($1, $3) }
   | ID ASSIGN expr                                           { Assign($1, $3) }
-  | ID LBRAC expr RBRAC                                     { VectAcc($1, $3) }
-  | ID LBRAC expr RBRAC LBRAC expr RBRAC                    { MatrixAcc($1, $3, $6) }
+  | ID LBRAC expr RBRAC                                      { VectAcc($1, $3) }
+  | ID LBRAC expr RBRAC LBRAC expr RBRAC                     { MatrixAcc($1, $3, $6) }
+  | RETURN expr                                              { Return($2) }
 
 vect_opt:
   | /* nothing */                        { [] }
@@ -78,6 +81,13 @@ bool_lits:
   | bool_lits COMMA bool_expr            { $3 :: $1 }
   | bool_lits COMMA NA                   { Na :: $1 }
 
+formals_opt:
+  | /* nothing */                        { [] }
+  | formals_list                         { List.rev $1 }
+
+formals_list:
+  | ID                                   { [$1] }
+  | formals_list COMMA ID                { $3 :: $1 }
 
 actuals_opt:
   | /* nothing */                        { [] }
@@ -96,7 +106,6 @@ bool_expr:
 
 string_expr:
   | string_data   { $1 }
-
 
 string_data:
   | STRING        { StringLit($1) }

@@ -16,6 +16,8 @@
     | "else"        { ELSE }
     | "for"         { FOR }
     | ":"           { RANGE }
+    | "function"    { FUNCTION }
+    | "return"      { RETURN }
     | "c("          { VECTSTART }
     | "matrix("     { MATRIXSTART }
     | "nrow"        { NROW }

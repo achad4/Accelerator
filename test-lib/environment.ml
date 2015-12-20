@@ -1,4 +1,5 @@
 module VarMap = Map.Make(String);;
+module FuncMap = Map.Make(String);;
 
 exception NoEnvironmentException;;
 exception UnassignedVarException of string;;
@@ -47,21 +48,26 @@ type expr =
   | And of expr * expr
   | Or of expr * expr
   | Not of expr
+  | Return of expr
 
 type stmt = 
   | Expr of expr
   | Block of stmt list
+  | ReturnBlock of stmt list * stmt
   | If of expr * stmt * stmt
   | For of string * expr * expr * stmt
+  | FunctionDef of string * string list * stmt
 
 type program = stmt list
 
 type environment = {
     symb_tbl_stk: t VarMap.t list; 
+    func_tbl: string FuncMap.t;
 }
 
 let init_env = {
     symb_tbl_stk = VarMap.empty::[];
+    func_tbl = FuncMap.empty;
 }
 
 let type_match = function
@@ -75,9 +81,19 @@ let type_match = function
   | Id(id) -> String
   | _ -> Na
 
-let reassign_symb_tbl_stk stk = {
+let reassign_symb_tbl_stk stk func = {
     symb_tbl_stk = stk;
+    func_tbl = func;
 }
+
+let push_env_scope env =  
+    reassign_symb_tbl_stk (VarMap.empty::env.symb_tbl_stk) env.func_tbl
+
+let pop_env_scope env = 
+   match env.symb_tbl_stk with 
+    | [] -> raise NoEnvironmentException 
+    | curr::rest -> 
+        reassign_symb_tbl_stk rest env.func_tbl
 
 let assign_current_scope var vtype env =
   let curr, rest =
@@ -85,7 +101,11 @@ let assign_current_scope var vtype env =
       | curr :: rest -> curr, rest
       | [] -> raise NoEnvironmentException ) in
     let updated = VarMap.add var vtype curr in
-  reassign_symb_tbl_stk (updated::rest)
+  reassign_symb_tbl_stk (updated::rest) env.func_tbl
+
+let init_func_args fname var env =
+  let updated = FuncMap.add fname var env.func_tbl in
+  reassign_symb_tbl_stk env.symb_tbl_stk updated
 
 let find_dtype_top_stack id env =
   let stack = env.symb_tbl_stk in
@@ -96,6 +116,15 @@ let find_dtype_top_stack id env =
         VarMap.find id top
       else
         raise (UnassignedVarException id)
+
+let rec init_args fname args env = 
+  match args with
+  | [] -> env
+  | fst :: rest -> 
+    let new_sym = assign_current_scope fst Na env in
+    let new_func = init_func_args fname fst env in
+    let new_env = reassign_symb_tbl_stk new_sym.symb_tbl_stk new_func.func_tbl in
+    init_args fname rest new_env
 
 let rec scope_expr_detail env = function
   | Ast.Na -> Na, env
@@ -165,13 +194,20 @@ let rec scope_expr_detail env = function
   | Ast.FuncCall(s, el) -> 
       let helper e = fst (scope_expr_detail env e) in
       FuncCall(s, List.map helper el), env
+  | Ast.Return(e) -> 
+      let e1, v1 = scope_expr_detail env e in
+      Return(e1), v1
 
 let rec scope_stmt env = function
   | Ast.Expr(expr) -> let e, v = scope_expr_detail env expr in 
                       Expr(e), v
   | Ast.Block(blk) -> 
       let helper e = fst (scope_stmt env e) in
-      Block(List.map helper blk), env
+      Block(List.map helper blk), env 
+  | Ast.ReturnBlock(blk,ret) -> 
+      let helper e = fst (scope_stmt env e) in
+      ReturnBlock(List.map helper blk, fst (scope_stmt env ret)), env
+
   | Ast.If(expr,stmt1,stmt2) -> let i, v = scope_expr_detail env expr in
       If(i, fst (scope_stmt env stmt1), fst (scope_stmt env stmt2)), env
   | Ast.For(str,expr2,expr3,stmt) ->
@@ -179,6 +215,11 @@ let rec scope_stmt env = function
       let e2, v2 = scope_expr_detail new_env expr2
       and e3, v3 = scope_expr_detail new_env expr3
     in For(str, e2, e3, fst (scope_stmt new_env stmt)), new_env
+  | Ast.FunctionDef(str, el, stmt) -> 
+      let new_env = assign_current_scope str Na (push_env_scope env) in
+      let init_env = init_args str el new_env in
+(*       let helper e = fst (scope_expr_detail init_env e) in *)
+      FunctionDef(str, el, fst (scope_stmt init_env stmt)), init_env
 
 let run env stmts =
   let helper henv hstmts = snd (scope_stmt henv hstmts) in
@@ -190,13 +231,3 @@ let program program =
   let helper env e = (scope_stmt env e) in
   List.map (helper new_env) program
 
-(* 
-let push_scope env =  
-    update_only_scope (VariableMap.empty::env.var_stack) env
-
-let pop_scope env = 
-   match env.var_stack with 
-    | popped_scope::other_scopes -> 
-        update_only_scope other_scopes env
-    | [] -> raise EmptyEnvironmentError 
- *)

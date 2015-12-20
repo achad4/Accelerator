@@ -43,6 +43,7 @@ type expr_detail =
   | And of expr_detail * expr_detail * t
   | Or of expr_detail * expr_detail * t
   | Not of expr_detail * t
+  | Return of expr_detail * t
 
 type detail = 
 	| ExprDet of expr_detail
@@ -68,8 +69,10 @@ type expression =
 type statement = 
   | Sstmt of expression * t
   | Sblock of statement list * t
+  | SReturnBlock of statement list * statement * t
   | Sif of expression * statement * statement * t
   | Sfor of string * expression * expression * statement * t
+  | FunctionDef of string * string list * statement * t
 
 (* type variable = 
   | Var of id * t *)
@@ -298,6 +301,10 @@ let rec expr = function
               )
           else
               failwith "Type incompatibility"
+  | Environment.Return(e), env -> 
+          let e1 = expr (e, env) in
+          let _, t1 = e1 in
+          Return(fst e1, t1), t1
 
 let rec stmt = function
 	| Environment.Expr( e ), env -> 
@@ -307,6 +314,11 @@ let rec stmt = function
           let helper s = stmt (s, env) in
           let l = List.map helper sl in
           Sblock(l, Na)
+  | Environment.ReturnBlock(sl, s ), env ->
+          let helper s = stmt (s, env) in
+          let l1 = List.map helper sl in
+          let l2 = helper s in
+          SReturnBlock(l1, l2, Na)
   | Environment.If(e, s1, s2), env -> 
           let r = expr (e, env) in
 
@@ -321,6 +333,8 @@ let rec stmt = function
                Sexpr(fst(rie2),snd(rie2)), 
                stmt (sl, new_env),
                Na)
+  | Environment.FunctionDef(s, sl, rstmt), env ->
+          FunctionDef(s, sl, stmt (rstmt, env), Na)
 
 let program program = 
 	List.map stmt program
