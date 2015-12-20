@@ -81,7 +81,11 @@ let rec compile_detail = function
   | Cast.FMult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ 
                              (compile_detail e2)
   | Cast.FDiv(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
-                            (compile_detail e2) in
+                            (compile_detail e2) 
+  | Cast.Return(e, t) -> "return " ^ (compile_detail e)
+  | Cast.FormalDef(id, e, t) -> Cast.string_of_ctype t ^ " " ^ id ^ "=" ^ (compile_detail e)
+
+  in
 
 let rec compile_expr = function
 	| Cexpr(e, t) -> compile_detail e 
@@ -105,16 +109,23 @@ let rec compile_stmt = function
   | Cstmt(e, t) -> compile_expr e ^ ";\n"
   | Cblock(sl, t) -> let string_list l = List.map compile_stmt l in
                   "{\n" ^ String.concat "" (string_list sl) ^ "}\n"
-  | CReturnBlock(sl, s, t) -> let string_list l = List.map compile_stmt l in
+(*   | CReturnBlock(sl, s, t) -> let string_list l = List.map compile_stmt l in
               "{\n" ^ String.concat "" (string_list sl) ^
-              compile_stmt s ^ "}\n"
+              compile_stmt s ^ "}\n" *)
   | Cif(e, s1, s2, t) ->   "if(" ^ compile_expr e ^ ")" 
                            ^ (compile_stmt s1)  ^ 
                            "else" 
                            ^  (compile_stmt s2)
   | Cfor(id, e1, e2, s, t) -> "for( int " ^ id ^ "="  ^ compile_expr e1 ^ "; " ^ 
                           id ^" <= " ^ compile_expr e2 ^ "; " ^ id ^
-                          "++)\n" ^ compile_stmt s in
+                          "++)\n" ^ compile_stmt s 
+  | CFunctionDef(s, frmls, stmts, ret, t) -> 
+        let string_list_stmt l = List.map compile_stmt l in
+        let string_list_det l = List.map compile_detail l in
+        Cast.string_of_ctype t ^ " " ^ s ^ "(" ^ String.concat ", " (string_list_det frmls) ^ ") {\n" ^
+        String.concat "" (string_list_stmt stmts) ^ compile_detail ret ^ "}\n"
+      
+  in
 
 let compile_func (f, t) = 
   let stmt_string_list = List.map compile_stmt (List.rev f.body) in
