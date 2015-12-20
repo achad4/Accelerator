@@ -56,10 +56,12 @@ type stmt =
 (*   | ReturnBlock of stmt list * stmt *)
   | If of expr * stmt * stmt
   | For of string * expr * expr * stmt
-  | FunctionDef of string * expr list * stmt
   | Return of expr
 
-type program = stmt list
+type func_def = 
+  | FunctionDef of string * expr list * stmt
+
+type program = func_def list * stmt list
 
 type environment = {
     symb_tbl_stk: t VarMap.t list; 
@@ -220,6 +222,11 @@ let rec scope_stmt env = function
       let e2, v2 = scope_expr_detail new_env expr2
       and e3, v3 = scope_expr_detail new_env expr3
     in For(str, e2, e3, fst (scope_stmt new_env stmt)), new_env
+  | Ast.Return(e) -> 
+      let e1, v1 = scope_expr_detail env e in
+      Return(e1), v1
+
+let scope_func env = function
   | Ast.FunctionDef(str, el, stmt) -> 
       let init_env = assign_current_scope str Na (push_env_scope env) in
       let init_formals env1 forms =
@@ -229,19 +236,17 @@ let rec scope_stmt env = function
       let helper1 e = fst (scope_stmt new_env e) in
       let helper2 e = fst (scope_expr_detail new_env e) in
       let block = scope_stmt env stmt in
-(*       let helper e = fst (scope_expr_detail init_env e) in *)
       FunctionDef(str, List.map helper2 el, fst block), new_env
-  | Ast.Return(e) -> 
-      let e1, v1 = scope_expr_detail env e in
-      Return(e1), v1
 
 let run env stmts =
   let helper henv hstmts = snd (scope_stmt henv hstmts) in
   List.fold_left helper env stmts
 
 let program program = 
-  let program_rev = List.rev program in
+  let program_rev = List.rev (snd program) in
+  let funcs_rev = List.rev (fst program) in
   let new_env = run init_env program_rev in
-  let helper env e = (scope_stmt env e) in
-  List.map (helper new_env) program
+  let helper1 env e = (scope_stmt env e) in
+  let helper2 env e = (scope_func env e) in
+  (List.map (helper2 new_env) funcs_rev), (List.map (helper1 new_env) (snd program))
 

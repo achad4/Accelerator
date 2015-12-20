@@ -118,25 +118,37 @@ let rec compile_stmt = function
   | Cfor(id, e1, e2, s, t) -> "for( int " ^ id ^ "="  ^ compile_expr e1 ^ "; " ^ 
                           id ^" <= " ^ compile_expr e2 ^ "; " ^ id ^
                           "++)\n" ^ compile_stmt s 
-  | CFunctionDef(s, frmls, block, t) -> 
-        let string_list_stmt l = List.map compile_stmt l in
-        let string_list_det l = List.map compile_detail l in
-        Cast.string_of_ctype t ^ " " ^ s ^ "(" ^ String.concat ", " (string_list_det frmls) ^ ")"
-        ^ compile_stmt block
   | Creturn(e, t) -> "return " ^ (compile_expr e)
 
       
   in
 
-let compile_func (f, t) = 
-  let stmt_string_list = List.map compile_stmt (List.rev f.body) in
-    string_of_ctype t ^ " " ^ f.fname
-    ^ "(" ^ String.concat "," f.formals ^ ")\n{\n"
-    ^ String.concat "; " stmt_string_list
-    ^ "\n}" in
+let compile_func_detail f = 
+  let helper e = compile_detail e in
+  let string_formals = List.map helper f.formals in
+    f.fname
+    ^ 
+    "(" ^ String.concat "," string_formals ^ ")\n{\n"
+    ^ 
+    compile_stmt f.body
+    ^ 
+    "\n}" in
+
+let compile_func = function 
+    | CFunctionDef(f, t) -> 
+        string_of_ctype t ^ " " ^
+        compile_func_detail f in
+
+
+(*         let string_list_stmt l = List.map compile_stmt l in
+        let string_list_det l = List.map compile_detail l in
+        Cast.string_of_ctype t ^ " " ^ s ^ "(" ^ String.concat ", " (string_list_det frmls) ^ ")"
+        ^ compile_stmt block in *)
+
 
 let compile cast = 
   let string_list = List.map compile_func cast in
+
   String.concat "" string_list in
 
   let c_begin = 

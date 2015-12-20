@@ -75,17 +75,16 @@ type statement =
 (*   | CReturnBlock of statement list * statement * ct *)
   | Cif of cexpression * statement * statement * ct
   | Cfor of string * cexpression * cexpression * statement * ct
-  | CFunctionDef of string * cexpr_detail list * statement * ct
   | Creturn of cexpression * ct
 
 type func_decl_detail = {
     fname : string;
-    formals : string list;
-    body : statement list;
+    formals : cexpr_detail list;
+    body : statement;
 }
 
 type func_decl = 
-  func_decl_detail * ct
+  | CFunctionDef of func_decl_detail * ct
 
 type program = 
   func_decl list
@@ -185,16 +184,35 @@ let rec stmt = function
   | Sast.Sif(e, s1, s2, t) -> let r = cexpr e in
                               Cif(r, stmt s1, stmt s2, type_match t)
   | Sast.Sfor(id, e1, e2, s, t) -> Cfor(id, cexpr e1, cexpr e2, stmt s, Void)
-  | Sast.FunctionDef(s, frmls, b, t) -> let block = stmt b in
-                                              CFunctionDef(s, List.map cexpr_detail frmls, block, type_match t)
   | Sast.Sreturn(e, t) -> let r = cexpr e in
                          Creturn(r, type_match t)
+
+let func_def = function
+  | Sast.FunctionDef(s, frmls, b, t) -> let block = stmt b in
+                                        let func_det = 
+                                                      {
+                                                        fname = s;
+                                                        formals = List.map cexpr_detail frmls;
+                                                        body = block
+                                                      } in
+                                        CFunctionDef(func_det, type_match t)
  
+ 
+let program sast = 
+  let functions = List.map func_def (fst sast) in
+  let main = CFunctionDef({
+                fname = "main";
+                 formals = [];
+                  body = Cblock(List.map stmt (snd sast), Void)
+              }, Int) in
+  functions@[main]
+
+
  (*return a c program in the form of a single *)
-let program cast = 
+(* let program sast = 
   [({
     fname = "main";
     formals = [];
-    body = List.map stmt cast
-  }, Int)]
+    body = List.map stmt sast
+  }, Int)] *)
 

@@ -72,8 +72,10 @@ type statement =
 (*   | SReturnBlock of statement list * statement * t *)
   | Sif of expression * statement * statement * t
   | Sfor of string * expression * expression * statement * t
-  | FunctionDef of string * expr_detail list * statement * t
   | Sreturn of expression * t
+
+type function_definition =
+  | FunctionDef of string * expr_detail list * statement * t
 
 (* type variable = 
   | Var of id * t *)
@@ -130,7 +132,6 @@ let rec type_of_stmt = function
                      type_of_stmt last_stmt
   | Sif(e,s1,s2,t) -> t
   | Sfor(s1,e1,e2,s2,t) -> t
-  | FunctionDef(s1, el, s2, t) -> t
   | Sreturn(e, t) -> t
     
 
@@ -339,6 +340,18 @@ let rec stmt = function
                Sexpr(fst(rie2),snd(rie2)), 
                stmt (sl, new_env),
                Na)
+(*   | Environment.FunctionDef(s, ids, b), env ->
+          let helper1 e = stmt (e, env) in
+          let helper2 e = fst (expr (e, env)) in
+          let forms = List.map helper2 ids in
+          let block = stmt (b, env) in
+          (*TODO:  find the return type of the function here*)
+          FunctionDef(s, forms, block, type_of_stmt block) *)
+  | Environment.Return(e), env -> 
+          let e1 = expr (e, env) in
+          Sreturn(Sexpr(fst e1, snd e1), snd e1)
+
+let func_def = function
   | Environment.FunctionDef(s, ids, b), env ->
           let helper1 e = stmt (e, env) in
           let helper2 e = fst (expr (e, env)) in
@@ -346,9 +359,6 @@ let rec stmt = function
           let block = stmt (b, env) in
           (*TODO:  find the return type of the function here*)
           FunctionDef(s, forms, block, type_of_stmt block)
-  | Environment.Return(e), env -> 
-          let e1 = expr (e, env) in
-          Sreturn(Sexpr(fst e1, snd e1), snd e1)
 
 let program program = 
-	List.map stmt program
+	List.map func_def (fst program), List.map stmt (snd program)

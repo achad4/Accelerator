@@ -40,10 +40,14 @@ type stmt =
 (*   | ReturnBlock of stmt list * stmt *)
   | If of expr * stmt * stmt
   | For of string * expr * expr * stmt
-  | FunctionDef of string * expr list * stmt
   | Return of expr
 
-type program = stmt list
+type func_def = 
+  | FunctionDef of string * expr list * stmt
+
+
+
+type program = func_def list * stmt list
 
 (* let rec string_of_expression = function
   | Id(s) -> s
