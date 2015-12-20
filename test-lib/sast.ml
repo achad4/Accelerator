@@ -280,18 +280,26 @@ let rec stmt = function
           Sblock(l, type_of_stmt last_stmt)
   | Environment.If(e, s1, s2), env -> 
           let r = expr (e, env) in
-
-          Sif(Sexpr( (fst r), (snd r) ), 
-              stmt (s1, env), stmt (s2, env), Na)
-  | Environment.For(s, ie1, ie2, sl), env -> 
-          let new_env = Environment.assign_current_scope s Int env
-          and rie1 = expr (ie1, env)
+          let stmt1 =  stmt (s1, env) in
+          let stmt2 =  stmt (s2, env) in
+          let t1 = type_of_stmt stmt1 in
+          let t2 = type_of_stmt stmt2 in
+          if(t1 = t2) then
+          (
+            Sif(Sexpr( (fst r), (snd r) ), 
+                stmt1, stmt2, t1)
+          )else
+            failwith "Type incompatibility in if else statement"
+  | Environment.For(s, ie1, ie2, b), env -> 
+          let rie1 = expr (ie1, env)
           and rie2 = expr (ie2, env) in
+          let b1 = stmt (b, env) in
+          let t = type_of_stmt b1 in
           Sfor(s, 
                Sexpr(fst(rie1),snd(rie1)), 
                Sexpr(fst(rie2),snd(rie2)), 
-               stmt (sl, new_env),
-               Na)
+               b1,
+               t)
   | Environment.Return(e), env -> 
           let e1 = expr (e, env) in
           Sreturn(Sexpr(fst e1, snd e1), snd e1)

@@ -90,7 +90,7 @@ type program =
   func_decl list
 
 let rec string_of_ctype = function
-  | String -> "string"
+  | String -> "String"
   | Float -> "float"
   | Int -> "int"
   | Bool -> "bool"
@@ -187,8 +187,28 @@ let rec stmt = function
   | Sast.Sreturn(e, t) -> let r = cexpr e in
                          Creturn(r, type_match t)
 
+
+let rec add_return = function
+  | Cblock(sl, t) -> let last_stmt = List.nth sl (List.length sl - 1) in
+                          let sl = List.rev sl in
+                          let sl = List.tl sl in
+                          let return = match last_stmt with
+                              | Cstmt(e,t) -> Creturn(e, t) 
+                              | Cblock(sl, t) -> let last_stmt = List.nth sl (List.length sl - 1) in
+                                                 add_return last_stmt
+                              | Cif(e, s1, s2, t) -> add_return s1; add_return s2
+                              | Cfor(s1, e1, e2, s2, t) -> add_return s2
+                              | Creturn(e, t) -> Creturn(e, t)
+                          in
+                          Cblock(sl@[return], t)
+  | _ -> failwith "something"
+
 let func_def = function
-  | Sast.FunctionDef(s, frmls, b, t) -> let block = stmt b in
+  | Sast.FunctionDef(s, frmls, b, t) -> let block = 
+                                          if(type_match t != Void) then
+                                            add_return (stmt b)
+                                          else
+                                            stmt b in
                                         let func_det = 
                                                       {
                                                         fname = s;
@@ -196,23 +216,15 @@ let func_def = function
                                                         body = block
                                                       } in
                                         CFunctionDef(func_det, type_match t)
+
  
  
 let program sast = 
   let functions = List.map func_def (fst sast) in
   let main = CFunctionDef({
-                fname = "main";
+                 fname = "main";
                  formals = [];
-                  body = Cblock(List.map stmt (List.rev(snd sast)), Void)
+                 body = Cblock(List.map stmt (List.rev(snd sast)), Void)
               }, Int) in
   functions@[main]
-
-
- (*return a c program in the form of a single *)
-(* let program sast = 
-  [({
-    fname = "main";
-    formals = [];
-    body = List.map stmt sast
-  }, Int)] *)
 
