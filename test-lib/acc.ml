@@ -105,6 +105,9 @@ let rec compile_stmt = function
   | Cstmt(e, t) -> compile_expr e ^ ";\n"
   | Cblock(sl, t) -> let string_list l = List.map compile_stmt l in
                   "{\n" ^ String.concat "" (string_list sl) ^ "}\n"
+  | CReturnBlock(sl, s, t) -> let string_list l = List.map compile_stmt l in
+              "{\n" ^ String.concat "" (string_list sl) ^
+              compile_stmt s ^ "}\n"
   | Cif(e, s1, s2, t) ->   "if(" ^ compile_expr e ^ ")" 
                            ^ (compile_stmt s1)  ^ 
                            "else" 

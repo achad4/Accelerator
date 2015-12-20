@@ -32,10 +32,10 @@ stmt_list:
 stmt:
   | expr DLIN                                                { Expr($1) }
   | LBRACE DLIN stmt_list RBRACE DLIN                        { Block(List.rev $3) }
-  | LBRACE DLIN stmt_list stmt RBRACE DLIN                   { ReturnBlock(List.rev $3, $4) }
+/*  | LBRACE DLIN stmt_list stmt RBRACE DLIN                   { ReturnBlock(List.rev $3, $4) } */
   | IF LPAREN bool_expr RPAREN DLIN stmt ELSE DLIN stmt      { If($3, $6, $9) }
   | FOR LPAREN ID IN expr RANGE expr RPAREN stmt             { For($3, $5, $7, $9) }
-  | ID ASSIGN FUNCTION LPAREN formals_opt RPAREN stmt        { FunctionDef($1, $5, $7) }
+  | ID ASSIGN FUNCTION LPAREN formals_opt RPAREN stmt_list expr DLIN RBRACE DLIN { FunctionDef($1, $5, $7, $8) }
 
 expr:
   | ID                                                       { Id($1) }
@@ -48,9 +48,9 @@ expr:
   | literal                                                  { $1 }
   | bool_expr                                                { $1 }
   | string_expr                                              { $1 }
-  | ID ASSIGN VECTSTART vect_opt RPAREN                      { Vector($1, $4) }
-  | ID ASSIGN MATRIXSTART VECTSTART vect_opt RPAREN COMMA 
-    NROW EQSING expr COMMA NCOL EQSING expr RPAREN           { Matrix($1, $5, $10, $14) }
+  | ID ASSIGN VECTSTART LPAREN vect_opt RPAREN               { Vector($1, $5) }
+  | ID ASSIGN MATRIXSTART LPAREN VECTSTART vect_opt RPAREN COMMA 
+    NROW EQSING expr COMMA NCOL EQSING expr RPAREN           { Matrix($1, $6, $11, $15) }
   | ID LPAREN actuals_opt RPAREN                             { FuncCall($1, $3) }
   | ID ASSIGN expr                                           { Assign($1, $3) }
   | ID LBRAC expr RBRAC                                      { VectAcc($1, $3) }
@@ -86,9 +86,12 @@ formals_opt:
   | formals_list                         { List.rev $1 }
 
 formals_list:
-  | ID                                   { [$1] }
-  | formals_list COMMA ID                { $3 :: $1 }
+  | formal_def                           { [$1] }
+  | formals_list COMMA formal_def        { $3 :: $1 }
 
+formal_def:
+  | ID EQSING expr                       { FormalDef($1, $3) }
+ 
 actuals_opt:
   | /* nothing */                        { [] }
   | actuals_list                         { List.rev $1 }

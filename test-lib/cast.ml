@@ -72,10 +72,10 @@ type cexpression =
 type statement = 
   | Cstmt of cexpression * ct
   | Cblock of statement list * ct
-  | CReturnBlock of statement list * statement * ct
+(*   | CReturnBlock of statement list * statement * ct *)
   | Cif of cexpression * statement * statement * ct
   | Cfor of string * cexpression * cexpression * statement * ct
-  | CFunctionDef of string * string list * statement * ct
+  | CFunctionDef of string * string list * statement list * cexpr_detail * ct
 
 type func_decl_detail = {
     fname : string;
@@ -176,13 +176,13 @@ let rec stmt = function
                         Cstmt(r, type_match t)
   | Sast.Sblock(sl, t) -> let l = List.map stmt sl in
                         Cblock(l, type_match t)
-  | Sast.SReturnBlock(sl, s, t) -> 
+(*   | Sast.SReturnBlock(sl, s, t) -> 
                           let l = List.map stmt sl in
-                          CReturnBlock(l, stmt s, type_match t)
+                          CReturnBlock(l, stmt s, type_match t) *)
   | Sast.Sif(e, s1, s2, t) -> let r = cexpr e in
                               Cif(r, stmt s1, stmt s2, type_match t)
   | Sast.Sfor(id, e1, e2, s, t) -> Cfor(id, cexpr e1, cexpr e2, stmt s, Void)
-  | Sast.FunctionDef(s, sl, stmt1, t) -> CFunctionDef(s, sl, stmt stmt1, type_match t)
+  | Sast.FunctionDef(s, sl, stmts, ret, t) -> CFunctionDef(s, sl, List.map stmt stmts, cexpr_detail ret, type_match t)
  
  (*return a c program in the form of a single *)
 let program cast = 

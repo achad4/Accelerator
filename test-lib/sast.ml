@@ -44,6 +44,7 @@ type expr_detail =
   | Or of expr_detail * expr_detail * t
   | Not of expr_detail * t
   | Return of expr_detail * t
+  | FormalDef of string * expr_detail * t
 
 type detail = 
 	| ExprDet of expr_detail
@@ -69,10 +70,10 @@ type expression =
 type statement = 
   | Sstmt of expression * t
   | Sblock of statement list * t
-  | SReturnBlock of statement list * statement * t
+(*   | SReturnBlock of statement list * statement * t *)
   | Sif of expression * statement * statement * t
   | Sfor of string * expression * expression * statement * t
-  | FunctionDef of string * string list * statement * t
+  | FunctionDef of string * expr_detail list * statement list * expr_detail * t
 
 (* type variable = 
   | Var of id * t *)
@@ -125,7 +126,7 @@ let check_vector_type v t = List.iter (type_match t) v; *)
     
 
 let rec expr = function
-  | Environment.Id (s), env -> Id(s), Environment.find_dtype_top_stack s env
+  | Environment.Id (s), env -> Id(s), Environment.find_type s env
   | Environment.Assign(id, e), env -> 
         let e1 = expr (e, env) in
         Assign(id, fst e1, snd e1), snd e1
@@ -144,7 +145,7 @@ let rec expr = function
 
         if (t = Int) then
             (
-              let v_type = Environment.find_dtype_top_stack s env in 
+              let v_type = Environment.find_type s env in 
               VectAcc(s,
                         fst e1,
                         v_type), v_type
@@ -170,7 +171,7 @@ let rec expr = function
         let t2 = snd ed2 in
         if (t1 = Int && t2 = Int) then
         (
-          let m_type = Environment.find_dtype_top_stack s env in 
+          let m_type = Environment.find_type s env in 
           MatrixAcc(s,
                           fst ed1,
                           fst ed2,
@@ -305,6 +306,10 @@ let rec expr = function
           let e1 = expr (e, env) in
           let _, t1 = e1 in
           Return(fst e1, t1), t1
+  | Environment.FormalDef(id,e), env -> 
+          let e1 = expr (e, env) in
+          let _, t1 = e1 in
+          FormalDef(id, fst e1, t1), t1
 
 let rec stmt = function
 	| Environment.Expr( e ), env -> 
@@ -314,11 +319,11 @@ let rec stmt = function
           let helper s = stmt (s, env) in
           let l = List.map helper sl in
           Sblock(l, Na)
-  | Environment.ReturnBlock(sl, s ), env ->
+(*   | Environment.ReturnBlock(sl, s), env ->
           let helper s = stmt (s, env) in
           let l1 = List.map helper sl in
           let l2 = helper s in
-          SReturnBlock(l1, l2, Na)
+          SReturnBlock(l1, l2, Na) *)
   | Environment.If(e, s1, s2), env -> 
           let r = expr (e, env) in
 
@@ -333,8 +338,11 @@ let rec stmt = function
                Sexpr(fst(rie2),snd(rie2)), 
                stmt (sl, new_env),
                Na)
-  | Environment.FunctionDef(s, sl, rstmt), env ->
-          FunctionDef(s, sl, stmt (rstmt, env), Na)
+  | Environment.FunctionDef(s, ids, stmts, e), env ->
+          let ret, t = expr (e, env) in
+          let helper1 e = stmt (e, env) in
+          let helper2 e = fst (expr (e, env)) in
+          FunctionDef(s, List.map helper2 ids, List.map helper1 stmts, ret, t)
 
 let program program = 
 	List.map stmt program
