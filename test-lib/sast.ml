@@ -92,23 +92,24 @@ let st : symbol_table = {
                             variables = [] 
                         }  *)
 
-
+(* 
 let string_of_type = function
   | String -> "string"
   | Int -> "int"
   | Bool -> "bool"
   | Float -> "float"
   | Na -> "Na"
+  | Vector -> "Vector"
+  | Matrix -> "Matrix" *)
 
-let string_of_id = function
-	Id(s) -> s 
-
+(* 
 let type_match = function
   | String -> String
   | Int -> Int
   | Float -> Float
   | Bool -> Bool
   | Na -> Na
+   *)
 
 (* let type_match t = function
   | NaLit(n), env -> ();
@@ -140,9 +141,10 @@ let rec expr = function
 
         if (t = Int) then
             (
+              let v_type = Environment.find_dtype_top_stack s env in 
               VectAcc(s,
                         fst e1,
-                        Na), Na
+                        v_type), v_type
             )
         else
             failwith "Type incompatibility"
@@ -161,10 +163,18 @@ let rec expr = function
   | Environment.MatrixAcc(s, e1, e2), env ->
         let ed1 = expr (e1, env) in
         let ed2 = expr (e2, env) in
-        MatrixAcc(s,
-                        fst ed1,
-                        fst ed2,
-                        Na), Na
+        let t1 = snd ed1 in
+        let t2 = snd ed2 in
+        if (t1 = Int && t2 = Int) then
+        (
+          let m_type = Environment.find_dtype_top_stack s env in 
+          MatrixAcc(s,
+                          fst ed1,
+                          fst ed2,
+                          m_type), m_type
+        )
+        else
+            failwith "Type incompatibility"
   | Environment.Na, env -> NaLit(Na), Na
 	| Environment.FuncCall(id, el), env -> 		
     		(*iterate over list of expressions and pull out the expression_detail from each one*)

@@ -97,8 +97,6 @@ let rec string_of_ctype = function
   | Vector(t) -> "Vector of " ^ string_of_ctype t
   | Matrix(t) -> "Matrix of " ^ string_of_ctype t
 
-let string_of_id = function
-  Id(s, ct) -> s 
 
 let rec type_match = function
   | Environment.String -> String
@@ -107,8 +105,6 @@ let rec type_match = function
   | Environment.Bool -> Bool
   | Environment.Na -> Void
 
-let id_match = function
-  | Sast.Id(s) -> Id(s, String)
 
 let rec cexpr_detail = function
  | Sast.Id(s) ->  Id(s, String)

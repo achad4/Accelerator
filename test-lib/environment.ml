@@ -42,10 +42,6 @@ type expr =
   | Div of expr * expr
   | Expo of expr * expr
   | Mod of expr * expr
-  | FAdd of expr * expr
-  | FSub of expr * expr
-  | FMult of expr * expr
-  | FDiv of expr * expr
   | FuncCall of string * expr list 
   | Assign of string * expr
   | And of expr * expr
