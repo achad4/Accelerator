@@ -44,7 +44,7 @@ stmt:
 /*  | LBRACE DLIN stmt_list stmt RBRACE DLIN                   { ReturnBlock(List.rev $3, $4) } */
   | IF LPAREN bool_expr RPAREN DLIN block ELSE DLIN block      { If($3, $6, $9) }
   | FOR LPAREN ID IN expr RANGE expr RPAREN block             { For($3, $5, $7, $9) }
-  | ID ASSIGN FUNCTION LPAREN formals_opt RPAREN func_block DLIN { FunctionDef($1, $5, $7) }
+  | ID ASSIGN FUNCTION LPAREN formals_opt RPAREN func_block { FunctionDef($1, $5, $7) }
 
 func_stmt:
   | stmt                                          { $1 }

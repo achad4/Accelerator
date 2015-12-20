@@ -123,6 +123,15 @@ let type_match = function
   | StringLit(s), env -> if(t != String) then raise "Vector type incompatibility";
 
 let check_vector_type v t = List.iter (type_match t) v; *)
+
+let rec type_of_stmt = function
+  | Sstmt(e,t) -> t
+  | Sblock(sl, t) -> let last_stmt = List.nth sl (List.length sl - 1) in
+                     type_of_stmt last_stmt
+  | Sif(e,s1,s2,t) -> t
+  | Sfor(s1,e1,e2,s2,t) -> t
+  | FunctionDef(s1, el, s2, t) -> t
+  | Sreturn(e, t) -> t
     
 
 let rec expr = function
@@ -314,7 +323,8 @@ let rec stmt = function
   | Environment.Block( sl ), env -> 
           let helper s = stmt (s, env) in
           let l = List.map helper sl in
-          Sblock(l, Na)
+          let last_stmt = List.nth l (List.length l - 1) in
+          Sblock(l, type_of_stmt last_stmt)
   | Environment.If(e, s1, s2), env -> 
           let r = expr (e, env) in
 
@@ -335,7 +345,7 @@ let rec stmt = function
           let forms = List.map helper2 ids in
           let block = stmt (b, env) in
           (*TODO:  find the return type of the function here*)
-          FunctionDef(s, forms, block, Na)
+          FunctionDef(s, forms, block, type_of_stmt block)
   | Environment.Return(e), env -> 
           let e1 = expr (e, env) in
           Sreturn(Sexpr(fst e1, snd e1), snd e1)
