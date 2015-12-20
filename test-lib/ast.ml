@@ -37,7 +37,6 @@ type expr =
 type stmt = 
 	| Expr of expr
   | Block of stmt list
-(*   | ReturnBlock of stmt list * stmt *)
   | If of expr * stmt * stmt
   | For of string * expr * expr * stmt
   | Return of expr

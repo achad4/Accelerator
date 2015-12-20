@@ -90,7 +90,7 @@ type program =
   func_decl list
 
 let rec string_of_ctype = function
-  | String -> "String"
+  | String -> "string"
   | Float -> "float"
   | Int -> "int"
   | Bool -> "bool"
@@ -190,8 +190,8 @@ let rec stmt = function
 
 let rec add_return = function
   | Cblock(sl, t) -> let last_stmt = List.nth sl (List.length sl - 1) in
-(*                           let sl = List.rev sl in
-                          let sl = List.tl sl in *)
+                          let sl = List.rev sl in
+                          let sl = List.tl sl in
                           let return = match last_stmt with
                               | Cstmt(e,t) -> Creturn(e, t) 
                               | Cblock(sl, t) -> let last_stmt = List.nth sl (List.length sl - 1) in
