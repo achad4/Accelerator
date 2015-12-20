@@ -340,13 +340,6 @@ let rec stmt = function
                Sexpr(fst(rie2),snd(rie2)), 
                stmt (sl, new_env),
                Na)
-(*   | Environment.FunctionDef(s, ids, b), env ->
-          let helper1 e = stmt (e, env) in
-          let helper2 e = fst (expr (e, env)) in
-          let forms = List.map helper2 ids in
-          let block = stmt (b, env) in
-          (*TODO:  find the return type of the function here*)
-          FunctionDef(s, forms, block, type_of_stmt block) *)
   | Environment.Return(e), env -> 
           let e1 = expr (e, env) in
           Sreturn(Sexpr(fst e1, snd e1), snd e1)
@@ -357,7 +350,6 @@ let func_def = function
           let helper2 e = fst (expr (e, env)) in
           let forms = List.map helper2 ids in
           let block = stmt (b, env) in
-          (*TODO:  find the return type of the function here*)
           FunctionDef(s, forms, block, type_of_stmt block)
 
 let program program = 

@@ -23,6 +23,9 @@
 %%
 
 program :
+  | EOF                                                {([],[])}
+  | func_def_list                                      { ($1, []) }
+  | stmt_list                                          { ([], $1) }
   | func_def_list stmt_list EOF                        { ($1, $2) }
     
 stmt_list:
