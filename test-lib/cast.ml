@@ -74,7 +74,7 @@ type statement =
   | Cblock of statement list * ct
 (*   | CReturnBlock of statement list * statement * ct *)
   | Cif of cexpression * statement * statement * ct
-  | Ccsv of string * string * bool
+  | Ccsv of string * string * bool * int * int * ct
   | Cfor of string * cexpression * cexpression * statement * ct
   | Creturn of cexpression * ct
 
@@ -184,7 +184,7 @@ let rec stmt = function
                           CReturnBlock(l, stmt s, type_match t) *)
   | Sast.Sif(e, s1, s2, t) -> let r = cexpr e in
                               Cif(r, stmt s1, stmt s2, type_match t)
-  | Sast.Scsv(id, fl, b) -> Ccsv(id, fl, b)
+  | Sast.Scsv(id, fl, b, r, c, t) -> Ccsv(id, fl, b, r, c, type_match t)
   | Sast.Sfor(id, e1, e2, s, t) -> Cfor(id, cexpr e1, cexpr e2, stmt s, Void)
   | Sast.Sreturn(e, t) -> let r = cexpr e in
                          Creturn(r, type_match t)

@@ -57,7 +57,7 @@ type stmt =
   | If of expr * stmt * stmt
   | For of string * expr * expr * stmt
   | Return of expr
-  | Csv of string * string * bool
+  | Csv of string * string * bool * t
 
 type func_def = 
   | FunctionDef of string * expr list * stmt
@@ -92,7 +92,7 @@ let rec type_of_stmt = function
   | If(e,s1,s2) -> Na
   | For(s1,e1,e2,s2) -> Na
   | Return(e) -> type_match e
-  | Csv(id, csv, bool_opt) -> Na
+  | Csv(id, csv, bool_opt, t) -> Matrix
 
 let reassign_symb_tbl_stk stk func = {
     symb_tbl_stk = stk;
@@ -235,7 +235,7 @@ let rec scope_stmt env = function
   | Ast.Return(e) -> 
       let e1, v1 = scope_expr_detail env e in
       Return(e1), v1
-  | Ast.Csv(id, csv_str, bool_opt) -> Csv(id, csv_str, bool_opt), env
+  | Ast.Csv(id, csv_str, bool_opt) -> Csv(id, csv_str, bool_opt, Matrix), env
 
 let scope_func env = function
   | Ast.FunctionDef(str, el, stmt) -> 

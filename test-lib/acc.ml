@@ -115,7 +115,27 @@ let rec compile_stmt = function
                            ^ (compile_stmt s1)  ^ 
                            "else" 
                            ^  (compile_stmt s2)
-  | Ccsv(id, )in
+  | Ccsv(id, fl, opt, row, col, csv_type ) ->
+          let holder = id ^ "Holder" in
+          let nr_str = string_of_int row in
+          let nc_str = string_of_int col in 
+          let matrix = id in 
+          let ty = Cast.string_of_ctype csv_type in
+          (* open stream of fl *)
+          "ifstream csvIn;\n" ^
+          "csvIn.open(\"" ^ fl ^ "\");\n" ^
+          ty ^ " " ^ holder ^ "[] = {" ^ 
+          (String.concat ", " (List.map helper v)) ^ "};\n" ^
+          "vector<" ^ ty ^ "> " ^ matrix ^ "Vector" ^
+          " (" ^ holder ^ ", " ^ holder ^ " + " ^
+          nc_str ^ " / sizeof(" ^ ty ^ "));\n" ^
+          "vector<vector<" ^ ty ^ "> > " ^ matrix ^ " (" ^ nr_str ^ ");\n" ^
+          "int count=0;\n" ^
+          "for(int i=0; i<" ^ nr_str ^ "; i++) { \n" ^
+          matrix ^ "[i].resize(" ^ nc_str ^ ");\n" ^
+          "for(int j=0; j<" ^ nc_str ^ "; j++) { \n" ^
+          matrix ^ "[i][j] = " ^ holder ^ "[count++];\n}\n}"
+
   | Cfor(id, e1, e2, s, t) -> "for( int " ^ id ^ "="  ^ compile_expr e1 ^ "; " ^ 
                           id ^" <= " ^ compile_expr e2 ^ "; " ^ id ^
                           "++)\n" ^ compile_stmt s 
@@ -153,6 +173,7 @@ let compile cast =
 
   let c_begin = 
   "#include<iostream>\n"^
+  "#include<fstream>\n"^
   "#include<stdio.h>\n" ^
   "#include<math.h>\n" ^
   "#include<vector>\n" ^

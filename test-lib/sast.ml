@@ -1,5 +1,7 @@
 open Environment
 
+exception CSVFormatFailure;;
+
 type op = 
   | Add
   | Sub
@@ -71,7 +73,7 @@ type statement =
   | Sblock of statement list * t
 (*   | SReturnBlock of statement list * statement * t *)
   | Sif of expression * statement * statement * t
-  | Scsv of string * string * bool
+  | Scsv of string * string * bool * int * int * t
   | Sfor of string * expression * expression * statement * t
   | Sreturn of expression * t
 
@@ -79,12 +81,22 @@ type function_definition =
   | FunctionDef of string * expr_detail list * statement * t
 
 let csv_string_type input =
-  if ((Str.regexp "['-']?['0'-'9']+") input) then Int
-  else if (Str.regexp "['-']?['0'-'9']+['.']['0'-'9']+") input then Float 
-  else if (Str.regexp "['\"'][.]*['\"']") input then String
-  else if (Str.regexp "true") input then Bool
-  else if (Str.regexp "false") input then Bool
-  else if (Str.regexp "Na") input then Na
+  if (Str.string_match (Str.regexp "['-']?['0'-'9']+") input 0) then Int
+  else if Str.string_match 
+          (Str.regexp "['-']?['0'-'9']+['.']['0'-'9']+") 
+           input 0 then Float 
+  else if Str.string_match
+          (Str.regexp "['\"'][.]*['\"']") 
+          input 0 then String
+  else if Str.string_match 
+          (Str.regexp "true") 
+          input 0 then Bool
+  else if Str.string_match 
+          (Str.regexp "false") 
+          input 0 then Bool
+  else if Str.string_match 
+          (Str.regexp "Na") 
+          input 0 then Na
   else raise IncorrectTypeException
 
 let rec type_of_stmt = function
@@ -94,6 +106,7 @@ let rec type_of_stmt = function
   | Sif(e,s1,s2,t) -> t
   | Sfor(s1,e1,e2,s2,t) -> t
   | Sreturn(e, t) -> t
+  | Scsv(id, fl, opt, row, col, t) -> t 
 
 
 let rec expr = function
@@ -301,11 +314,10 @@ let rec stmt = function
                Sexpr(fst(rie2),snd(rie2)), 
                stmt (sl, new_env),
                Na)
-  | Ast.Csv(id, fl, b) -> 
+  | Environment.Csv(id, fl, b, t), env -> 
           (* get the first line, type of 1st elem, number of elements *)
           (* iterate across all newline sep rows, checking length and
            * type *)
-
           let read_csv_channel chan =
               let buf = Buffer.create 4096 in
                 let rec loop () =
@@ -336,11 +348,27 @@ let rec stmt = function
           (* get number of elements in first row *)
           let row_len = List.length first_row_list in
           (* get type of first element *)
-          let first_elem = List.hd first_row in
-          let first_elem_type = string_to_type first_elem in
-
-
-          Scsv(id,fl,b)
+          let first_elem = List.hd first_row_list in
+          let first_elem_type = csv_string_type first_elem in
+          if first_elem_type == Na then raise IncorrectTypeException
+          else
+              (* iterate across all rows *)
+              let row_help row = 
+                  let curr_row_list = comma_split row in
+                  if List.length curr_row_list != row_len then
+                      raise CSVFormatFailure
+                  else
+                      let elem_help elem =
+                          let elem_type = csv_string_type elem in
+                          if (elem_type != first_elem_type && elem_type != Na)
+                          then
+                              raise CSVFormatFailure
+                          else
+                              ()
+                      in
+                      List.iter elem_help curr_row_list in
+              List.iter row_help row_list;
+              Scsv(id, fl, b, num_row, row_len, first_elem_type)
 
   | Environment.Return(e), env -> 
           let e1 = expr (e, env) in
