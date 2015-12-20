@@ -201,8 +201,10 @@ let rec scope_expr_detail env = function
       let e1, v1 = scope_expr_detail env e in
       Return(e1), v1
   | Ast.FormalDef(id,e) -> 
-      let e1, v1 = scope_expr_detail env e in
-      FormalDef(id, e1), v1
+      let e1 = scope_expr_detail env e in
+      let t = type_match (fst e1) in
+      let new_env = assign_current_scope id t env in
+      FormalDef(id, fst e1), new_env
 
 let rec scope_stmt env = function
   | Ast.Expr(expr) -> let e, v = scope_expr_detail env expr in 
@@ -223,10 +225,14 @@ let rec scope_stmt env = function
     in For(str, e2, e3, fst (scope_stmt new_env stmt)), new_env
   | Ast.FunctionDef(str, el, stmt, expr) -> 
       let init_env = assign_current_scope str Na (push_env_scope env) in
-      let helper1 e = fst (scope_stmt init_env e) in
-      let helper2 e = fst (scope_expr_detail init_env e) in
+      let init_formals env1 forms =
+        let helper henv hforms = snd (scope_expr_detail henv hforms) in
+        List.fold_left helper env1 forms in
+      let new_env = init_formals init_env el in
+      let helper1 e = fst (scope_stmt new_env e) in
+      let helper2 e = fst (scope_expr_detail new_env e) in
 (*       let helper e = fst (scope_expr_detail init_env e) in *)
-      FunctionDef(str, List.map helper2 el, List.map helper1 stmt, fst (scope_expr_detail init_env expr)), init_env
+      FunctionDef(str, List.map helper2 el, List.map helper1 stmt, fst (scope_expr_detail new_env expr)), new_env
 
 let run env stmts =
   let helper henv hstmts = snd (scope_stmt henv hstmts) in

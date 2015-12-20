@@ -44,7 +44,7 @@ type expr_detail =
   | Or of expr_detail * expr_detail * t
   | Not of expr_detail * t
   | Return of expr_detail * t
-  | FormalDef of string * expr_detail * t
+  | FormalDef of string * expr_detail * t * environment
 
 type detail = 
 	| ExprDet of expr_detail
@@ -309,7 +309,7 @@ let rec expr = function
   | Environment.FormalDef(id,e), env -> 
           let e1 = expr (e, env) in
           let _, t1 = e1 in
-          FormalDef(id, fst e1, t1), t1
+          FormalDef(id, fst e1, t1, env), t1
 
 let rec stmt = function
 	| Environment.Expr( e ), env -> 
@@ -339,10 +339,12 @@ let rec stmt = function
                stmt (sl, new_env),
                Na)
   | Environment.FunctionDef(s, ids, stmts, e), env ->
-          let ret, t = expr (e, env) in
           let helper1 e = stmt (e, env) in
           let helper2 e = fst (expr (e, env)) in
-          FunctionDef(s, List.map helper2 ids, List.map helper1 stmts, ret, t)
+          let forms = List.map helper2 ids in
+          let tstmts = List.map helper1 stmts in
+          let ret, rett = expr (e, env) in
+          FunctionDef(s, forms, tstmts, ret, rett)
 
 let program program = 
 	List.map stmt program

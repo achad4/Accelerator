@@ -123,7 +123,7 @@ let rec compile_stmt = function
         let string_list_stmt l = List.map compile_stmt l in
         let string_list_det l = List.map compile_detail l in
         Cast.string_of_ctype t ^ " " ^ s ^ "(" ^ String.concat ", " (string_list_det frmls) ^ ") {\n" ^
-        String.concat "" (string_list_stmt stmts) ^ compile_detail ret ^ "}\n"
+        String.concat "" (string_list_stmt stmts) ^ compile_detail ret ^ ";\n}\n"
       
   in
 
