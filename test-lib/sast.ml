@@ -133,7 +133,7 @@ let rec type_of_stmt = function
   | Sif(e,s1,s2,t) -> t
   | Sfor(s1,e1,e2,s2,t) -> t
   | Sreturn(e, t) -> t
-    
+
 
 let rec expr = function
   | Environment.Id (s), env -> Id(s), Environment.find_type s env

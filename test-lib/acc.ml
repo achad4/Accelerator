@@ -128,11 +128,10 @@ let compile_func_detail f =
   let string_formals = List.map helper f.formals in
     f.fname
     ^ 
-    "(" ^ String.concat "," string_formals ^ ")\n{\n"
+    "(" ^ String.concat "," string_formals ^ ")"
     ^ 
     compile_stmt f.body
-    ^ 
-    "\n}" in
+    in
 
 let compile_func = function 
     | CFunctionDef(f, t) -> 

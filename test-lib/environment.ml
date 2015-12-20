@@ -84,6 +84,14 @@ let type_match = function
   | Id(id) -> String
   | _ -> Na
 
+let rec type_of_stmt = function
+  | Expr(e) -> type_match e
+  | Block(sl) -> let last_stmt = List.nth sl (List.length sl - 1) in
+                     type_of_stmt last_stmt
+  | If(e,s1,s2) -> Na
+  | For(s1,e1,e2,s2) -> Na
+  | Return(e) -> type_match e
+
 let reassign_symb_tbl_stk stk func = {
     symb_tbl_stk = stk;
     func_tbl = func;
@@ -236,17 +244,23 @@ let scope_func env = function
       let helper1 e = fst (scope_stmt new_env e) in
       let helper2 e = fst (scope_expr_detail new_env e) in
       let block = scope_stmt env stmt in
+      let new_env = assign_current_scope str (type_of_stmt (fst block)) env in
       FunctionDef(str, List.map helper2 el, fst block), new_env
 
-let run env stmts =
+let run_stmts env stmts =
   let helper henv hstmts = snd (scope_stmt henv hstmts) in
   List.fold_left helper env stmts
 
+let run_funcs env funcs =
+  let helper henv hfuncs = snd (scope_func henv hfuncs) in
+  List.fold_left helper env funcs
+
 let program program = 
-  let program_rev = List.rev (snd program) in
   let funcs_rev = List.rev (fst program) in
-  let new_env = run init_env program_rev in
-  let helper1 env e = (scope_stmt env e) in
-  let helper2 env e = (scope_func env e) in
-  (List.map (helper2 new_env) funcs_rev), (List.map (helper1 new_env) (snd program))
+  let stmts_rev = List.rev (snd program) in
+  let new_env = run_funcs init_env funcs_rev in 
+  let new_env = run_stmts new_env stmts_rev in
+  let helper1 env e = (scope_func env e) in
+  let helper2 env e = (scope_stmt env e) in
+  (List.map (helper1 new_env) funcs_rev), (List.map (helper2 new_env) (snd program))
 
