@@ -241,7 +241,6 @@ let scope_func env = function
         let helper henv hforms = snd (scope_expr_detail henv hforms) in
         List.fold_left helper env1 forms in
       let new_env = init_formals init_env el in
-      let helper1 e = fst (scope_stmt new_env e) in
       let helper2 e = fst (scope_expr_detail new_env e) in
       let block = scope_stmt env stmt in
       let new_env = assign_current_scope str (type_of_stmt (fst block)) env in

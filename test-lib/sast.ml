@@ -77,54 +77,6 @@ type statement =
 type function_definition =
   | FunctionDef of string * expr_detail list * statement * t
 
-(* type variable = 
-  | Var of id * t *)
-
-
-
-(* type symbol_table = {
-    variables : (id * t) list
-}
-
-
-let find_var (id, symbol_table) =
-    try
-        List.find ( fun var, env -> (fst var = id) ) symbol_table.variables
-    with Not_found, env ->
-        print_endline "find_var";
-        raise Not_found
-
-let st : symbol_table = { 
-                            variables = [] 
-                        }  *)
-
-(* 
-let string_of_type = function
-  | String -> "string"
-  | Int -> "int"
-  | Bool -> "bool"
-  | Float -> "float"
-  | Na -> "Na"
-  | Vector -> "Vector"
-  | Matrix -> "Matrix" *)
-
-(* 
-let type_match = function
-  | String -> String
-  | Int -> Int
-  | Float -> Float
-  | Bool -> Bool
-  | Na -> Na
-   *)
-
-(* let type_match t = function
-  | NaLit(n), env -> ();
-  | IntLit(i), env -> if (t != Int) then raise "Vector type incompatibility";
-  | FloatLit(f), env -> if(t != Float) then raise "Vector type incompatibility";
-  | BoolLit(b), env -> if(t != Bool) then raise "Vector type incompatibility";
-  | StringLit(s), env -> if(t != String) then raise "Vector type incompatibility";
-
-let check_vector_type v t = List.iter (type_match t) v; *)
 
 let rec type_of_stmt = function
   | Sstmt(e,t) -> t
@@ -346,7 +298,6 @@ let rec stmt = function
 
 let func_def = function
   | Environment.FunctionDef(s, ids, b), env ->
-          let helper1 e = stmt (e, env) in
           let helper2 e = fst (expr (e, env)) in
           let forms = List.map helper2 ids in
           let block = stmt (b, env) in
