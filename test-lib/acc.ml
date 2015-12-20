@@ -82,7 +82,6 @@ let rec compile_detail = function
                              (compile_detail e2)
   | Cast.FDiv(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
                             (compile_detail e2) 
-  | Cast.Return(e, t) -> "return " ^ (compile_detail e)
   | Cast.FormalDef(id, e, t) -> Cast.string_of_ctype t ^ " " ^ id ^ "=" ^ (compile_detail e)
 
   in
@@ -119,11 +118,13 @@ let rec compile_stmt = function
   | Cfor(id, e1, e2, s, t) -> "for( int " ^ id ^ "="  ^ compile_expr e1 ^ "; " ^ 
                           id ^" <= " ^ compile_expr e2 ^ "; " ^ id ^
                           "++)\n" ^ compile_stmt s 
-  | CFunctionDef(s, frmls, stmts, ret, t) -> 
+  | CFunctionDef(s, frmls, block, t) -> 
         let string_list_stmt l = List.map compile_stmt l in
         let string_list_det l = List.map compile_detail l in
-        Cast.string_of_ctype t ^ " " ^ s ^ "(" ^ String.concat ", " (string_list_det frmls) ^ ") {\n" ^
-        String.concat "" (string_list_stmt stmts) ^ compile_detail ret ^ ";\n}\n"
+        Cast.string_of_ctype t ^ " " ^ s ^ "(" ^ String.concat ", " (string_list_det frmls) ^ ")"
+        ^ compile_stmt block
+  | Creturn(e, t) -> "return " ^ (compile_expr e)
+
       
   in
 

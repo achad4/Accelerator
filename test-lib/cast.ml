@@ -49,7 +49,6 @@ type cexpr_detail =
    | And of cexpr_detail * cexpr_detail * ct
    | Or of cexpr_detail * cexpr_detail * ct
    | Not of cexpr_detail * ct
-   | Return of cexpr_detail * ct
    | FormalDef of string * cexpr_detail * ct
 
 type cexpression = 
@@ -76,7 +75,8 @@ type statement =
 (*   | CReturnBlock of statement list * statement * ct *)
   | Cif of cexpression * statement * statement * ct
   | Cfor of string * cexpression * cexpression * statement * ct
-  | CFunctionDef of string * cexpr_detail list * statement list * cexpr_detail * ct
+  | CFunctionDef of string * cexpr_detail list * statement * ct
+  | Creturn of cexpression * ct
 
 type func_decl_detail = {
     fname : string;
@@ -151,8 +151,6 @@ let rec cexpr_detail = function
                           Or(cexpr_detail e1, cexpr_detail e2, ct)
  | Sast.Not(e, t) -> let ct = type_match t in
                       Not(cexpr_detail e, ct)
- | Sast.Return(e, t) -> let ct = type_match t in
-                      Return(cexpr_detail e, ct)
  | Sast.FormalDef(id, e, t, env) -> 
       let t = Environment.find_type id env in
       FormalDef(id, cexpr_detail e, type_match t)
@@ -187,8 +185,10 @@ let rec stmt = function
   | Sast.Sif(e, s1, s2, t) -> let r = cexpr e in
                               Cif(r, stmt s1, stmt s2, type_match t)
   | Sast.Sfor(id, e1, e2, s, t) -> Cfor(id, cexpr e1, cexpr e2, stmt s, Void)
-  | Sast.FunctionDef(s, frmls, stmts, ret, t) -> 
-      CFunctionDef(s, List.map cexpr_detail frmls, List.map stmt stmts, cexpr_detail ret, type_match t)
+  | Sast.FunctionDef(s, frmls, b, t) -> let block = stmt b in
+                                              CFunctionDef(s, List.map cexpr_detail frmls, block, type_match t)
+  | Sast.Sreturn(e, t) -> let r = cexpr e in
+                         Creturn(r, type_match t)
  
  (*return a c program in the form of a single *)
 let program cast = 

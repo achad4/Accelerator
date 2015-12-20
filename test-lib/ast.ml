@@ -32,7 +32,6 @@ type expr =
   | And of expr * expr
   | Or of expr * expr
   | Not of expr
-  | Return of expr
   | FormalDef of string * expr
 
 type stmt = 
@@ -41,7 +40,8 @@ type stmt =
 (*   | ReturnBlock of stmt list * stmt *)
   | If of expr * stmt * stmt
   | For of string * expr * expr * stmt
-  | FunctionDef of string * expr list * stmt list * expr
+  | FunctionDef of string * expr list * stmt
+  | Return of expr
 
 type program = stmt list
 
