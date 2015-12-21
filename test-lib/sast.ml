@@ -161,11 +161,8 @@ let rec expr = function
 
         (* compare actuals and formals *)
         let actual_types = List.map helper2 el in
-        print_endline "actuals"; print_endline id;
         let formal_types = Environment.FuncMap.find id env.func_tbl_formals in
-        print_endline "formals"; 
         if (actual_types = formal_types) then (
-          print_endline "comparing a+f";
           let ret_type = Environment.FuncMap.find id env.func_tbl in
           FuncCall(id, (List.map helper1 el), ret_type), ret_type ) 
         else 

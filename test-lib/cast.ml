@@ -226,7 +226,7 @@ let program sast =
   let main = CFunctionDef({
                  fname = "main";
                  formals = [];
-                 body = Cblock(List.map stmt (List.rev(snd sast)), Void)
+                 body = Cblock(List.map stmt (snd sast), Void)
               }, Int) in
   functions@[main]
 

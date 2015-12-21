@@ -88,22 +88,21 @@ let find_type id env =
   in search_scope_lvl env.symb_tbl_stk 
 
 let rec type_match env = function
-  | StringLit(s) -> print_endline "String"; String
-  | IntLit(i) -> print_endline "Int"; Int
-  | FloatLit(f) -> print_endline "Int"; Float
-  | BoolLit(b) -> print_endline "Int"; Bool
-  | Na -> print_endline "Na"; Na
-  | Matrix(a,b,c,d) -> print_endline "Int"; Matrix
-  | Vector(a,b) -> print_endline "Int"; Vector
-  | Id(id) -> print_endline "string"; find_type id env
+  | StringLit(s) -> String
+  | IntLit(i) -> Int
+  | FloatLit(f) -> Float
+  | BoolLit(b) -> Bool
+  | Na -> Na
+  | Matrix(a,b,c,d) -> Matrix
+  | Vector(a,b) -> Vector
+  | Id(id) -> find_type id env
   | FormalDef(id, e, t) -> type_match env e
   | FuncCall(s, el) -> 
-      print_endline "func call";
       if FuncMap.mem s env.func_tbl then
         FuncMap.find s env.func_tbl
       else
         failwith "Function does not exist"
-  | _ -> print_endline "everything else"; Na
+  | _ -> Na
 
 let rec type_of_stmt env = function
   | Expr(e) -> type_match env e
@@ -240,7 +239,6 @@ let rec scope_stmt env = function
        | [s] -> let (s, new_env) = scope_stmt env s in 
                 [s]
        | hd :: tl ->  let (s, new_env) = scope_stmt env hd in
-                      print_int (List.length tl);
                       (pass_envs new_env tl)@[s] in
 
         let helper henv hstmts = snd (scope_stmt henv hstmts) in
@@ -250,7 +248,6 @@ let rec scope_stmt env = function
   | Ast.If(expr,stmt1,stmt2) -> let i, v = scope_expr_detail env expr in
       If(i, fst (scope_stmt env stmt1), fst (scope_stmt env stmt2)), env
   | Ast.For(str,expr2,expr3,stmt) ->
-      print_endline str;
       let new_env = assign_current_scope str Int env in
       let e2, v2 = scope_expr_detail new_env expr2
       and e3, v3 = scope_expr_detail new_env expr3 in
@@ -308,7 +305,6 @@ let program program =
   let funcs_env = List.map func_helper2 funcs_rev in *)
 
   let new_env1 = run_funcs init_env funcs_rev in 
-  print_endline "break--";
   let new_env2 = run_stmts new_env1 stmts_rev in
   let helper1 env e = (scope_func env e) in
   let helper2 env e = (scope_stmt env e) in
