@@ -48,6 +48,7 @@ runTest "forTest"
 runTest "matrixTest"
 runTest "stringTest"
 runTest "func1Test"
+runTest "eqNeqTest"
 
 echo ====================================================
 echo Results
