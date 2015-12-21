@@ -3,7 +3,7 @@
 %token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE, NA
 %token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, VECTSTART
 %token MATRIXSTART, NROW, NCOL, EQSING, EQ, FOR, IN, RANGE, LBRAC, RBRAC
-%token DOUBLEQT, FUNCTION, RETURN
+%token DOUBLEQT, FUNCTION, RETURN, NEQ
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -62,6 +62,8 @@ func_stmt:
 
 expr:
   | ID                                                       { Id($1) }
+  | eq_expr EQ eq_expr {Eq($1, $3) }
+  | eq_expr NEQ eq_expr {Neq($1, $3) }
   | expr MULT expr  { Mult($1, $3) }
   | expr PLUS expr  { Add($1, $3) }
   | expr MINUS expr { Sub($1, $3) }
@@ -78,6 +80,12 @@ expr:
   | ID ASSIGN expr                                           { Assign($1, $3) }
   | ID LBRAC expr RBRAC                                      { VectAcc($1, $3) }
   | ID LBRAC expr RBRAC LBRAC expr RBRAC                     { MatrixAcc($1, $3, $6) }
+
+eq_expr:
+  | literal {$1}
+  | bool_expr {$1}
+  | string_expr {$1}
+  | ID {Id($1)}
 
 vect_opt:
   | /* nothing */                        { [] }
