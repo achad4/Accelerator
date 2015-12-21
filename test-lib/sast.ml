@@ -88,8 +88,8 @@ let rec type_of_stmt = function
 
 
 let rec expr = function
-  | Environment.Id (s), env -> Id(s), Environment.find_type s env
-  | Environment.Assign(id, e), env -> 
+  | Environment.Id (s), env -> print_endline "hi"; Id(s), Environment.find_type s env
+  | Environment.Assign(id, e), env -> print_endline "assign";
         let e1 = expr (e, env) in
         Assign(id, fst e1, snd e1), snd e1
   | Environment.IntLit(c), env -> IntLit(c), Int

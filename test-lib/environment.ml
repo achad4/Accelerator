@@ -73,7 +73,19 @@ let init_env = {
     func_tbl = FuncMap.empty;
 }
 
-let type_match = function
+(* Rename to any stack  *)
+let find_type id env =
+  let rec search_scope_lvl lvl =
+  match lvl with
+    | [] -> raise (UnassignedVarException id)
+    | top :: rest ->
+      if VarMap.mem id top then
+        VarMap.find id top
+      else
+        search_scope_lvl rest
+  in search_scope_lvl env.symb_tbl_stk 
+
+let rec type_match env = function
   | StringLit(s) -> print_endline "String"; String
   | IntLit(i) -> print_endline "Int"; Int
   | FloatLit(f) -> print_endline "Int"; Float
@@ -81,16 +93,17 @@ let type_match = function
   | Na -> print_endline "Na"; Na
   | Matrix(a,b,c,d) -> print_endline "Int"; Matrix
   | Vector(a,b) -> print_endline "Int"; Vector
-  | Id(id) -> print_endline "string"; String
-(*   | _ -> print_endline "Na"; Na *)
+  | Id(id) -> print_endline "string"; find_type id env
+  | Add(expr1,expr2) -> type_match env expr1
+(*   | _ -> print_endline "Na"; Na *) 
 
-let rec type_of_stmt = function
-  | Expr(e) -> type_match e
+let rec type_of_stmt env = function
+  | Expr(e) -> type_match env e
   | Block(sl) -> let last_stmt = List.nth sl (List.length sl - 1) in
-                     type_of_stmt last_stmt
+                     type_of_stmt env last_stmt
   | If(e,s1,s2) -> Na
   | For(s1,e1,e2,s2) -> Na
-  | Return(e) -> type_match e
+  | Return(e) -> type_match env e
 
 let reassign_symb_tbl_stk stk func = {
     symb_tbl_stk = stk;
@@ -118,18 +131,6 @@ let init_func_args fname var env =
   let updated = FuncMap.add fname var env.func_tbl in
   reassign_symb_tbl_stk env.symb_tbl_stk updated
 
-(* Rename to any stack  *)
-let find_type id env =
-  let rec search_scope_lvl lvl =
-  match lvl with
-    | [] -> raise (UnassignedVarException id)
-    | top :: rest ->
-      if VarMap.mem id top then
-        VarMap.find id top
-      else
-        search_scope_lvl rest
-  in search_scope_lvl env.symb_tbl_stk 
-
 (* let rec init_args fname args env = 
   match args with
   | [] -> env
@@ -148,23 +149,23 @@ let rec scope_expr_detail env = function
   | Ast.StringLit(s) -> StringLit(s) , env
   | Ast.Assign(s,e) ->
     let e1 = scope_expr_detail env e in
-    print_endline s;
-    let t = type_match (fst e1) in
+    print_endline "in assign";
+    let t = type_match env (fst e1) in
     let new_env = assign_current_scope s t env in
-    Assign(s, fst(scope_expr_detail env e)), new_env
+    Assign(s, fst(e1)), new_env
   | Ast.Vector(s, el) ->
 (*       let new_env = assign_current_scope s (type_match t) env in
  *)   
       let head = List.hd el in
       let e1 = scope_expr_detail env head in
-      let t = type_match (fst e1) in
+      let t = type_match env (fst e1) in
       let new_env = assign_current_scope s t env in
       let helper e = fst (scope_expr_detail env e) in
       Vector(s, List.map helper el), new_env
   | Ast.VectAcc(s, expr) -> VectAcc(s, fst(scope_expr_detail env expr)), env
   | Ast.Matrix(s, el, e1, e2) ->
       let head = List.hd el in
-      let mtype = type_match (fst (scope_expr_detail env head)) in
+      let mtype = type_match env (fst (scope_expr_detail env head)) in
       let new_env = assign_current_scope s mtype env in
       let helper e = fst (scope_expr_detail env e) in
       Matrix(s, List.map helper el, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), new_env
@@ -210,7 +211,7 @@ let rec scope_expr_detail env = function
       FuncCall(s, List.map helper el), env
   | Ast.FormalDef(id,e) -> 
       let e1 = scope_expr_detail env e in
-      let t = type_match (fst e1) in
+      let t = type_match env (fst e1) in
       let new_env = assign_current_scope id t env in
       FormalDef(id, fst e1), new_env
 
@@ -218,8 +219,6 @@ let rec scope_stmt env = function
   | Ast.Expr(expr) -> let e, env = scope_expr_detail env expr in 
                       Expr(e), env
   | Ast.Block(blk) -> 
-      let helper s = (scope_stmt env s) in
-      print_endline "scope block";
       let rec pass_envs env = function
        | [] -> []
        | [s] -> let (s, new_env) = scope_stmt env s in 
@@ -254,22 +253,22 @@ let scope_func env = function
       let new_env = init_formals init_env el in
       let helper2 e = fst (scope_expr_detail new_env e) in
       let block = scope_stmt env stmt in
-      let new_env = assign_current_scope str (type_of_stmt (fst block)) env in
+      let new_env = assign_current_scope str (type_of_stmt env (fst block)) env in
       FunctionDef(str, List.map helper2 el, fst block), new_env
 
 let run_stmts env stmts =
   let helper henv hstmts = snd (scope_stmt henv hstmts) in
   List.fold_left helper env stmts
-
+(* 
 let run_funcs env funcs =
   let helper henv hfuncs = snd (scope_func henv hfuncs) in
-  List.fold_left helper env funcs
+  List.fold_left helper env funcs *)
 
 let program program = 
   let funcs_rev = List.rev (fst program) in
   let stmts_rev = List.rev (snd program) in
-  let new_env = run_funcs init_env funcs_rev in 
-  let new_env = run_stmts new_env stmts_rev in
+(*   let new_env = run_funcs init_env funcs_rev in  *)
+  let new_env = run_stmts init_env stmts_rev in
   let helper1 env e = (scope_func env e) in
   let helper2 env e = (scope_stmt env e) in
   (List.map (helper1 new_env) funcs_rev), (List.map (helper2 new_env) (snd program))
