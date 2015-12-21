@@ -169,6 +169,7 @@ let compile cast =
   "#include<math.h>\n" ^
   "#include<vector>\n" ^
   "#include<string>\n" ^
+  "#include<string.h>\n" ^
   "using namespace std;\n" in
 
 print_endline ( c_begin ^ (compile cast))
