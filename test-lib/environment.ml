@@ -243,7 +243,7 @@ let rec scope_stmt env = function
                       (pass_envs new_env tl)@[s] in
 
         let helper henv hstmts = snd (scope_stmt henv hstmts) in
-        let block_env = List.fold_left helper env blk in
+        let block_env = List.fold_left helper env (List.rev blk) in
       
       Block(pass_envs env (List.rev blk)), block_env 
   | Ast.If(expr,stmt1,stmt2) -> let i, v = scope_expr_detail env expr in
