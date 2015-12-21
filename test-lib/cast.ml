@@ -84,6 +84,7 @@ type statement =
 (*   | CReturnBlock of statement list * statement * ct *)
   | Cif of cexpression * statement * statement * ct
   | Cfor of string * cexpression * cexpression * statement * ct
+  | Cwhile of cexpr_detail * statement * ct
   | Creturn of cexpression * ct
 
 type func_decl_detail = {
@@ -199,6 +200,7 @@ let rec stmt = function
   | Sast.Sif(e, s1, s2, t) -> let r = cexpr e in
                               Cif(r, stmt s1, stmt s2, type_match t)
   | Sast.Sfor(id, e1, e2, s, t) -> Cfor(id, cexpr e1, cexpr e2, stmt s, Void)
+  | Sast.Swhile(e, s, t) -> Cwhile(cexpr_detail e, stmt s , type_match t)
   | Sast.Sreturn(e, t) -> let r = cexpr e in
                          Creturn(r, type_match t)
 

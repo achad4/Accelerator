@@ -77,6 +77,7 @@ type statement =
 (*   | SReturnBlock of statement list * statement * t *)
   | Sif of expression * statement * statement * t
   | Sfor of string * expression * expression * statement * t
+  | Swhile of expr_detail * statement * t
   | Sreturn of expression * t
 
 type function_definition =
@@ -360,6 +361,10 @@ let rec stmt = function
                Sexpr(fst(rie2),snd(rie2)), 
                b1,
                t)
+  | Environment.While(e, s), env -> 
+          let e_val = expr (e, env) in
+          let s_val = stmt (s, env) in
+          Swhile(fst e_val, s_val, Na)
   | Environment.Return(e), env -> 
           let e1 = expr (e, env) in
           Sreturn(Sexpr(fst e1, snd e1), snd e1)

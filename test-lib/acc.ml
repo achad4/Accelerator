@@ -132,7 +132,7 @@ let rec compile_stmt = function
                           id ^" <= " ^ compile_expr e2 ^ "; " ^ id ^
                           "++)\n" ^ compile_stmt s 
   | Creturn(e, t) -> "return (" ^ (compile_expr e) ^ ");\n"
- 
+  | Cwhile(e, s, t) -> "while " ^ (compile_detail e) ^ compile_stmt s
       
   in
 
