@@ -219,17 +219,14 @@ let rec scope_stmt env = function
   | Ast.Block(blk) -> 
       let helper e = fst (scope_stmt env e) in
       Block(List.map helper blk), env 
-(*   | Ast.ReturnBlock(blk,ret) -> 
-      let helper e = fst (scope_stmt env e) in
-      ReturnBlock(List.map helper blk, fst (scope_stmt env ret)), env
- *)
   | Ast.If(expr,stmt1,stmt2) -> let i, v = scope_expr_detail env expr in
       If(i, fst (scope_stmt env stmt1), fst (scope_stmt env stmt2)), env
   | Ast.For(str,expr2,expr3,stmt) ->
       let new_env = assign_current_scope str Int env in
       let e2, v2 = scope_expr_detail new_env expr2
-      and e3, v3 = scope_expr_detail new_env expr3
-    in For(str, e2, e3, fst (scope_stmt new_env stmt)), new_env
+      and e3, v3 = scope_expr_detail new_env expr3 in
+      let r = (scope_stmt new_env stmt) in
+      For(str, e2, e3, fst r), snd r
   | Ast.Return(e) -> 
       let e1, v1 = scope_expr_detail env e in
       Return(e1), v1
