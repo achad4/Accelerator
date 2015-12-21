@@ -90,6 +90,7 @@ let rec type_of_stmt = function
                      type_of_stmt last_stmt
   | Sif(e,s1,s2,t) -> t
   | Sfor(s1,e1,e2,s2,t) -> t
+  | Swhile(e,s,t) -> t
   | Sreturn(e, t) -> t
 
 

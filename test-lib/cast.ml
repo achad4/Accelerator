@@ -217,6 +217,7 @@ let rec add_return = function
                                                  add_return last_stmt
                               | Cif(e, s1, s2, t) -> Cif(e, add_return s1, add_return s2, t)
                               | Cfor(s1, e1, e2, s2, t) -> add_return s2
+                              | Cwhile(e,s,t) -> Cwhile(e, add_return s ,t)
                               | Creturn(e, t) -> Creturn(e, t)
                           in
                           Cblock(sl@[return], t)
