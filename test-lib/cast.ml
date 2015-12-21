@@ -94,11 +94,10 @@ let rec string_of_ctype = function
   | Float -> "float"
   | Int -> "int"
   | Bool -> "bool"
-  | Void -> "Na"
+  | Void -> "void"
   | IdType -> "IdType"
   | Vector -> "Vector"
   | Matrix -> "Matrix"
-
 
 let rec type_match = function
   | Environment.String -> String

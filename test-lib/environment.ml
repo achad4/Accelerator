@@ -209,7 +209,7 @@ let rec scope_expr_detail env = function
       let helper e = fst (scope_expr_detail env e) in
       
       FuncCall(s, List.map helper el), env
-  | Ast.FormalDef(id,e) -> 
+  | Ast.FormalDef(id,e) ->
       let e1 = scope_expr_detail env e in
       let t = type_match env (fst e1) in
       let new_env = assign_current_scope id t env in
@@ -245,15 +245,15 @@ let rec scope_stmt env = function
       Return(e1), v1
 
 let scope_func env = function
-  | Ast.FunctionDef(str, el, stmt) -> 
+  | Ast.FunctionDef(str, el, stmt) ->
       let init_env = assign_current_scope str Na (push_env_scope env) in
       let init_formals env1 forms =
         let helper henv hforms = snd (scope_expr_detail henv hforms) in
         List.fold_left helper env1 forms in
       let new_env = init_formals init_env el in
       let helper2 e = fst (scope_expr_detail new_env e) in
-      let block = scope_stmt env stmt in
-      let new_env = assign_current_scope str (type_of_stmt env (fst block)) env in
+      let block = scope_stmt new_env stmt in
+      let new_env = assign_current_scope str (type_of_stmt new_env (fst block)) new_env in
       FunctionDef(str, List.map helper2 el, fst block), new_env
 
 let run_stmts env stmts =
