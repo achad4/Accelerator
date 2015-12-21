@@ -75,14 +75,14 @@ let init_env = {
 
 let type_match = function
   | StringLit(s) -> String
-  | IntLit(i) -> Int
+  | IntLit(i) -> print_endline "Int"; Int
   | FloatLit(f) -> Float
   | BoolLit(b) -> Bool
   | Na -> Na
   | Matrix(a,b,c,d) -> Matrix
   | Vector(a,b) -> Vector
   | Id(id) -> String
-  | _ -> Na
+  | _ -> print_endline "Na"; Na
 
 let rec type_of_stmt = function
   | Expr(e) -> type_match e
@@ -148,6 +148,7 @@ let rec scope_expr_detail env = function
   | Ast.StringLit(s) -> StringLit(s) , env
   | Ast.Assign(s,e) ->
     let e1 = scope_expr_detail env e in
+    print_endline s;
     let t = type_match (fst e1) in
     let new_env = assign_current_scope s t env in
     Assign(s, fst(scope_expr_detail env e)), new_env
