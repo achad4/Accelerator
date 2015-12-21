@@ -186,8 +186,8 @@ let rec cexpr = function
 let rec stmt = function
   | Sast.Sstmt(e, t) -> let r = cexpr e in
                         Cstmt(r, type_match t)
-  | Sast.Sblock(sl, t) -> let stmt_rev = List.rev sl in
-                        let l = List.map stmt stmt_rev in
+  | Sast.Sblock(sl, t) ->
+                        let l = List.map stmt sl in
                         Cblock(l, type_match t)
 (*   | Sast.SReturnBlock(sl, s, t) -> 
                           let l = List.map stmt sl in
