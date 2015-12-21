@@ -217,11 +217,21 @@ let rec scope_stmt env = function
   | Ast.Expr(expr) -> let e, env = scope_expr_detail env expr in 
                       Expr(e), env
   | Ast.Block(blk) -> 
-      let helper e = fst (scope_stmt env e) in
-      Block(List.map helper blk), env 
+      let helper s = (scope_stmt env s) in
+      print_endline "scope block";
+      let rec pass_envs env = function
+       | [] -> []
+       | [s] -> let (s, new_env) = scope_stmt env s in 
+                [s]
+       | hd :: tl ->  let (s, new_env) = scope_stmt env hd in
+                      print_int (List.length tl);
+                      (pass_envs new_env tl)@[s] in
+
+      Block(pass_envs env blk), env 
   | Ast.If(expr,stmt1,stmt2) -> let i, v = scope_expr_detail env expr in
       If(i, fst (scope_stmt env stmt1), fst (scope_stmt env stmt2)), env
   | Ast.For(str,expr2,expr3,stmt) ->
+      print_endline str;
       let new_env = assign_current_scope str Int env in
       let e2, v2 = scope_expr_detail new_env expr2
       and e3, v3 = scope_expr_detail new_env expr3 in
