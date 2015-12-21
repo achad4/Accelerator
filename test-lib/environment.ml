@@ -175,8 +175,6 @@ let rec scope_expr_detail env = function
     let new_env = assign_current_scope s t env in
     Assign(s, fst(e1)), new_env
   | Ast.Vector(s, el) ->
-(*       let new_env = assign_current_scope s (type_match t) env in
- *)   
       let head = List.hd el in
       let e1 = scope_expr_detail env head in
       let t = type_match env (fst e1) in
@@ -272,28 +270,27 @@ let rec scope_stmt env = function
 
 let scope_func env = function
   | Ast.FunctionDef(str, el, stmt) ->
+      print_endline ("scope_func: " ^ str);
       (* let init_env = assign_current_scope str Na (push_env_scope env) in *)
       (* Initialize formal arguments *)
       let init_formals env1 forms =
         let helper henv hforms = 
          snd (scope_expr_detail henv hforms) in
         List.fold_left helper env1 forms in
-      let new_env = init_formals init_env el in
+      let new_env = init_formals env el in
       let block, new_env = scope_stmt new_env stmt in
       let ret_type = (type_of_stmt new_env block) in
-      let new_fname_map = FuncMap.add str ret_type new_env.func_tbl in
-      let new_env = reassign_symb_tbl_stk new_env.symb_tbl_stk new_fname_map env.func_tbl_formals in
-      (* let new_env = assign_current_scope str ret_type new_env in
-       *)
+
       let helper2 e = fst (scope_expr_detail new_env e) in
+      
       (* Add function formals to env *)
       let rec formal_type_list env = function
         | [] -> []
         | hd::tl -> type_match env hd :: formal_type_list env tl in
       let my_formal_type_list = formal_type_list new_env (List.map helper2 el) in
       let new_form_map = FuncMap.add str my_formal_type_list new_env.func_tbl_formals in
+      let new_fname_map = FuncMap.add str ret_type new_env.func_tbl in
       let new_env = reassign_symb_tbl_stk new_env.symb_tbl_stk new_fname_map new_form_map in
-      
       FunctionDef(str, List.map helper2 el, block), new_env
 
 let run_stmts env stmts =
@@ -310,14 +307,11 @@ let program program =
 
   let funcs_rev = List.rev (fst program) in
   let stmts_rev = List.rev (snd program) in
-  (* let func_helper1 f = fst (scope_func init_env f) in
-  let func_helper2 f = snd (scope_func init_env f) in
-  let funcs = List.map func_helper1 funcs_rev in
-  let funcs_env = List.map func_helper2 funcs_rev in *)
 
   let new_env1 = run_funcs init_env funcs_rev in 
   let new_env2 = run_stmts new_env1 stmts_rev in
+
   let helper1 env e = (scope_func env e) in
   let helper2 env e = (scope_stmt env e) in
-  (List.map (helper1 new_env1) funcs_rev), (List.map (helper2 new_env2) stmts_rev)
+  (List.map (helper1 new_env2) funcs_rev), (List.map (helper2 new_env2) stmts_rev)
 
