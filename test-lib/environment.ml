@@ -227,7 +227,10 @@ let rec scope_stmt env = function
                       print_int (List.length tl);
                       (pass_envs new_env tl)@[s] in
 
-      Block(pass_envs env blk), env 
+        let helper henv hstmts = snd (scope_stmt henv hstmts) in
+        let block_env = List.fold_left helper env blk in
+
+      Block(pass_envs env (List.rev blk)), block_env 
   | Ast.If(expr,stmt1,stmt2) -> let i, v = scope_expr_detail env expr in
       If(i, fst (scope_stmt env stmt1), fst (scope_stmt env stmt2)), env
   | Ast.For(str,expr2,expr3,stmt) ->
