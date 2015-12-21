@@ -49,6 +49,7 @@ type expr =
   | Mod of expr * expr
   | FuncCall of string * expr list 
   | Assign of string * expr
+  | Update of string * expr
   | And of expr * expr
   | Or of expr * expr
   | Not of expr
@@ -110,6 +111,17 @@ let rec type_match env = function
       else
         failwith "Function does not exist"
   | _ -> Na
+
+let find_type_top id env =
+  let rec search_scope_lvl lvl =
+  match lvl with
+    | [] -> raise (UnassignedVarException id)
+    | top :: rest ->
+      if VarMap.mem id top then
+        VarMap.find id top
+      else
+        type_match env Na
+  in search_scope_lvl env.symb_tbl_stk 
 
 let rec type_of_stmt env = function
   | Expr(e) -> type_match env e
@@ -174,8 +186,18 @@ let rec scope_expr_detail env = function
   | Ast.Assign(s,e) ->
     let e1 = scope_expr_detail env e in
     let t = type_match env (fst e1) in
+    let old_t = find_type_top s env in
+
+   (*  No new assignment necessary *)
+    if (old_t != Na && old_t = t) then
+      ( print_endline "update";
+      Update(s, fst(e1)), env
+    )
+    else (
+      print_endline "assign";
     let new_env = assign_current_scope s t env in
-    Assign(s, fst(e1)), new_env
+      Assign(s, fst(e1)), new_env
+    )
   | Ast.Vector(s, el) ->
 (*       let new_env = assign_current_scope s (type_match t) env in
  *)   
@@ -320,10 +342,11 @@ let program program =
   let func_helper2 f = snd (scope_func init_env f) in
   let funcs = List.map func_helper1 funcs_rev in
   let funcs_env = List.map func_helper2 funcs_rev in *)
-
   let new_env1 = run_funcs init_env funcs_rev in 
-  let new_env2 = run_stmts new_env1 stmts_rev in
+  let push_env = push_env_scope new_env1 in
+  let new_env2 = run_stmts push_env stmts_rev in
+  let pop_env = pop_env_scope new_env2 in
   let helper1 env e = (scope_func env e) in
   let helper2 env e = (scope_stmt env e) in
-  (List.map (helper1 new_env1) funcs_rev), (List.map (helper2 new_env2) stmts_rev)
+  (List.map (helper1 new_env1) funcs_rev), (List.map (helper2 pop_env) stmts_rev)
 
