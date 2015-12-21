@@ -71,6 +71,12 @@ let rec compile_detail = function
                            (compile_detail e2) ^ ")"
   | Cast.Neq(e1, e2, t) -> "(" ^ (compile_detail e1) ^ " != " ^
                            (compile_detail e2) ^ ")"
+  | Cast.StrEq(e1, e2, t) -> "(strcmp(" ^ 
+                           (compile_detail e1) ^ "," ^
+                           (compile_detail e2) ^ ") == 1)"
+  | Cast.StrNeq(e1, e2, t) -> "(strcmp(" ^ 
+                           (compile_detail e1) ^ "," ^
+                           (compile_detail e2) ^ ") == 0)"
   | Cast.Div(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
                            (compile_detail e2)
   | Cast.Mult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ 

@@ -38,6 +38,8 @@ type cexpr_detail =
    | MatrixAcc of string * cexpr_detail * cexpr_detail * ct
    | Eq of cexpr_detail * cexpr_detail * ct
    | Neq of cexpr_detail * cexpr_detail * ct
+   | StrEq of cexpr_detail * cexpr_detail * ct
+   | StrNeq of cexpr_detail * cexpr_detail * ct
    | Add of cexpr_detail * cexpr_detail * ct
    | Sub of cexpr_detail * cexpr_detail * ct
    | Mult of cexpr_detail * cexpr_detail * ct
@@ -137,6 +139,8 @@ let rec cexpr_detail = function
  (*Expand when you pull in Alan's Fadd etc.*)
  | Sast.Neq(e1, e2, t) -> Neq((cexpr_detail e1), (cexpr_detail e2), type_match t)
  | Sast.Eq(e1, e2, t) -> Eq((cexpr_detail e1), (cexpr_detail e2), type_match t)
+ | Sast.StrEq(e1, e2, t) -> StrEq((cexpr_detail e1), (cexpr_detail e2), type_match t)
+ | Sast.StrNeq(e1, e2, t) -> StrNeq((cexpr_detail e1), (cexpr_detail e2), type_match t)
  | Sast.Add(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Int)
  | Sast.Sub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.Mult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, Int)
