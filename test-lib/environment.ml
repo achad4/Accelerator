@@ -267,8 +267,8 @@ let scope_func env = function
          snd (scope_expr_detail henv hforms) in
         List.fold_left helper env1 forms in
       let new_env = init_formals init_env el in
-      let block = scope_stmt new_env stmt in
-      let ret_type = (type_of_stmt new_env (fst block)) in
+      let block, new_env = scope_stmt new_env stmt in
+      let ret_type = (type_of_stmt new_env block) in
       let new_fname_map = FuncMap.add str ret_type new_env.func_tbl in
       let new_env = reassign_symb_tbl_stk new_env.symb_tbl_stk new_fname_map env.func_tbl_formals in
       (* let new_env = assign_current_scope str ret_type new_env in
@@ -282,7 +282,7 @@ let scope_func env = function
       let new_form_map = FuncMap.add str my_formal_type_list new_env.func_tbl_formals in
       let new_env = reassign_symb_tbl_stk new_env.symb_tbl_stk new_fname_map new_form_map in
       
-      FunctionDef(str, List.map helper2 el, fst block), new_env
+      FunctionDef(str, List.map helper2 el, block), new_env
 
 let run_stmts env stmts =
   let helper henv hstmts = snd (scope_stmt henv hstmts) in
