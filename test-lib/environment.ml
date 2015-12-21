@@ -148,11 +148,9 @@ let rec scope_expr_detail env = function
   | Ast.FloatLit(f) -> FloatLit(f), env
   | Ast.StringLit(s) -> StringLit(s) , env
   | Ast.Assign(s,e) ->
-    print_endline "in assign";
     let e1 = scope_expr_detail env e in
     let t = type_match env (fst e1) in
     let new_env = assign_current_scope s t env in
-    print_endline "assigned new env";
     Assign(s, fst(e1)), new_env
   | Ast.Vector(s, el) ->
 (*       let new_env = assign_current_scope s (type_match t) env in
@@ -173,41 +171,40 @@ let rec scope_expr_detail env = function
   | Ast.MatrixAcc(s, e1, e2) -> 
       MatrixAcc(s, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), env
   | Ast.Add(expr1,expr2) ->
-      print_endline "in add "; 
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
-      Add(e1, e2), v1
+      let e1, v1 = scope_expr_detail env expr1 in
+      let e2, v2 = scope_expr_detail v1 expr2 in
+      Add(e1, e2), v2
   | Ast.Sub(expr1,expr2) ->
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
+      let e1, v1 = scope_expr_detail env expr1 in
+      let e2, v2 = scope_expr_detail v1 expr2 in
       Sub(e1, e2), env
   | Ast.Mult(expr1,expr2) ->
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
+      let e1, v1 = scope_expr_detail env expr1 in
+      let e2, v2 = scope_expr_detail v1 expr2 in
       Mult(e1, e2), env
   | Ast.Div(expr1,expr2) ->
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
+      let e1, v1 = scope_expr_detail env expr1 in
+      let e2, v2 = scope_expr_detail v1 expr2 in
       Div(e1, e2), env
   | Ast.Expo(expr1,expr2) ->
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
+      let e1, v1 = scope_expr_detail env expr1 in
+      let e2, v2 = scope_expr_detail v1 expr2 in
       Expo(e1, e2), env
   | Ast.Mod(expr1,expr2) ->
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
+      let e1, v1 = scope_expr_detail env expr1 in
+      let e2, v2 = scope_expr_detail v1 expr2 in
       Mod(e1, e2), env
   | Ast.And(expr1,expr2) ->
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
+      let e1, v1 = scope_expr_detail env expr1 in
+      let e2, v2 = scope_expr_detail v1 expr2 in
       And(e1, e2), env
   | Ast.Or(expr1,expr2) ->
-      let e1, v1 = scope_expr_detail env expr1
-      and e2, v2 = scope_expr_detail env expr2 in
+      let e1, v1 = scope_expr_detail env expr1 in
+      let e2, v2 = scope_expr_detail v1 expr2 in
       Or(e1, e2), env
   | Ast.Not(expr1) ->
       let e1, v1 = scope_expr_detail env expr1 in
-      Not(e1), env
+      Not(e1), v1
   | Ast.FuncCall(s, el) -> 
       let helper e = fst (scope_expr_detail env e) in
       FuncCall(s, List.map helper el), env
