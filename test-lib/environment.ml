@@ -148,10 +148,11 @@ let rec scope_expr_detail env = function
   | Ast.FloatLit(f) -> FloatLit(f), env
   | Ast.StringLit(s) -> StringLit(s) , env
   | Ast.Assign(s,e) ->
-    let e1 = scope_expr_detail env e in
     print_endline "in assign";
+    let e1 = scope_expr_detail env e in
     let t = type_match env (fst e1) in
     let new_env = assign_current_scope s t env in
+    print_endline "assigned new env";
     Assign(s, fst(e1)), new_env
   | Ast.Vector(s, el) ->
 (*       let new_env = assign_current_scope s (type_match t) env in
@@ -172,9 +173,10 @@ let rec scope_expr_detail env = function
   | Ast.MatrixAcc(s, e1, e2) -> 
       MatrixAcc(s, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), env
   | Ast.Add(expr1,expr2) ->
+      print_endline "in add "; 
       let e1, v1 = scope_expr_detail env expr1
       and e2, v2 = scope_expr_detail env expr2 in
-      Add(e1, e2), env
+      Add(e1, e2), v1
   | Ast.Sub(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1
       and e2, v2 = scope_expr_detail env expr2 in
@@ -216,8 +218,8 @@ let rec scope_expr_detail env = function
       FormalDef(id, fst e1), new_env
 
 let rec scope_stmt env = function
-  | Ast.Expr(expr) -> let e, env = scope_expr_detail env expr in 
-                      Expr(e), env
+  | Ast.Expr(expr) -> let e, new_env = scope_expr_detail env expr in 
+                      Expr(e), new_env
   | Ast.Block(blk) -> 
       let rec pass_envs env = function
        | [] -> []
@@ -259,16 +261,16 @@ let scope_func env = function
 let run_stmts env stmts =
   let helper henv hstmts = snd (scope_stmt henv hstmts) in
   List.fold_left helper env stmts
-(* 
+
 let run_funcs env funcs =
   let helper henv hfuncs = snd (scope_func henv hfuncs) in
-  List.fold_left helper env funcs *)
+  List.fold_left helper env funcs
 
 let program program = 
   let funcs_rev = List.rev (fst program) in
   let stmts_rev = List.rev (snd program) in
-(*   let new_env = run_funcs init_env funcs_rev in  *)
-  let new_env = run_stmts init_env stmts_rev in
+  let new_env = run_funcs init_env funcs_rev in 
+  let new_env = run_stmts new_env stmts_rev in
   let helper1 env e = (scope_func env e) in
   let helper2 env e = (scope_stmt env e) in
   (List.map (helper1 new_env) funcs_rev), (List.map (helper2 new_env) (snd program))
