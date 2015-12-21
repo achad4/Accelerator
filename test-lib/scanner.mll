@@ -46,6 +46,7 @@
     | "||"          { OR }
     | '!'           { NOT }
     | "=="          { EQ }
+    | "!="          { NEQ }
     | '['           { LBRAC }
     | ']'           { RBRAC }
     | '"'           { DOUBLEQT }
