@@ -144,8 +144,20 @@ let rec expr = function
   | Environment.Na, env -> NaLit(Na), Na
 	| Environment.FuncCall(id, el), env -> 		
     		(*iterate over list of expressions and pull out the expression_detail from each one*)
-    		let helper e = fst (expr (e, env)) in
-    		FuncCall(id, (List.map helper el), Na), Na
+    		let helper1 e = fst (expr (e, env)) in
+        let helper2 e = snd (expr (e, env)) in
+
+        (* compare actuals and formals *)
+        let actual_types = List.map helper2 el in
+        print_endline "fuck"; print_endline id;
+        let formal_types = Environment.FuncMap.find id env.func_tbl_formals in
+        print_endline "you";
+        if (actual_types = formal_types) then (
+          print_endline "wtf";
+          FuncCall(id, (List.map helper1 el), Na), Na ) 
+        else 
+          failwith "Illegal function arguments - type mismatch"
+
 	| Environment.Add( e1, e2), env ->
 		let e1 = expr (e1, env)
 		and e2 = expr (e2, env) in
@@ -264,7 +276,7 @@ let rec expr = function
               )
           else
               failwith "Type incompatibility"
-  | Environment.FormalDef(id,e), env -> 
+  | Environment.FormalDef(id,e,t), env -> 
           let e1 = expr (e, env) in
           let _, t1 = e1 in
           FormalDef(id, fst e1, t1, env), t1
@@ -282,7 +294,7 @@ let rec stmt = function
           let r = expr (e, env) in
           let stmt1 =  stmt (s1, env) in
           let stmt2 =  stmt (s2, env) in
-          let t1 = type_of_stmt stmt1 in
+          let t1 = type_of_stmt stmt1 in 
           let t2 = type_of_stmt stmt2 in
           if(t1 = t2) then
           (

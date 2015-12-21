@@ -27,10 +27,6 @@ program :
   | func_def_list                                      { ($1, []) }
   | stmt_list                                          { ([], $1) }
   | func_def_list stmt_list EOF                        { ($1, $2) }
-    
-stmt_list:
-  | stmt                                 { [$1] }
-  | stmt_list stmt                       { $2 :: $1 }
 
 func_stmt_list:
   | func_stmt                                 { [$1] }
@@ -41,6 +37,10 @@ block:
 
 func_block:
   | LBRACE DLIN func_stmt_list RBRACE DLIN                        { Block(List.rev $3) }
+
+stmt_list:
+  | stmt                                 { [$1] }
+  | stmt_list stmt                       { $2 :: $1 }
 
 stmt:
   | expr DLIN                                                { Expr($1) }
