@@ -190,7 +190,8 @@ let rec cexpr = function
 let rec stmt = function
   | Sast.Sstmt(e, t) -> let r = cexpr e in
                         Cstmt(r, type_match t)
-  | Sast.Sblock(sl, t) -> let l = List.map stmt sl in
+  | Sast.Sblock(sl, t) -> let stmt_rev = List.rev sl in
+                        let l = List.map stmt stmt_rev in
                         Cblock(l, type_match t)
 (*   | Sast.SReturnBlock(sl, s, t) -> 
                           let l = List.map stmt sl in
@@ -203,9 +204,11 @@ let rec stmt = function
 
 
 let rec add_return = function
-  | Cblock(sl, t) -> let last_stmt = List.nth sl (List.length sl - 1) in
+  | Cblock(sl, t) ->      
                           let sl = List.rev sl in
-                          let sl = List.tl sl in
+                          let last_stmt = List.nth sl (List.length sl - 1) in
+                          let sl = List.tl (List.rev sl) in
+                          let sl = List.rev sl in
                           let return = match last_stmt with
                               | Cstmt(e,t) -> Creturn(e, t) 
                               | Cblock(sl, t) -> let last_stmt = List.nth sl (List.length sl - 1) in
