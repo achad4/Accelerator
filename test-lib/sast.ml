@@ -30,6 +30,8 @@ type expr_detail =
   | MatrixAcc of string * expr_detail * expr_detail * t
   | Eq of expr_detail * expr_detail * t
   | Neq of expr_detail * expr_detail * t
+  | StrEq of expr_detail * expr_detail * t
+  | StrNeq of expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
@@ -179,7 +181,11 @@ let rec expr = function
 
 		if (t1 == t2) then
 			(
-				Eq((fst e1), (fst e2), t1), t1
+                if t1 == String then
+				    StrEq((fst e1), (fst e2), t1), t1
+                else
+                    Eq((fst e1), (fst e2), t1), t1
+
 			)
 		else
 			failwith "Type incompatibility"
@@ -192,7 +198,11 @@ let rec expr = function
 
 		if (t1 == t2 ) then
 			(
-				Neq((fst e1), (fst e2), t1), t1
+                if t1 == String then
+				    StrNeq((fst e1), (fst e2), t1), t1
+                else
+                    Neq((fst e1), (fst e2), t1), t1
+
 			)
 		else
 			failwith "Type incompatibility"
