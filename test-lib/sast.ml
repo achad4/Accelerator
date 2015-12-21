@@ -40,6 +40,7 @@ type expr_detail =
   | FSub of expr_detail * expr_detail * t
   | FMult of expr_detail * expr_detail * t
   | FDiv of expr_detail * expr_detail * t
+  | MatrixAdd of expr_detail * expr_detail * t
   | Expo of expr_detail * expr_detail * t
   | Mod of expr_detail * expr_detail * t
   | FuncCall of string * expr_detail list * t
@@ -62,6 +63,7 @@ type expression =
   | SFSub of expression * expression * t
   | SFMult of expression * expression * t
   | SFDiv of expression * expression * t
+  | SMatrixAdd of expression * expression * t
   | Sdiv of expression * expression * t
   | Sexpo of expression * expression * t
   | Smod of expression * expression * t
@@ -217,7 +219,12 @@ let rec expr = function
 			(
 				Add((fst e1), (fst e2), t1), t1
 			)
-		else
+		else if ( t1 == t2 && t1 == Matrix) then
+            (
+
+                MatrixAdd((fst e1), (fst e2), t1), t1
+            )
+        else
 			failwith "Type incompatibility"
   | Environment.Sub( e1, e2 ), env ->
           let e1 = expr (e1, env)

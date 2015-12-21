@@ -49,6 +49,7 @@ runTest "matrixTest"
 runTest "stringTest"
 runTest "func1Test"
 runTest "eqNeqTest"
+runTest "matrixAdd"
 
 echo ====================================================
 echo Results

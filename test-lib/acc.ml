@@ -35,6 +35,7 @@ let rec compile_detail = function
   | Cast.Matrix(s, v, nr, nc, t) ->
           let helper e = compile_detail e in
           let holder = s ^ "Holder" in
+          let count = s ^ "count" in
           let nr_str = compile_detail nr in
           let nc_str = compile_detail nc in 
           let matrix = s in 
@@ -45,11 +46,11 @@ let rec compile_detail = function
           " (" ^ holder ^ ", " ^ holder ^ " + " ^
           nc_str ^ " / sizeof(" ^ ty ^ "));\n" ^
           "vector<vector<" ^ ty ^ "> > " ^ matrix ^ " (" ^ nr_str ^ ");\n" ^
-          "int count=0;\n" ^
+          "int " ^ count ^ "=0;\n" ^
           "for(int i=0; i<" ^ nr_str ^ "; i++) { \n" ^
           matrix ^ "[i].resize(" ^ nc_str ^ ");\n" ^
           "for(int j=0; j<" ^ nc_str ^ "; j++) { \n" ^
-          matrix ^ "[i][j] = " ^ holder ^ "[count++];\n}\n}"
+          matrix ^ "[i][j] = " ^ holder ^ "[" ^ count ^ "++];\n}\n}"
   | Cast.MatrixAcc(m, r, c, t) ->
           m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
@@ -92,7 +93,28 @@ let rec compile_detail = function
   | Cast.FMult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ 
                              (compile_detail e2)
   | Cast.FDiv(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
-                            (compile_detail e2) 
+                            (compile_detail e2)
+  | Cast.MatrixAdd(e1, e2, t) ->
+          let mid1 = compile_detail e1 in
+          let mid2 = compile_detail e2 in
+          let 1row = mid1 ^ "row" in
+          let 2row = mid2 ^ "row" in
+          let 1col = mid1 ^ "col" in
+          let 2col = mid2 ^ "col" in
+         (* e1 and e2 should be strings representing our matrix ids *)
+          "int " ^ 1row ^ " = " ^ mid1 ^ ".size();\n" ^
+          "int " ^ 2row ^ " = " ^ mid2 ^ ".size();\n" ^
+          "if (" ^ 1row ^ " != " ^ 2row ^ "){\n" ^
+          "\t cout << \"matrix size mismatch\";\n\t count << endl;\n" ^
+          "int " ^ 1col ^ " = " ^ mid1 ^ "[0].size();\n" ^
+          "int " ^ 2col ^ " = " ^ mid1 ^ "[0].size();\n" ^
+          "if (" ^ 1col ^ " != " ^ 2col ^ "){\n" ^
+          "\t cout << \"matrix size mismatch\";\n\t count << endl;\n" ^
+          (* checked num rows and num cols, now create a result matrix *)
+
+
+
+         mid1 ^ " + " ^ mid2 
   | Cast.FormalDef(id, e, t) -> Cast.string_of_ctype t ^ " " ^ id ^ "=" ^ (compile_detail e)
 
   in
@@ -106,10 +128,12 @@ let rec compile_expr = function
   | Cdiv(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cmult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
   | Csub(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
-	| Cadd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | Cadd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | CFAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2  
   | CFSub(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | CFMult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | CMatrixAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
+  | CMatrixAcc(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
   | Ceq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cneq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | CFDiv(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
