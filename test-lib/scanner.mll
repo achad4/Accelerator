@@ -15,6 +15,7 @@
     | "if"          { IF }
     | "else"        { ELSE }
     | "for"         { FOR }
+    | "while"       { WHILE }
     | ":"           { RANGE }
     | "function"    { FUNCTION }
     | "return"      { RETURN }

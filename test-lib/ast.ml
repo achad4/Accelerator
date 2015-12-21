@@ -43,6 +43,7 @@ type stmt =
   | Block of stmt list
   | If of expr * stmt * stmt
   | For of string * expr * expr * stmt
+  | While of expr * stmt
   | Return of expr
 
 type func_def = 

@@ -60,6 +60,7 @@ type stmt =
 (*   | ReturnBlock of stmt list * stmt *)
   | If of expr * stmt * stmt
   | For of string * expr * expr * stmt
+  | While of expr * stmt
   | Return of expr
 
 type func_def = 
@@ -116,6 +117,7 @@ let rec type_of_stmt env = function
                      type_of_stmt env last_stmt
   | If(e,s1,s2) -> Na
   | For(s1,e1,e2,s2) -> Na
+  | While(e,s) -> Na
   | Return(e) -> type_match env e
 
 let reassign_symb_tbl_stk stk func forms = {
@@ -266,6 +268,10 @@ let rec scope_stmt env = function
       and e3, v3 = scope_expr_detail new_env expr3 in
       let r = (scope_stmt new_env stmt) in
       For(str, e2, e3, fst r), snd r
+  | Ast.While(expr,stmt) -> 
+      let compare = scope_expr_detail env expr in
+      let block = scope_stmt env stmt in
+      While(fst compare, fst block), snd block
   | Ast.Return(e) -> 
       let e1, v1 = scope_expr_detail env e in
       Return(e1), v1
