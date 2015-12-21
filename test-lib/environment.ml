@@ -97,8 +97,10 @@ let rec type_match env = function
   | Vector(a,b) -> Vector
   | Id(id) -> find_type id env
   | FormalDef(id, e, t) -> type_match env e
-  | FuncCall(s, el) -> 
-      if FuncMap.mem s env.func_tbl then
+  | FuncCall(s, el) ->
+      if (s = "print") then
+        Na
+      else if FuncMap.mem s env.func_tbl then
         FuncMap.find s env.func_tbl
       else
         failwith "Function does not exist"
@@ -294,7 +296,6 @@ let run_funcs env funcs =
 
 let program program =
   let init_print = FuncMap.add "print" (type_match init_env Na) init_env.func_tbl in
-
   let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk init_print init_env.func_tbl_formals in
 
   let funcs_rev = List.rev (fst program) in
