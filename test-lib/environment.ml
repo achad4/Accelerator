@@ -74,15 +74,15 @@ let init_env = {
 }
 
 let type_match = function
-  | StringLit(s) -> String
+  | StringLit(s) -> print_endline "String"; String
   | IntLit(i) -> print_endline "Int"; Int
-  | FloatLit(f) -> Float
-  | BoolLit(b) -> Bool
-  | Na -> Na
-  | Matrix(a,b,c,d) -> Matrix
-  | Vector(a,b) -> Vector
-  | Id(id) -> String
-  | _ -> print_endline "Na"; Na
+  | FloatLit(f) -> print_endline "Int"; Float
+  | BoolLit(b) -> print_endline "Int"; Bool
+  | Na -> print_endline "Na"; Na
+  | Matrix(a,b,c,d) -> print_endline "Int"; Matrix
+  | Vector(a,b) -> print_endline "Int"; Vector
+  | Id(id) -> print_endline "string"; String
+(*   | _ -> print_endline "Na"; Na *)
 
 let rec type_of_stmt = function
   | Expr(e) -> type_match e
