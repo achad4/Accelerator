@@ -95,7 +95,7 @@ let rec type_match env = function
   | Vector(a,b) -> print_endline "Int"; Vector
   | Id(id) -> print_endline "string"; find_type id env
   | Add(expr1,expr2) -> type_match env expr1
-(*   | _ -> print_endline "Na"; Na *) 
+  | _ -> print_endline "Na"; Na 
 
 let rec type_of_stmt env = function
   | Expr(e) -> type_match env e
@@ -207,6 +207,7 @@ let rec scope_expr_detail env = function
       Not(e1), v1
   | Ast.FuncCall(s, el) -> 
       let helper e = fst (scope_expr_detail env e) in
+      
       FuncCall(s, List.map helper el), env
   | Ast.FormalDef(id,e) -> 
       let e1 = scope_expr_detail env e in

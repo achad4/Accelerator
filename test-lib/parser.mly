@@ -37,10 +37,10 @@ func_stmt_list:
   | func_stmt_list func_stmt                  { $2 :: $1 }
 
 block:
-  | LBRACE DLIN stmt_list RBRACE DLIN                        { print_endline "block"; Block(List.rev $3) }
+  | LBRACE DLIN stmt_list RBRACE DLIN                        { Block(List.rev $3) }
 
 func_block:
-  | LBRACE DLIN func_stmt_list RBRACE DLIN                        { print_endline "func block"; Block(List.rev $3) }
+  | LBRACE DLIN func_stmt_list RBRACE DLIN                        { Block(List.rev $3) }
 
 stmt:
   | expr DLIN                                                { Expr($1) }
