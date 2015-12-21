@@ -238,14 +238,13 @@ let rec scope_stmt env = function
   | Ast.Block(blk) -> 
       let rec pass_envs env = function
        | [] -> []
-       | [s] -> let (s, new_env) = scope_stmt env s in 
-                [s]
+       | [s] -> let (s, new_env) = scope_stmt env s in [s]
        | hd :: tl ->  let (s, new_env) = scope_stmt env hd in
                       (pass_envs new_env tl)@[s] in
 
         let helper henv hstmts = snd (scope_stmt henv hstmts) in
         let block_env = List.fold_left helper env blk in
-
+      
       Block(pass_envs env (List.rev blk)), block_env 
   | Ast.If(expr,stmt1,stmt2) -> let i, v = scope_expr_detail env expr in
       If(i, fst (scope_stmt env stmt1), fst (scope_stmt env stmt2)), env
@@ -268,7 +267,6 @@ let scope_func env = function
          snd (scope_expr_detail henv hforms) in
         List.fold_left helper env1 forms in
       let new_env = init_formals init_env el in
-
       let block = scope_stmt new_env stmt in
       let ret_type = (type_of_stmt new_env (fst block)) in
       let new_fname_map = FuncMap.add str ret_type new_env.func_tbl in
@@ -282,8 +280,8 @@ let scope_func env = function
         | hd::tl -> type_match env hd :: formal_type_list env tl in
       let my_formal_type_list = formal_type_list new_env (List.map helper2 el) in
       let new_form_map = FuncMap.add str my_formal_type_list new_env.func_tbl_formals in
-
       let new_env = reassign_symb_tbl_stk new_env.symb_tbl_stk new_fname_map new_form_map in
+      
       FunctionDef(str, List.map helper2 el, fst block), new_env
 
 let run_stmts env stmts =
