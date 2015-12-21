@@ -53,8 +53,9 @@ let rec compile_detail = function
   | Cast.MatrixAcc(m, r, c, t) ->
           m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
-        id ^ "(" ^ (String.concat ", " (List.map helper el)) ^ ";\n"
-  | Cast.PrintCall(e, t) -> "cout << " ^ (compile_detail e) ^ " << endl;"
+        id ^ "(" ^ (String.concat ", " (List.map helper el)) ^ ")\n"
+  | Cast.PrintCall(e, t) -> "cout << " ^ (compile_detail e) ^ ";\n" ^ 
+                            "cout << endl"
   | Cast.And(b1, b2, t) -> (compile_detail b1) ^ " && " ^ 
                            (compile_detail b2)
   | Cast.Or(b1, b2, t) -> (compile_detail b1) ^ " || " ^ 

@@ -144,8 +144,8 @@ let rec expr = function
             failwith "Type incompatibility"
   | Environment.Na, env -> NaLit(Na), Na
 	| Environment.FuncCall(id, el), env -> 	
-        (* Check that you're only printing one thing	 *)
-    		if(id = "print") then (
+        (* Check that you're only printing one thing *)
+    		if(id = "print") then ( 
           let print_length = List.length el in
           if (print_length != 1) then
             failwith "print only takes one argument"
@@ -166,9 +166,10 @@ let rec expr = function
         print_endline "formals"; 
         if (actual_types = formal_types) then (
           print_endline "comparing a+f";
-          FuncCall(id, (List.map helper1 el), Na), Na ) 
+          let ret_type = Environment.FuncMap.find id env.func_tbl in
+          FuncCall(id, (List.map helper1 el), ret_type), ret_type ) 
         else 
-          failwith "Illegal function arguments - type mismatch"
+          failwith "Illegal function arguments"
 
 	| Environment.Add( e1, e2), env ->
 		let e1 = expr (e1, env)

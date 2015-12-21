@@ -97,7 +97,13 @@ let rec type_match env = function
   | Vector(a,b) -> print_endline "Int"; Vector
   | Id(id) -> print_endline "string"; find_type id env
   | FormalDef(id, e, t) -> type_match env e
-  | _ -> print_endline "Na"; Na 
+  | FuncCall(s, el) -> 
+      print_endline "func call";
+      if FuncMap.mem s env.func_tbl then
+        FuncMap.find s env.func_tbl
+      else
+        failwith "Function does not exist"
+  | _ -> print_endline "everything else"; Na
 
 let rec type_of_stmt env = function
   | Expr(e) -> type_match env e
@@ -271,7 +277,6 @@ let scope_func env = function
       (* let new_env = assign_current_scope str ret_type new_env in
        *)
       let helper2 e = fst (scope_expr_detail new_env e) in
-      print_endline "yooo fuck";
       (* Add function formals to env *)
       let rec formal_type_list env = function
         | [] -> []

@@ -203,7 +203,7 @@ let rec add_return = function
                               | Creturn(e, t) -> Creturn(e, t)
                           in
                           Cblock(sl@[return], t)
-  | _ -> failwith "idk..."
+  | _ -> failwith "Unable to identify a block"
 
 let func_def = function
   | Sast.FunctionDef(s, frmls, b, t) -> let block = 
