@@ -6,6 +6,8 @@ exception UnassignedVarException of string;;
 exception IncorrectTypeException;;
 
 type op = 
+  | Eq
+  | Neq
   | Add
   | Sub
   | Mult
@@ -37,6 +39,8 @@ type expr =
   | VectAcc of string * expr
   | Matrix of string * expr list * expr * expr
   | MatrixAcc of string * expr * expr
+  | Eq of expr * expr
+  | Neq of expr * expr
   | Add of expr * expr
   | Sub of expr * expr
   | Mult of expr * expr
@@ -188,6 +192,16 @@ let rec scope_expr_detail env = function
       Matrix(s, List.map helper el, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), new_env
   | Ast.MatrixAcc(s, e1, e2) -> 
       MatrixAcc(s, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), env
+  | Ast.Eq(expr1,expr2) ->
+      let e1, v1 = scope_expr_detail env expr1 in
+      let e2, v2 = scope_expr_detail v1 expr2 in
+      Eq(e1, e2), v2
+  | Ast.Neq(expr1,expr2) ->
+      let e1, v1 = scope_expr_detail env expr1 in
+      let e2, v2 = scope_expr_detail v1 expr2 in
+      Neq(e1, e2), v2
+
+
   | Ast.Add(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1 in
       let e2, v2 = scope_expr_detail v1 expr2 in

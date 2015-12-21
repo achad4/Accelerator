@@ -28,6 +28,8 @@ type expr_detail =
   | VectAcc of string * expr_detail * t
   | Matrix of string * expr_detail list * expr_detail * expr_detail * t
   | MatrixAcc of string * expr_detail * expr_detail * t
+  | Eq of expr_detail * expr_detail * t
+  | Neq of expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
@@ -168,6 +170,32 @@ let rec expr = function
         else 
           failwith "Illegal function arguments"
 
+	| Environment.Eq( e1, e2), env ->
+		let e1 = expr (e1, env)
+		and e2 = expr (e2, env) in
+
+		let _, t1 = e1
+		and _, t2 = e2 in
+
+		if (t1 == t2) then
+			(
+				Eq((fst e1), (fst e2), t1), t1
+			)
+		else
+			failwith "Type incompatibility"
+	| Environment.Neq( e1, e2), env ->
+		let e1 = expr (e1, env)
+		and e2 = expr (e2, env) in
+
+		let _, t1 = e1
+		and _, t2 = e2 in
+
+		if (t1 == t2 ) then
+			(
+				Neq((fst e1), (fst e2), t1), t1
+			)
+		else
+			failwith "Type incompatibility"
 	| Environment.Add( e1, e2), env ->
 		let e1 = expr (e1, env)
 		and e2 = expr (e2, env) in

@@ -67,6 +67,10 @@ let rec compile_detail = function
                            (compile_detail e2) 
   | Cast.Expo(e1, e2, t) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ 
                             (compile_detail e2) ^ ")"
+  | Cast.Eq(e1, e2, t) -> "(" ^ (compile_detail e1) ^ " == " ^
+                           (compile_detail e2) ^ ")"
+  | Cast.Neq(e1, e2, t) -> "(" ^ (compile_detail e1) ^ " != " ^
+                           (compile_detail e2) ^ ")"
   | Cast.Div(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
                            (compile_detail e2)
   | Cast.Mult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ 
@@ -100,6 +104,8 @@ let rec compile_expr = function
   | CFAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2  
   | CFSub(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | CFMult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | Ceq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | Cneq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | CFDiv(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cand(b1, b2, t) -> compile_expr b1 ^ compile_expr b2 
   | Cor(b1, b2, t) -> compile_expr b1 ^ compile_expr b2

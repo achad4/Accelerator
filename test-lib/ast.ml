@@ -1,4 +1,6 @@
 type op = 
+    | Eq
+    | Neq
   | Add
   | Sub
   | Mult
@@ -21,6 +23,8 @@ type expr =
   | VectAcc of string * expr
   | Matrix of string * expr list * expr * expr
   | MatrixAcc of string * expr * expr
+  | Eq of expr * expr
+  | Neq of expr * expr
   | Add of expr * expr
   | Sub of expr * expr
   | Mult of expr * expr
