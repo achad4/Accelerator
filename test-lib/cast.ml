@@ -45,6 +45,7 @@ type cexpr_detail =
    | Expo of cexpr_detail * cexpr_detail * ct
    | Mod of cexpr_detail * cexpr_detail * ct
    | FuncCall of string * cexpr_detail list * ct
+   | PrintCall of cexpr_detail * ct
    | Assign of string * cexpr_detail * ct
    | And of cexpr_detail * cexpr_detail * ct
    | Or of cexpr_detail * cexpr_detail * ct
@@ -141,6 +142,8 @@ let rec cexpr_detail = function
  | Sast.FuncCall(id, el, t) -> let ct = type_match t in
                                FuncCall(id, 
                                List.map cexpr_detail el, ct)
+ | Sast.PrintCall(e, t) -> let ct = type_match t in
+                                PrintCall(cexpr_detail e, ct)
  | Sast.Assign(id, e, t) -> let ct = type_match t in
                              Assign(id, cexpr_detail e, ct)
  | Sast.And(e1, e, t) -> let ct = type_match t in 

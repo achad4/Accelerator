@@ -218,7 +218,6 @@ let rec scope_expr_detail env = function
       Not(e1), v1
   | Ast.FuncCall(s, el) -> 
       let helper e = fst (scope_expr_detail env e) in
-      
       FuncCall(s, List.map helper el), env
   | Ast.FormalDef(id,e) ->
       let e1 = scope_expr_detail env e in
@@ -305,8 +304,8 @@ let program program =
 
   let new_env1 = run_funcs init_env funcs_rev in 
   print_endline "break--";
-  (* let new_env2 = run_stmts new_env1 stmts_rev in *)
+  let new_env2 = run_stmts new_env1 stmts_rev in
   let helper1 env e = (scope_func env e) in
   let helper2 env e = (scope_stmt env e) in
-  (List.map (helper1 new_env1) funcs_rev), (List.map (helper2 new_env1) stmts_rev)
+  (List.map (helper1 new_env1) funcs_rev), (List.map (helper2 new_env2) stmts_rev)
 

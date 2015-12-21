@@ -39,6 +39,7 @@ type expr_detail =
   | Expo of expr_detail * expr_detail * t
   | Mod of expr_detail * expr_detail * t
   | FuncCall of string * expr_detail list * t
+  | PrintCall of expr_detail * t
   | Assign of string * expr_detail * t
   | And of expr_detail * expr_detail * t
   | Or of expr_detail * expr_detail * t
@@ -142,18 +143,29 @@ let rec expr = function
         else
             failwith "Type incompatibility"
   | Environment.Na, env -> NaLit(Na), Na
-	| Environment.FuncCall(id, el), env -> 		
-    		(*iterate over list of expressions and pull out the expression_detail from each one*)
-    		let helper1 e = fst (expr (e, env)) in
+	| Environment.FuncCall(id, el), env -> 	
+        (* Check that you're only printing one thing	 *)
+    		if(id = "print") then (
+          let print_length = List.length el in
+          if (print_length != 1) then
+            failwith "print only takes one argument"
+          else (
+            let print_arg, print_arg_type = expr (List.hd el, env) in
+            PrintCall(print_arg, print_arg_type), Na
+          )
+        )
+      else 
+        (*iterate over list of expressions and pull out the expression_detail from each one*)
+        let helper1 e = fst (expr (e, env)) in
         let helper2 e = snd (expr (e, env)) in
 
         (* compare actuals and formals *)
         let actual_types = List.map helper2 el in
-        print_endline "fuck"; print_endline id;
+        print_endline "actuals"; print_endline id;
         let formal_types = Environment.FuncMap.find id env.func_tbl_formals in
-        print_endline "you";
+        print_endline "formals"; 
         if (actual_types = formal_types) then (
-          print_endline "wtf";
+          print_endline "comparing a+f";
           FuncCall(id, (List.map helper1 el), Na), Na ) 
         else 
           failwith "Illegal function arguments - type mismatch"
