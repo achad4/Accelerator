@@ -66,7 +66,7 @@ let rec compile_detail = function
           let ty = (string_of_ctype t) in
           if (ty = "Matrix") then
           (
-                let ty = (Cast.string_of_ctype t) in
+                (* let ty = (Cast.string_of_ctype t) in
                 (* make sure we save our matrix output to temp *) 
                 (compile_detail e) ^
                 (* get how big temp is right now *)
@@ -75,7 +75,8 @@ let rec compile_detail = function
                 "for(int i = 0; i < rows; i++){\n" ^
                 "\t" ^ "vector<" ^ty^ "> row (temp[i]);\n" ^
                 "\t" ^ id ^ ".push_back(row);\n" ^
-                "}"    
+                "}"     *)
+            id
               (* raise (UnassignedVarException "matrix detected") *)
             )
           else
