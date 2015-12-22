@@ -50,5 +50,4 @@
     | "!="          { NEQ }
     | '['           { LBRAC }
     | ']'           { RBRAC }
-    | '"'           { DOUBLEQT }
     | eof           { EOF } 
