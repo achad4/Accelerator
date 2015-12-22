@@ -29,7 +29,6 @@ let rec compile_detail = function
           "vector<" ^ ty ^ "> " ^ s ^ 
           " (" ^ holder ^ ", " ^ holder ^ " + sizeof(" ^ 
           holder ^ ") / sizeof(" ^ ty ^"))"
-  (* What is this minus 1 stuff and do we need it for vectors too? *)
   | Cast.VectAcc(e1, e2, t) ->
           e1 ^ "[" ^ compile_detail e2 ^ "-1]"
   | Cast.Matrix(s, v, nr, nc, t) ->
@@ -72,16 +71,6 @@ let rec compile_detail = function
             let ty = (string_of_ctype t) in
             ty ^ " " ^ id ^ " = " ^ (compile_detail e)
           )
-         
-(*   | Cast.MatrixAssign(id, e, t) ->
-          print_endline "MatrixAssign acc";
-         let ty = (Cast.string_of_ctype t) in
-         "int rows = temp.size();\n" ^
-          "vector<vector<" ^ty^ "> " ^ id ^ ";\n" ^
-          "for(int i = 0; i < rows; i++){\n" ^
-          "\t" ^ "vector<" ^ty^ "> row (temp[i]);\n" ^
-          "\t" ^ id ^ ".push_back(row);\n" ^
-          "};"   *)
   | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ 
                            (compile_detail e2) 
   | Cast.Expo(e1, e2, t) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ 
@@ -116,25 +105,6 @@ let rec compile_detail = function
                                 (compile_detail e1) ^ " + " ^
                                 (compile_detail e2)
                               )
-  (* | Cast.FAdd(e1, e2, t) -> (compile_detail e1) ^ " + " ^ 
-                            (compile_detail e2)
-  | Cast.FSub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ 
-                            (compile_detail e2)
-  | Cast.FMult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ 
-                             (compile_detail e2)
-  | Cast.FDiv(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
-                            (compile_detail e2) *)
- (*  | Cast.MatrixAdd(e1, e2, t) ->
-          let mid1 = string_of_matrix_assign e1 in
-          let mid2 = string_of_matrix_assign e2 in
-          "vector<vector<int> > result = matrix_add("^mid1^", "^ mid2 ^ ");" *)
-
-(*   | Cast.MatrixMult(e1, e2, t) ->
-          let mid1 = string_of_matrix_assign e1 in
-          let mid2 = string_of_matrix_assign e2 in
-          "vector<vector<int> > result = matrix_mult("^mid1^", "^ mid2 ^ ");" *)
-
-
   | Cast.FormalDef(id, e, t) -> Cast.string_of_ctype t ^ " " ^ id ^ "=" ^ (compile_detail e)
 
   in
@@ -142,8 +112,6 @@ let rec compile_detail = function
 let rec compile_expr = function
 	| Cexpr(e, t) -> compile_detail e 
 	| CfuncCall(el, t) -> String.concat "" (List.map compile_expr el)
-(* 	| Cassign(e, t) -> (string_of_ctype t) ^ compile_expr e
- *)
   | Cmod(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cexpo(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
   | Cdiv(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
@@ -153,8 +121,6 @@ let rec compile_expr = function
   | CFAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2  
   | CFSub(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | CFMult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
-(*   | CMatrixAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
-  | CMatrixMult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 *)
   | CMatrixAcc(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
   | Ceq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cneq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
@@ -167,9 +133,6 @@ let rec compile_stmt = function
   | Cstmt(e, t) -> compile_expr e ^ ";\n"
   | Cblock(sl, t) -> let string_list l = List.map compile_stmt l in
                   "{\n" ^ String.concat "" (string_list sl) ^ "}\n"
-(*   | CReturnBlock(sl, s, t) -> let string_list l = List.map compile_stmt l in
-              "{\n" ^ String.concat "" (string_list sl) ^
-              compile_stmt s ^ "}\n" *)
   | Cif(e, s1, s2, t) ->   "if(" ^ compile_expr e ^ ")" 
                            ^ (compile_stmt s1)  ^ 
                            "else" 
@@ -178,8 +141,7 @@ let rec compile_stmt = function
                           id ^" <= " ^ compile_expr e2 ^ "; " ^ id ^
                           "++)\n" ^ compile_stmt s 
   | Creturn(e, t) -> "return (" ^ (compile_expr e) ^ ");\n"
-  | Cwhile(e, s, t) -> "while " ^ (compile_detail e) ^ compile_stmt s
-      
+  | Cwhile(e, s, t) -> "while " ^ (compile_detail e) ^ compile_stmt s 
   in
 
 let compile_func_detail f = 
@@ -202,14 +164,6 @@ let compile_func = function
             compile_func_detail f
         ) in
         
-
-
-(*         let string_list_stmt l = List.map compile_stmt l in
-        let string_list_det l = List.map compile_detail l in
-        Cast.string_of_ctype t ^ " " ^ s ^ "(" ^ String.concat ", " (string_list_det frmls) ^ ")"
-        ^ compile_stmt block in *)
-
-
 let compile cast = 
   let string_list = List.map compile_func cast in
 

@@ -1,8 +1,8 @@
 open Environment
 
 type op = 
-    | Eq
-    | Neq
+  | Eq
+  | Neq
   | Add
   | Sub
   | Mult
@@ -44,12 +44,6 @@ type cexpr_detail =
    | Sub of cexpr_detail * cexpr_detail * ct
    | Mult of cexpr_detail * cexpr_detail * ct
    | Div of cexpr_detail * cexpr_detail * ct
-   | FAdd of cexpr_detail * cexpr_detail * ct
-   | FSub of cexpr_detail * cexpr_detail * ct
-   | FMult of cexpr_detail * cexpr_detail * ct
-   | FDiv of cexpr_detail * cexpr_detail * ct
-(*    | MatrixAdd of cexpr_detail * cexpr_detail * ct
-   | MatrixMult of cexpr_detail * cexpr_detail * ct *)
    | Expo of cexpr_detail * cexpr_detail * ct
    | Mod of cexpr_detail * cexpr_detail * ct
    | FuncCall of string * cexpr_detail list * ct
@@ -57,8 +51,7 @@ type cexpr_detail =
    | PrintMatrixCall of cexpr_detail * ct
    | Assign of string * cexpr_detail * ct
    | Update of string * cexpr_detail * ct
-(*    | MatrixAssign of string * cexpr_detail * ct
- *)   | And of cexpr_detail * cexpr_detail * ct
+   | And of cexpr_detail * cexpr_detail * ct
    | Or of cexpr_detail * cexpr_detail * ct
    | Not of cexpr_detail * ct
    | FormalDef of string * cexpr_detail * ct
@@ -76,12 +69,9 @@ type cexpression =
   | CFMult of cexpression * cexpression * ct
   | CFDiv of cexpression * cexpression * ct
   | CMatrixAcc of cexpression * cexpression * ct
-  | CMatrixAdd of cexpression * cexpression * ct
-  | CMatrixMult of cexpression * cexpression * ct
   | Cexpo of cexpression * cexpression * ct
   | Cmod of cexpression * cexpression * ct
   | CfuncCall of cexpression list * ct
-  | Cassign of cexpression * ct
   | Cand of cexpression * cexpression * ct
   | Cor of cexpression * cexpression * ct
   | Cnot of cexpression * ct
@@ -89,7 +79,6 @@ type cexpression =
 type statement = 
   | Cstmt of cexpression * ct
   | Cblock of statement list * ct
-(*   | CReturnBlock of statement list * statement * ct *)
   | Cif of cexpression * statement * statement * ct
   | Cfor of string * cexpression * cexpression * statement * ct
   | Cwhile of cexpr_detail * statement * ct
@@ -112,8 +101,6 @@ let rec string_of_matrix_assign = function
   | Assign(s, e, ct) -> string_of_matrix_assign e
   | Id(s, ct) -> s
   | _ -> failwith "matrix required"
-
-
 
 let rec string_of_ctype = function
   | String -> "string"
@@ -154,7 +141,6 @@ let rec cexpr_detail = function
         let cexp1 = cexpr_detail e1 in
          let cexp2 = cexpr_detail e2 in
         MatrixAcc(s, cexp1, cexp2, type_match t)
- (*Expand when you pull in Alan's Fadd etc.*)
  | Sast.Neq(e1, e2, t) -> Neq((cexpr_detail e1), (cexpr_detail e2), type_match t)
  | Sast.Eq(e1, e2, t) -> Eq((cexpr_detail e1), (cexpr_detail e2), type_match t)
  | Sast.StrEq(e1, e2, t) -> StrEq((cexpr_detail e1), (cexpr_detail e2), type_match t)
@@ -163,12 +149,6 @@ let rec cexpr_detail = function
  | Sast.Sub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, type_match t)
  | Sast.Mult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, type_match t)
  | Sast.Div(e1, e2, t) -> Div(cexpr_detail e1, cexpr_detail e2, type_match t)
-(*  | Sast.FAdd(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Float)
- | Sast.FSub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Float)
- | Sast.FMult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, Float)
- | Sast.FDiv(e1, e2, t) -> Div(cexpr_detail e1, cexpr_detail e2, Float) *)
-(*  | Sast.MatrixAdd(e1, e2, t) ->  MatrixAdd(cexpr_detail e1, cexpr_detail e2, Matrix)
- | Sast.MatrixMult(e1, e2, t) -> MatrixMult(cexpr_detail e1, cexpr_detail e2, Matrix) *)
  | Sast.Expo(e1, e2, t) -> Expo(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.Mod(e1, e2, t) -> Mod(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.FuncCall(id, el, t) -> let ct = type_match t in
@@ -181,8 +161,6 @@ let rec cexpr_detail = function
                              Assign(id, cexpr_detail e, ct)
  | Sast.Update(id, e, t) -> let ct = type_match t in
                               Update(id, cexpr_detail e, ct)
-(*  | Sast.MatrixAssign(id, e, t) -> let ct = type_match t in
-                                  MatrixAssign(id, cexpr_detail e, ct) *)
  | Sast.And(e1, e, t) -> let ct = type_match t in 
                           And(cexpr_detail e1, cexpr_detail e, ct)
  | Sast.Or(e1, e2, t) ->  let ct = type_match t in
@@ -193,26 +171,17 @@ let rec cexpr_detail = function
       let t = Environment.find_type id env in
       FormalDef(id, cexpr_detail e, type_match t)
   
-
 let rec cexpr = function
   | Sast.Sexpr(e, t) -> Cexpr(cexpr_detail e, type_match t)
   | Sast.Sadd(e1, e2, t) -> Cadd(cexpr e1, cexpr e2, type_match t)
   | Sast.Ssub(e1, e2, t) -> Csub(cexpr e1, cexpr e2, type_match t)
   | Sast.Smult(e1, e2, t) -> Cmult(cexpr e1, cexpr e2, type_match t)
-  | Sast.Sdiv(e1, e2, t) -> Cdiv(cexpr e1, cexpr e2, type_match t)
-  | Sast.SFAdd(e1, e2, t) -> Cadd(cexpr e1, cexpr e2, type_match t)
-  | Sast.SFSub(e1, e2, t) -> Csub(cexpr e1, cexpr e2, type_match t)
-  | Sast.SFMult(e1, e2, t) -> Cmult(cexpr e1, cexpr e2, type_match t)
-  | Sast.SFDiv(e1, e2, t) -> Cdiv(cexpr e1, cexpr e2, type_match t)
-(*   | Sast.SMatrixAdd(e1, e2, t) -> CMatrixAdd(cexpr e1, cexpr e2, type_match t)
-(*  *)  | Sast.SMatrixMult(e1, e2, t) -> CMatrixMult(cexpr e1, cexpr e2, type_match t)
- *)  | Sast.Sexpo(e1, e2, t) -> Cexpo(cexpr e1, cexpr e2, type_match t)
+  | Sast.Sexpo(e1, e2, t) -> Cexpo(cexpr e1, cexpr e2, type_match t)
   | Sast.Smod(e1, e2, t) -> Cmod(cexpr e1, cexpr e2, type_match t)
   | Sast.SfuncCall(el, t) -> CfuncCall((List.map cexpr el), type_match t)
   | Sast.Sand(e1, e2, t) -> Cand(cexpr e1, cexpr e2, type_match t)
   | Sast.Sor(e1, e2, t) -> Cor(cexpr e1, cexpr e2, type_match t)
   | Sast.Snot(e, t) -> Cnot(cexpr e, type_match t)
-
 
 let rec stmt = function
   | Sast.Sstmt(e, t) -> let r = cexpr e in
@@ -220,16 +189,12 @@ let rec stmt = function
   | Sast.Sblock(sl, t) -> let stmt_rev = sl in
                         let l = List.map stmt stmt_rev in
                         Cblock(List.rev l, type_match t)
-(*   | Sast.SReturnBlock(sl, s, t) -> 
-                          let l = List.map stmt sl in
-                          CReturnBlock(l, stmt s, type_match t) *)
   | Sast.Sif(e, s1, s2, t) -> let r = cexpr e in
                               Cif(r, stmt s1, stmt s2, type_match t)
   | Sast.Sfor(id, e1, e2, s, t) -> Cfor(id, cexpr e1, cexpr e2, stmt s, Void)
   | Sast.Swhile(e, s, t) -> Cwhile(cexpr_detail e, stmt s , type_match t)
   | Sast.Sreturn(e, t) -> let r = cexpr e in
                          Creturn(r, type_match t)
-
 
 let rec add_return = function
   | Cblock(sl, t) ->      
@@ -261,9 +226,6 @@ let func_def = function
                                                         body = block
                                                       } in
                                         CFunctionDef(func_det, type_match t)
-
- 
- 
 let program sast = 
   let functions = List.map func_def (fst sast) in
   let main = CFunctionDef({

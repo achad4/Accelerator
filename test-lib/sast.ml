@@ -29,8 +29,8 @@ type expr_detail =
   | StrEq of expr_detail * expr_detail * t
   | StrNeq of expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
-  | MatrixAdd of expr_detail * expr_detail * t
-  | MatrixMult of expr_detail * expr_detail * t
+(*   | MatrixAdd of expr_detail * expr_detail * t
+  | MatrixMult of expr_detail * expr_detail * t *)
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
   | Div of expr_detail * expr_detail * t
@@ -54,13 +54,6 @@ type expression =
   | Sadd of expression * expression * t
   | Ssub of expression * expression * t
   | Smult of expression * expression * t
-  | SFAdd of expression * expression * t
-  | SFSub of expression * expression * t
-  | SFMult of expression * expression * t
-  | SFDiv of expression * expression * t
-  | SMatrixAdd of expression * expression * t
-  | SMatrixMult of expression * expression * t
-  | Sdiv of expression * expression * t
   | Sexpo of expression * expression * t
   | Smod of expression * expression * t
   | SfuncCall of expression list * t
