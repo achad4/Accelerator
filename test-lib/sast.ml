@@ -34,6 +34,7 @@ type expr_detail =
   | StrEq of expr_detail * expr_detail * t
   | StrNeq of expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
+  | MatrixAdd of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
   | Div of expr_detail * expr_detail * t
@@ -41,7 +42,6 @@ type expr_detail =
   | FSub of expr_detail * expr_detail * t
   | FMult of expr_detail * expr_detail * t
   | FDiv of expr_detail * expr_detail * t
-  | MatrixAdd of expr_detail * expr_detail * t
   | Expo of expr_detail * expr_detail * t
   | Mod of expr_detail * expr_detail * t
   | FuncCall of string * expr_detail list * t
@@ -229,7 +229,20 @@ let rec expr = function
                 MatrixAdd((fst e1), (fst e2), t1), t1
             )
         else
-			failwith "Type incompatibility"
+            failwith "Type incompatibility"
+	| Environment.MatrixAdd( e1, e2), env ->
+		let e1 = expr (e1, env)
+		and e2 = expr (e2, env) in
+
+		let _, t1 = e1
+		and _, t2 = e2 in
+
+		if (t1 == t2 && (t1 == Matrix)) then
+            (
+                MatrixAdd((fst e1), (fst e2), t1), t1
+            )
+        else
+            failwith "Type incompatibility"
   | Environment.Sub( e1, e2 ), env ->
           let e1 = expr (e1, env)
           and e2 = expr (e2, env) in

@@ -42,6 +42,7 @@ type expr =
   | Eq of expr * expr
   | Neq of expr * expr
   | Add of expr * expr
+  | MatrixAdd of expr * expr
   | Sub of expr * expr
   | Mult of expr * expr
   | Div of expr * expr
