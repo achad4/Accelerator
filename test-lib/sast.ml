@@ -79,7 +79,6 @@ type statement =
 type function_definition =
   | FunctionDef of string * expr_detail list * statement * t
 
-
 let rec type_of_stmt = function
   | Sstmt(e,t) -> t
   | Sblock(sl, t) -> let last_stmt = List.nth (List.rev sl) (List.length sl - 1) in
@@ -89,21 +88,14 @@ let rec type_of_stmt = function
   | Swhile(e,s,t) -> t
   | Sreturn(e, t) -> t
 
-
 let rec expr = function
   | Environment.Id (s), env -> Id(s), Environment.find_type s env
   | Environment.Assign(id, e), env ->
         let e1 = expr (e, env) in
-        (* let new_env = assign_current_scope id (snd e1) env in *)
         Assign(id, fst e1, snd e1), snd e1
   | Environment.Update(id, e), env -> 
-    (* do we need to send it a new env if just updating? *)
         let e1 = expr (e, env) in
         Update(id, fst e1, snd e1), snd e1
- (*  | Environment.MatrixAssign(id,e), env ->
-        print_endline "MatrixAssign sast";
-        let e1 = expr(e, env) in
-        MatrixAssign(id, fst e1, snd e1), snd e1 *)
   | Environment.IntLit(c), env -> IntLit(c), Int
   | Environment.FloatLit(f), env -> FloatLit(f), Float
   | Environment.BoolLit(b), env -> BoolLit(b), Bool
@@ -113,12 +105,9 @@ let rec expr = function
                         let helper e = fst (expr (e, env)) in
                         Vector(s, (List.map helper vl), vtype), Vector
   | Environment.VectAcc(s, e), env ->
-
         let e1 = expr (e, env) in
         let t = snd e1 in
-
-        if (t = Int) then
-            (
+        if (t = Int) then (
               let v_type = Environment.find_type s env in 
               VectAcc(s,
                         fst e1,
@@ -134,8 +123,7 @@ let rec expr = function
         let helper e = fst (expr (e, env)) in
         if (nrt != Int || nct != Int) then
           failwith "nrow and ncol must be integers"
-        else
-          (
+        else (
             Matrix(s, (List.map helper v), helper nr , helper nc, vtype), Matrix
           )  
   | Environment.MatrixAcc(s, e1, e2), env ->
@@ -143,14 +131,9 @@ let rec expr = function
         let ed2 = expr (e2, env) in
         let t1 = snd ed1 in
         let t2 = snd ed2 in
-        if (t1 = Int && t2 = Int) then
-        (
+        if (t1 = Int && t2 = Int) then (
           let m_type = Environment.find_type (s^"type") env in 
-
-          MatrixAcc(s,
-                          fst ed1,
-                          fst ed2,
-                          m_type), m_type
+          MatrixAcc(s, fst ed1, fst ed2, m_type), m_type
         )
         else
             failwith "Type incompatibility"
@@ -162,7 +145,6 @@ let rec expr = function
           if (print_length != 1) then
             failwith "print only takes one argument"
           else (
-
             let print_arg, print_arg_type = expr (List.hd el, env) in
 
             if(print_arg_type = Matrix) then (
@@ -185,95 +167,52 @@ let rec expr = function
           FuncCall(id, (List.map helper1 el), ret_type), ret_type ) 
         else 
           failwith "Illegal function arguments"
-
 	| Environment.Eq( e1, e2), env ->
 		let e1 = expr (e1, env)
 		and e2 = expr (e2, env) in
-
 		let _, t1 = e1
 		and _, t2 = e2 in
-
-		if (t1 == t2) then
-			(
+		if (t1 == t2) then (
                 if t1 == String then
 				    StrEq((fst e1), (fst e2), t1), t1
                 else
                     Eq((fst e1), (fst e2), t1), t1
-
 			)
 		else
 			failwith "Type incompatibility"
 	| Environment.Neq( e1, e2), env ->
 		let e1 = expr (e1, env)
 		and e2 = expr (e2, env) in
-
 		let _, t1 = e1
 		and _, t2 = e2 in
-
-		if (t1 == t2 ) then
-			(
+		if (t1 == t2 ) then (
                 if t1 == String then
 				    StrNeq((fst e1), (fst e2), t1), t1
                 else
                     Neq((fst e1), (fst e2), t1), t1
-
 			)
 		else
 			failwith "Type incompatibility"
 	| Environment.Add( e1, e2), env ->
 		let e1 = expr (e1, env)
 		and e2 = expr (e2, env) in
-
 		let _, t1 = e1
 		and _, t2 = e2 in
-		if (t1 == t2 && (t1 == Int || t1 == Float)) then
-			(
+		if (t1 == t2 && (t1 == Int || t1 == Float)) then (
 				Add((fst e1), (fst e2), t1), t1
 			)
-		else if ( t1 == t2 && t1 == Matrix) then
-            (
-
+		else if ( t1 == t2 && t1 == Matrix) then (
                 Add((fst e1), (fst e2), t1), Matrix
             )
         else
             failwith "Type incompatibility"
-	(* | Environment.MatrixAdd( e1, e2), env ->
-    		let e1 = expr (e1, env)
-    		and e2 = expr (e2, env) in
-
-    		let _, t1 = e1
-    		and _, t2 = e2 in
-
-    		if (t1 == t2 && (t1 == Matrix)) then
-            (
-                MatrixAdd((fst e1), (fst e2), t1), t1
-            )
-        else
-            failwith "Type incompatibility" *)
-(*   | Environment.MatrixMult( e1, e2), env ->
-        let e1 = expr (e1, env)
-        and e2 = expr (e2, env) in
-
-        let _, t1 = e1
-        and _, t2 = e2 in
-
-        if (t1 == t2 && (t1 == Matrix)) then
-            (
-                MatrixMult((fst e1), (fst e2), t1), t1
-            )
-        else
-            failwith "Type incompatibility" *)
   | Environment.Sub( e1, e2 ), env ->
           let e1 = expr (e1, env)
           and e2 = expr (e2, env) in
-
           let _, t1 = e1
           and _, t2 = e2 
-
         in
-
- 		if (t1 == t2 && (t1 == Int || t1 == Float)) then
-              (
+ 		if (t1 == t2 && (t1 == Int || t1 == Float)) then (
               Sub((fst e1),(fst e2), t1), t1
               )
           else
@@ -281,59 +220,42 @@ let rec expr = function
   | Environment.Mult( e1, e2 ), env ->
           let e1 = expr (e1, env)
           and e2 = expr (e2, env) in
-
           let _, t1 = e1
           and _, t2 = e2 in
-
-          if (t1 == t2 && (t1 == Int || t1 == Float)) then
-            (
+          if (t1 == t2 && (t1 == Int || t1 == Float)) then (
               Mult((fst e1), (fst e2), t1), t1
             )
-          else if ( t1 == t2 && t1 == Matrix) then
-            (
-
+          else if ( t1 == t2 && t1 == Matrix) then (
                 Mult((fst e1), (fst e2), t1), Matrix
             )
           else
               failwith "Type incompatibility"
-
   | Environment.Div( e1, e2 ), env ->
           let e1 = expr (e1, env)
           and e2 = expr (e2, env) in
-
           let _, t1 = e1
           and _, t2 = e2 in
-
-      if (t1 == t2 && (t1 == Int || t1 == Float)) then
-              (
+      if (t1 == t2 && (t1 == Int || t1 == Float)) then (
               Div((fst e1),(fst e2), t1), t1
               )
           else
               failwith "Type incompatability"
-
   | Environment.Expo( e1, e2 ), env ->
           let e1 = expr (e1, env)
           and e2 = expr (e2, env) in
-
           let _, t1 = e1
           and _, t2 = e2 in
-
-	if ((t1 == Int || t1 == Float) && (t2 == Int)) then
-              (
+	if ((t1 == Int || t1 == Float) && (t2 == Int)) then (
               Expo((fst e1),(fst e2), t1), t1
               )
           else
               failwith "Type incompatability"
-
   | Environment.Mod( e1, e2 ), env ->
           let e1 = expr (e1, env)
           and e2 = expr (e2, env) in
-
           let _, t1 = e1
           and _, t2 = e2 in
-
-	if (t1 == Int || t1 == Float && t2 == Int) then
-              (
+	if (t1 == Int || t1 == Float && t2 == Int) then (
               Mod((fst e1),(fst e2), t1), Int
               )
           else
@@ -341,12 +263,9 @@ let rec expr = function
   | Environment.And( b1, b2), env ->
           let b1 = expr (b1, env)
           and b2 = expr (b2, env) in
-
           let _, t1 = b1
           and _, t2 = b2 in
-
-	if (t1 == t2 && (t1 == Bool)) then
-              (
+	if (t1 == t2 && (t1 == Bool)) then (
                  And((fst b1),(fst b2), Bool), Bool
               )
           else
@@ -354,12 +273,9 @@ let rec expr = function
   | Environment.Or( b1, b2), env ->
           let b1 = expr (b1, env)
           and b2 = expr (b2, env) in
-
           let _, t1 = b1
           and _, t2 = b2 in
-
-	if (t1 == t2 && (t1 == Bool)) then
-              (
+	if (t1 == t2 && (t1 == Bool)) then (
                  Or((fst b1),(fst b2), Bool), Bool
               )
           else
@@ -367,8 +283,7 @@ let rec expr = function
   | Environment.Not( b1 ), env ->
           let b1 = expr (b1, env) in
           let _, t1 = b1 in
-          if ( t1 == Bool) then
-              (
+          if ( t1 == Bool) then (
                   Not((fst b1), Bool), Bool
               )
           else
@@ -377,20 +292,16 @@ let rec expr = function
           let e1 = expr (e, env) in
           let _, t1 = e1 in
           FormalDef(id, fst e1, t1, env), t1
-
 let rec stmt = function
 	| Environment.Expr( e ), env -> 
         let r = expr (e, env) in
 	      Sstmt(Sexpr(fst r, snd r), (snd r))
   | Environment.Block( sl ), env -> 
-          (* let helper s = stmt (s, env) in *)
-         (*  let l = List.map helper sl in *)
           let rec pass_envs env = function
                  | hd :: tl ->  let s = stmt (hd, env) in
                                 let passed = pass_envs env (tl) in
                                 (passed)@[s]
                  | [] -> [] in
-
           let l = pass_envs env sl in
           let last_stmt = List.nth l (List.length l - 1) in
           Sblock(l, type_of_stmt last_stmt) 
@@ -400,8 +311,7 @@ let rec stmt = function
           let stmt2 =  stmt (s2, env) in
           let t1 = type_of_stmt stmt1 in 
           let t2 = type_of_stmt stmt2 in
-          if(t1 = t2) then
-          (
+          if(t1 = t2) then (
             Sif(Sexpr( (fst r), (snd r) ), 
                 stmt1, stmt2, t1)
           )else
