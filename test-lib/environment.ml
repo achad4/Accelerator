@@ -42,8 +42,6 @@ type expr =
   | Eq of expr * expr
   | Neq of expr * expr
   | Add of expr * expr
-(*   | MatrixAdd of expr * expr
-  | MatrixMult of expr * expr *)
   | Sub of expr * expr
   | Mult of expr * expr
   | Div of expr * expr
@@ -60,7 +58,6 @@ type expr =
 type stmt = 
   | Expr of expr
   | Block of stmt list
-(*   | ReturnBlock of stmt list * stmt *)
   | If of expr * stmt * stmt
   | For of string * expr * expr * stmt
   | While of expr * stmt
@@ -83,7 +80,6 @@ let init_env = {
     func_tbl_formals = FuncMap.empty;
 }
 
-(* Rename to any stack  *)
 let find_type id env =
   let rec search_scope_lvl lvl =
   match lvl with
@@ -165,19 +161,6 @@ let assign_current_scope var vtype env =
     let updated = VarMap.add var vtype curr in
   reassign_symb_tbl_stk (updated::rest) env.func_tbl env.func_tbl_formals
 
-(* let init_func_args fname var env =
-  let updated = FuncMap.add fname var env.func_tbl in
-  reassign_symb_tbl_stk env.symb_tbl_stk updated env.func_tbl_formals *)
-
-(* let rec init_args fname args env = 
-  match args with
-  | [] -> env
-  | first :: rest -> 
-    let new_sym = assign_current_scope first Na env in
-    let new_func = init_func_args fname first env in
-    let new_env = reassign_symb_tbl_stk new_sym.symb_tbl_stk new_func.func_tbl in
-    init_args fname rest new_env *)
-
 let rec scope_expr_detail env = function
   | Ast.Na -> Na, env
   | Ast.Id(s) -> Id(s), env
@@ -198,20 +181,10 @@ let rec scope_expr_detail env = function
     let t = type_match env (fst e1) in
     let old_t = find_type_top s env in
 
-   (*  No new assignment necessary *)
-    if (old_t == Na) then
-      (
+    if (old_t == Na) then (
       let new_env = assign_current_scope s t env in
-(*       if (t = Matrix) then
-        (
-            print_endline "MatrixAssign environment";
-            MatrixAssign(s,fst(e1)), new_env
-        ) *)
-(*     else
-(*  *)        (
- *)            Assign(s,fst(e1)), new_env
-(*         )
- *)    )
+       Assign(s,fst(e1)), new_env
+    )
     else if (old_t = t) then (
       Update(s, fst(e1)), env
     )
@@ -315,8 +288,8 @@ let rec scope_stmt env = function
 
 let scope_func env = function
   | Ast.FunctionDef(str, el, stmt) ->
-      (* let init_env = assign_current_scope str Na (push_env_scope env) in *)
-      (* Initialize formal arguments *)
+
+     (* Initialize formal arguments *)
       let init_formals env1 forms =
         let helper henv hforms = 
          snd (scope_expr_detail henv hforms) in
@@ -348,8 +321,7 @@ let run_funcs env funcs =
 
 let program program =
   let init_print = FuncMap.add "print" (type_match init_env Na) init_env.func_tbl in
-(*   let init_print = FuncMap.add "print_matrix" (type_match init_env Na) init_env.func_tbl in
- *)  let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk init_print init_env.func_tbl_formals in
+  let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk init_print init_env.func_tbl_formals in
 
   let funcs_rev = List.rev (fst program) in
   let stmts_rev = List.rev (snd program) in
@@ -358,16 +330,6 @@ let program program =
 
   (*don't want things in function's scopes to be able to be accessed outside*)
   let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk new_env1.func_tbl new_env1.func_tbl_formals in 
-(*   let new_env2 = run_stmts init_env stmts_rev in
- *)
-
-  (* let func_helper1 f = fst (scope_func init_env f) in
-  let func_helper2 f = snd (scope_func init_env f) in
-  let funcs = List.map func_helper1 funcs_rev in
-  let funcs_env = List.map func_helper2 funcs_rev in *)
-
-  (* let push_env = push_env_scope new_env1 in *)
-  (* let new_env2 = run_stmts new_env1 stmts_rev in *)
 
   let rec pass_envs env = function
        | [] -> []
