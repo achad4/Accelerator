@@ -1,0 +1,10 @@
+gcd <- function(a=0,b=0, t=0) {
+while(b != 0) {
+t <- b
+b <- a %% b
+a <- t
+}
+return(a)
+}
+d <- gcd(15,10,0)
+print(d)

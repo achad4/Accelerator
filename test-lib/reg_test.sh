@@ -50,6 +50,7 @@ runTest "stringTest"
 runTest "funcTest"
 runTest "eqNeqTest"
 runTest "whileTest"
+runTest "gcdTest"
 
 echo ====================================================
 echo Results
