@@ -108,7 +108,7 @@ let rec compile_detail = function
   | Cast.MatrixAdd(e1, e2, t) ->
           let mid1 = string_of_matrix_assign e1 in
           let mid2 = string_of_matrix_assign e2 in
-          "vector<vector<"^string_of_ctype t^"> > result = matrix_add("^mid1^", "^ mid2 ^ ");"
+          "vector<vector<int> > result = matrix_add("^mid1^", "^ mid2 ^ ");"
           ^
           "print_matrix(result)"
 
@@ -196,7 +196,6 @@ let compile cast =
    "template<typename t>
    vector<vector<t> > matrix_add(vector<vector<t> > a, vector<vector<t> > b){
        vector<vector<t> > c;
-       cout<<a[0].size()<<endl;
        for(int i = 0; i < a.size(); i++){
            vector<t> row;
             for(int j = 0; j < a[0].size(); j++){
