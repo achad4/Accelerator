@@ -219,7 +219,6 @@ let rec scope_expr_detail env = function
   | Ast.Mult(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1 in
       let e2, v2 = scope_expr_detail v1 expr2 in
-      let t = type_match env e1 in
       Mult(e1, e2), v2
   | Ast.Div(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1 in

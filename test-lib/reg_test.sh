@@ -9,8 +9,8 @@ failures=0
 
 runTest() {
 	./acc < sourceFiles/$1.acc > compiledCpp/$1.cpp
-	g++ -o executables/$1 compiledCpp/$1.cpp
-	# clang-omp++ -o executables/$1 compiledCpp/$1.cpp -fopenmp
+	# g++ -o executables/$1 compiledCpp/$1.cpp
+	clang-omp++ -o executables/$1 compiledCpp/$1.cpp -fopenmp
 	./executables/$1 > output/$1.txt
 	count+=1
 	if diff "output/"$1".txt" "expected/"$1"Expected.txt" > /dev/null; then
@@ -27,6 +27,7 @@ if [ $# -eq 1 ]
     exit
 fi
 
+runTest "helloWorldTest"
 runTest "addTest"
 runTest "subTest"
 runTest "multTest"

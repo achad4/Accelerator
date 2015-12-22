@@ -1,0 +1,7 @@
+foo <- function(i="goodbye",j="moon") {
+	print(i)
+	print(j)
+	return(5)
+}
+i <- foo("hello", "world")
+print(i)
