@@ -190,12 +190,14 @@ let rec scope_expr_detail env = function
 
    (*  No new assignment necessary *)
     if (old_t == Na) then
-      (
+      ( print_endline "not yet assigned"; print_endline s;
     let new_env = assign_current_scope s t env in
       Assign(s, fst(e1)), new_env
     )
-    else if (old_t = t) then
+    else if (old_t = t) then (
+      print_endline "already assigned"; print_endline s;
       Update(s, fst(e1)), env
+    )
     else
     failwith "Cannot cast types"
   | Ast.Vector(s, el) ->
