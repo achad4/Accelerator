@@ -108,7 +108,7 @@ let rec compile_detail = function
   | Cast.MatrixAdd(e1, e2, t) ->
           let mid1 = string_of_matrix_assign e1 in
           let mid2 = string_of_matrix_assign e2 in
-          "vector<vector<int> > result = matrix_add("^mid1^", "^ mid2 ^ ");"
+          "vector<vector<"^string_of_ctype t^"> > result = matrix_add("^mid1^", "^ mid2 ^ ");"
           ^
           "print_matrix(result)"
 
@@ -186,31 +186,35 @@ let compile cast =
   String.concat ""  string_list in
 
   let c_begin = 
-  "#include<iostream>\n"^
-  "#include<stdio.h>\n" ^
-  "#include<math.h>\n" ^
-  "#include<vector>\n" ^
-  "#include<string>\n" ^
-  "#include<string.h>\n" ^
-  "using namespace std;\n" ^
-  "vector<vector<int> > matrix_add(vector<vector<int> > a, vector<vector<int> > b){
-      vector<vector<int> > c;
-      for(int i = 0; i < a.size(); i++){
-          vector<int> row;
-          for(int j = 0; j < a[0].size(); j++){
-             row.push_back(a[i][j] + b[i][j]);
-          }
-          c.push_back(row);
-          }
-            return c;
-    }
-    void print_matrix(vector<vector<int> > a){
-      for(int i = 0; i<a.size(); i++){
-        cout<<endl;
-        for(int j = 0; j<a[0].size(); j++){
-          cout << a[i][j] << \" \";
-        }
-      }
-    }\n" in
+   "#include<iostream>\n"^
+   "#include<stdio.h>\n" ^
+   "#include<math.h>\n" ^
+   "#include<vector>\n" ^
+   "#include<string>\n" ^
+   "#include<string.h>\n" ^
+   "using namespace std;\n" ^
+   "template<typename t>
+   vector<vector<t> > matrix_add(vector<vector<t> > a, vector<vector<t> > b){
+       vector<vector<t> > c;
+       cout<<a[0].size()<<endl;
+       for(int i = 0; i < a.size(); i++){
+           vector<t> row;
+            for(int j = 0; j < a[0].size(); j++){
+                row.push_back(a[i][j] + b[i][j]);
+            }
+           c.push_back(row);
+       }
+       return c;
+   }
+
+   template<typename t>
+   void print_matrix(vector<vector<t> > a){
+       for(int i = 0; i<a.size(); i++){
+           cout<<endl;
+           for(int j = 0; j<a[0].size(); j++){
+               cout << a[i][j] << \" \";
+           }
+       }
+   }\n" in
 
   print_endline ( c_begin ^ (compile cast))
