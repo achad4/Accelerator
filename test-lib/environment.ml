@@ -189,14 +189,15 @@ let rec scope_expr_detail env = function
     let old_t = find_type_top s env in
 
    (*  No new assignment necessary *)
-    if (old_t == Na (* || old_t != t *)) then
+    if (old_t == Na) then
       (
     let new_env = assign_current_scope s t env in
       Assign(s, fst(e1)), new_env
     )
-    else (
+    else if (old_t = t) then
       Update(s, fst(e1)), env
-    )
+    else
+    failwith "Cannot cast types"
   | Ast.Vector(s, el) ->
       let head = List.hd el in
       let e1 = scope_expr_detail env head in
