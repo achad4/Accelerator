@@ -25,7 +25,7 @@ type t =
   | Float
   | Bool
   | Vector
-  | Matrix 
+  | Matrix
   | Na
 
 type expr =
@@ -186,8 +186,11 @@ let rec scope_expr_detail env = function
   | Ast.FloatLit(f) -> FloatLit(f), env
   | Ast.StringLit(s) -> StringLit(s) , env
   | Ast.Matrix(s, el, e1, e2) ->
-(*    let mtype = type_match env (fst (scope_expr_detail env head)) in
- *)   let new_env = assign_current_scope s Matrix env in
+      let head = List.hd el in
+      let mtype = type_match env (fst (scope_expr_detail env head)) in
+      let new_env = assign_current_scope s Matrix env in
+      let s_type = s ^ "type" in
+      let new_env = assign_current_scope s_type mtype new_env in
       let helper e = fst (scope_expr_detail env e) in
       Matrix(s, List.map helper el, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), new_env
   | Ast.Assign(s,e) ->
