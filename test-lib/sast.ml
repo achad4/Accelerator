@@ -45,6 +45,7 @@ type expr_detail =
   | FuncCall of string * expr_detail list * t
   | PrintCall of expr_detail * t
   | Assign of string * expr_detail * t
+  | Update of string * expr_detail * t
   | And of expr_detail * expr_detail * t
   | Or of expr_detail * expr_detail * t
   | Not of expr_detail * t
@@ -77,6 +78,7 @@ type statement =
 (*   | SReturnBlock of statement list * statement * t *)
   | Sif of expression * statement * statement * t
   | Sfor of string * expression * expression * statement * t
+  | Swhile of expr_detail * statement * t
   | Sreturn of expression * t
 
 type function_definition =
@@ -89,6 +91,7 @@ let rec type_of_stmt = function
                      type_of_stmt last_stmt
   | Sif(e,s1,s2,t) -> t
   | Sfor(s1,e1,e2,s2,t) -> t
+  | Swhile(e,s,t) -> t
   | Sreturn(e, t) -> t
 
 
@@ -97,6 +100,10 @@ let rec expr = function
   | Environment.Assign(id, e), env ->
         let e1 = expr (e, env) in
         Assign(id, fst e1, snd e1), snd e1
+  | Environment.Update(id, e), env -> 
+    (* do we need to send it a new env if just updating? *)
+        let e1 = expr (e, env) in
+        Update(id, fst e1, snd e1), snd e1
   | Environment.IntLit(c), env -> IntLit(c), Int
   | Environment.FloatLit(f), env -> FloatLit(f), Float
   | Environment.BoolLit(b), env -> BoolLit(b), Bool
@@ -337,7 +344,7 @@ let rec stmt = function
           let helper s = stmt (s, env) in
           let l = List.map helper sl in
           let last_stmt = List.nth l (List.length l - 1) in
-          Sblock(l, type_of_stmt last_stmt)
+          Sblock(l, type_of_stmt last_stmt) 
   | Environment.If(e, s1, s2), env -> 
           let r = expr (e, env) in
           let stmt1 =  stmt (s1, env) in
@@ -360,6 +367,10 @@ let rec stmt = function
                Sexpr(fst(rie2),snd(rie2)), 
                b1,
                t)
+  | Environment.While(e, s), env -> 
+          let e_val = expr (e, env) in
+          let s_val = stmt (s, env) in
+          Swhile(fst e_val, s_val, Na)
   | Environment.Return(e), env -> 
           let e1 = expr (e, env) in
           Sreturn(Sexpr(fst e1, snd e1), snd e1)

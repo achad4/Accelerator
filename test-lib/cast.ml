@@ -53,6 +53,7 @@ type cexpr_detail =
    | FuncCall of string * cexpr_detail list * ct
    | PrintCall of cexpr_detail * ct
    | Assign of string * cexpr_detail * ct
+   | Update of string * cexpr_detail * ct
    | And of cexpr_detail * cexpr_detail * ct
    | Or of cexpr_detail * cexpr_detail * ct
    | Not of cexpr_detail * ct
@@ -84,6 +85,7 @@ type statement =
 (*   | CReturnBlock of statement list * statement * ct *)
   | Cif of cexpression * statement * statement * ct
   | Cfor of string * cexpression * cexpression * statement * ct
+  | Cwhile of cexpr_detail * statement * ct
   | Creturn of cexpression * ct
 
 type func_decl_detail = {
@@ -158,6 +160,8 @@ let rec cexpr_detail = function
                                 PrintCall(cexpr_detail e, ct)
  | Sast.Assign(id, e, t) -> let ct = type_match t in
                              Assign(id, cexpr_detail e, ct)
+ | Sast.Update(id, e, t) -> let ct = type_match t in
+                              Update(id, cexpr_detail e, ct)
  | Sast.And(e1, e, t) -> let ct = type_match t in 
                           And(cexpr_detail e1, cexpr_detail e, ct)
  | Sast.Or(e1, e2, t) ->  let ct = type_match t in
@@ -199,6 +203,7 @@ let rec stmt = function
   | Sast.Sif(e, s1, s2, t) -> let r = cexpr e in
                               Cif(r, stmt s1, stmt s2, type_match t)
   | Sast.Sfor(id, e1, e2, s, t) -> Cfor(id, cexpr e1, cexpr e2, stmt s, Void)
+  | Sast.Swhile(e, s, t) -> Cwhile(cexpr_detail e, stmt s , type_match t)
   | Sast.Sreturn(e, t) -> let r = cexpr e in
                          Creturn(r, type_match t)
 
@@ -215,6 +220,7 @@ let rec add_return = function
                                                  add_return last_stmt
                               | Cif(e, s1, s2, t) -> Cif(e, add_return s1, add_return s2, t)
                               | Cfor(s1, e1, e2, s2, t) -> add_return s2
+                              | Cwhile(e,s,t) -> Cwhile(e, add_return s ,t)
                               | Creturn(e, t) -> Creturn(e, t)
                           in
                           Cblock(sl@[return], t)
@@ -241,7 +247,7 @@ let program sast =
   let main = CFunctionDef({
                  fname = "main";
                  formals = [];
-                 body = Cblock(List.map stmt (snd sast), Void)
+                 body = Cblock(List.rev (List.map stmt (snd sast)), Void)
               }, Int) in
   functions@[main]
 

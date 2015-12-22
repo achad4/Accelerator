@@ -3,7 +3,7 @@
 %token EOF, DLIN, PLUS, MINUS, MULT, DIV, EXPO, MOD, RBRACE, LBRACE, NA
 %token LPAREN, RPAREN, COMMA, ASSIGN, AND, OR, NOT, IF, ELSE, VECTSTART
 %token MATRIXSTART, NROW, NCOL, EQSING, EQ, FOR, IN, RANGE, LBRAC, RBRAC
-%token DOUBLEQT, FUNCTION, RETURN, NEQ
+%token DOUBLEQT, FUNCTION, RETURN, NEQ, WHILE
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -47,6 +47,7 @@ stmt:
 /*  | LBRACE DLIN stmt_list stmt RBRACE DLIN                   { ReturnBlock(List.rev $3, $4) } */
   | IF LPAREN bool_expr RPAREN DLIN block ELSE DLIN block      { If($3, $6, $9) }
   | FOR LPAREN ID IN expr RANGE expr RPAREN block             { For($3, $5, $7, $9) }
+  | WHILE LPAREN compare_expr RPAREN block                  { While ($3, $5) }
 
 func_def_list:
   | func_def                                 { [$1] }
@@ -62,8 +63,7 @@ func_stmt:
 
 expr:
   | ID                                                       { Id($1) }
-  | eq_expr EQ eq_expr {Eq($1, $3) }
-  | eq_expr NEQ eq_expr {Neq($1, $3) }
+  | compare_expr    { $1 }
   | expr MULT expr  { Mult($1, $3) }
   | expr PLUS expr  { Add($1, $3) }
   | expr MINUS expr { Sub($1, $3) }
@@ -80,6 +80,10 @@ expr:
   | ID ASSIGN expr                                           { Assign($1, $3) }
   | ID LBRAC expr RBRAC                                      { VectAcc($1, $3) }
   | ID LBRAC expr RBRAC LBRAC expr RBRAC                     { MatrixAcc($1, $3, $6) }
+
+compare_expr:
+  | eq_expr EQ eq_expr {Eq($1, $3) }
+  | eq_expr NEQ eq_expr {Neq($1, $3) }
 
 eq_expr:
   | literal {$1}

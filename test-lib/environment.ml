@@ -49,6 +49,7 @@ type expr =
   | Mod of expr * expr
   | FuncCall of string * expr list 
   | Assign of string * expr
+  | Update of string * expr
   | And of expr * expr
   | Or of expr * expr
   | Not of expr
@@ -60,6 +61,7 @@ type stmt =
 (*   | ReturnBlock of stmt list * stmt *)
   | If of expr * stmt * stmt
   | For of string * expr * expr * stmt
+  | While of expr * stmt
   | Return of expr
 
 type func_def = 
@@ -110,12 +112,24 @@ let rec type_match env = function
         failwith "Function does not exist"
   | _ -> Na
 
+let find_type_top id env =
+  let rec search_scope_lvl lvl =
+  match lvl with
+    | [] -> raise (UnassignedVarException id)
+    | top :: rest ->
+      if VarMap.mem id top then
+        VarMap.find id top
+      else
+        type_match env Na
+  in search_scope_lvl env.symb_tbl_stk 
+
 let rec type_of_stmt env = function
   | Expr(e) -> type_match env e
   | Block(sl) -> let last_stmt = List.nth sl (List.length sl - 1) in
                      type_of_stmt env last_stmt
   | If(e,s1,s2) -> Na
   | For(s1,e1,e2,s2) -> Na
+  | While(e,s) -> Na
   | Return(e) -> type_match env e
 
 let reassign_symb_tbl_stk stk func forms = {
@@ -172,8 +186,19 @@ let rec scope_expr_detail env = function
   | Ast.Assign(s,e) ->
     let e1 = scope_expr_detail env e in
     let t = type_match env (fst e1) in
+    let old_t = find_type_top s env in
+
+   (*  No new assignment necessary *)
+    if (old_t == Na || old_t != t) then
+      (
+            (* print_endline "assign"; *)
     let new_env = assign_current_scope s t env in
-    Assign(s, fst(e1)), new_env
+      Assign(s, fst(e1)), new_env
+    )
+    else ((* print_endline "update"; *)
+      Update(s, fst(e1)), env
+
+    )
   | Ast.Vector(s, el) ->
       let head = List.hd el in
       let e1 = scope_expr_detail env head in
@@ -264,6 +289,10 @@ let rec scope_stmt env = function
       and e3, v3 = scope_expr_detail new_env expr3 in
       let r = (scope_stmt new_env stmt) in
       For(str, e2, e3, fst r), snd r
+  | Ast.While(expr,stmt) -> 
+      let compare = scope_expr_detail env expr in
+      let block = scope_stmt env stmt in
+      While(fst compare, fst block), snd block
   | Ast.Return(e) -> 
       let e1, v1 = scope_expr_detail env e in
       Return(e1), v1
@@ -312,9 +341,25 @@ let program program =
 
   (*don't want things in function's scopes to be able to be accessed outside*)
   let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk new_env1.func_tbl new_env1.func_tbl_formals in 
-  let new_env2 = run_stmts init_env stmts_rev in
+(*   let new_env2 = run_stmts init_env stmts_rev in
+ *)
+
+  (* let func_helper1 f = fst (scope_func init_env f) in
+  let func_helper2 f = snd (scope_func init_env f) in
+  let funcs = List.map func_helper1 funcs_rev in
+  let funcs_env = List.map func_helper2 funcs_rev in *)
+
+  (* let push_env = push_env_scope new_env1 in *)
+  (* let new_env2 = run_stmts new_env1 stmts_rev in *)
+
+  let rec pass_envs env = function
+       | [] -> []
+       | [s] -> let s = scope_stmt env s in [s]
+       | hd :: tl ->  let s = scope_stmt env hd in
+                      (pass_envs (snd s) tl)@[s] in
 
   let helper1 env e = (scope_func env e) in
-  let helper2 env e = (scope_stmt env e) in
-  (List.map (helper1 new_env2) funcs_rev), (List.map (helper2 new_env2) stmts_rev)
+
+  (List.map (helper1 new_env1) funcs_rev), pass_envs init_env (stmts_rev)
+
 
