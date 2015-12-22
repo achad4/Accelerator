@@ -7,10 +7,6 @@ type op =
   | Div
   | Expo
   | Mod
-  | FAdd
-  | FSub
-  | FMult
-  | FDiv
   | Assign
   | And
   | Or
@@ -38,10 +34,6 @@ type expr_detail =
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
   | Div of expr_detail * expr_detail * t
-  | FAdd of expr_detail * expr_detail * t
-  | FSub of expr_detail * expr_detail * t
-  | FMult of expr_detail * expr_detail * t
-  | FDiv of expr_detail * expr_detail * t
   | Expo of expr_detail * expr_detail * t
   | Mod of expr_detail * expr_detail * t
   | FuncCall of string * expr_detail list * t

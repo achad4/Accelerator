@@ -64,34 +64,17 @@ let rec compile_detail = function
   | Cast.Not(b1, t) -> "! " ^ (compile_detail b1)
   | Cast.Assign(id, e, t) -> 
           let ty = (string_of_ctype t) in
-          if (ty = "Matrix") then
-          (
-                (* let ty = (Cast.string_of_ctype t) in
-                (* make sure we save our matrix output to temp *) 
-                (compile_detail e) ^
-                (* get how big temp is right now *)
-                "int rows = temp.size();\n" ^
-                "vector<vector<" ^ty^ "> " ^ id ^ ";\n" ^
-                "for(int i = 0; i < rows; i++){\n" ^
-                "\t" ^ "vector<" ^ty^ "> row (temp[i]);\n" ^
-                "\t" ^ id ^ ".push_back(row);\n" ^
-                "}"     *)
-            id
-              (* raise (UnassignedVarException "matrix detected") *)
-            )
-          else
-              ty ^ " " ^ id ^ " = " ^ (compile_detail e)
+          ty ^ " " ^ id ^ " = " ^ (compile_detail e)
   | Cast.MatrixAssign(id, e, t) ->
           let ty = (Cast.string_of_ctype t) in
-          (* make sure we save our matrix output to temp *) 
-          (compile_detail e) ^
-          (* get how big temp is right now *)
+          "\n\n\n\n MATRIX ASSIGN \n\n\n " ^
           "int rows = temp.size();\n" ^
           "vector<vector<" ^ty^ "> " ^ id ^ ";\n" ^
           "for(int i = 0; i < rows; i++){\n" ^
           "\t" ^ "vector<" ^ty^ "> row (temp[i]);\n" ^
           "\t" ^ id ^ ".push_back(row);\n" ^
-          "}"    
+          "};" 
+              
   | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ 
                            (compile_detail e2) 
   | Cast.Expo(e1, e2, t) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ 
@@ -112,14 +95,8 @@ let rec compile_detail = function
                             (compile_detail e2)
   | Cast.Sub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ 
                            (compile_detail e2) 
-  | Cast.Add(e1, e2, t) -> 
-          if (t != Matrix) then
-              (
-                  (compile_detail e1) ^ " + " ^
+  | Cast.Add(e1, e2, t) -> (compile_detail e1) ^ " + " ^
                            (compile_detail e2)
-              )else(
-                  "MATRIX MATRIX MATRIX"
-              )
   | Cast.FAdd(e1, e2, t) -> (compile_detail e1) ^ " + " ^ 
                             (compile_detail e2)
   | Cast.FSub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ 
@@ -137,6 +114,8 @@ let rec compile_detail = function
           let col1 = mid1 ^ "col" in
           let col2 = mid2 ^ "col" in
          (* e1 and e2 should be strings representing our matrix ids *)
+          
+          "\n\n\n\n MATRIX ADD \n\n\n" ^
           "int " ^ row1 ^ " = " ^ mid1 ^ ".size();\n" ^
           "int " ^ row2 ^ " = " ^ mid2 ^ ".size();\n" ^
           "if (" ^ row1 ^ " != " ^ row2 ^ "){\n" ^
