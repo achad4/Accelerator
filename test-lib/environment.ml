@@ -191,11 +191,11 @@ let rec scope_expr_detail env = function
    (*  No new assignment necessary *)
     if (old_t == Na || old_t != t) then
       (
-            (* print_endline "assign"; *)
+            print_endline "assign"; print_endline s;
     let new_env = assign_current_scope s t env in
       Assign(s, fst(e1)), new_env
     )
-    else ((* print_endline "update"; *)
+    else (print_endline "update";print_endline s;
       Update(s, fst(e1)), env
 
     )
@@ -275,12 +275,12 @@ let rec scope_stmt env = function
        | [] -> []
        | [s] -> let (s, new_env) = scope_stmt env s in [s]
        | hd :: tl ->  let (s, new_env) = scope_stmt env hd in
-                      (pass_envs new_env tl)@[s] in
+                      [s]@(pass_envs new_env tl) in
 
         let helper henv hstmts = snd (scope_stmt henv hstmts) in
         let block_env = List.fold_left helper env (List.rev blk) in
       
-      Block(pass_envs env (List.rev blk)), block_env 
+      Block(pass_envs env blk), block_env 
   | Ast.If(expr,stmt1,stmt2) -> let i, v = scope_expr_detail env expr in
       If(i, fst (scope_stmt env stmt1), fst (scope_stmt env stmt2)), env
   | Ast.For(str,expr2,expr3,stmt) ->
@@ -308,18 +308,19 @@ let scope_func env = function
       let new_env = init_formals env el in
       let block, new_env = scope_stmt new_env stmt in
       let ret_type = (type_of_stmt new_env block) in
-
+      print_endline "heyyy";
       let helper2 e = fst (scope_expr_detail new_env e) in
       
       (* Add function formals to env *)
       let rec formal_type_list env = function
         | [] -> []
         | hd::tl -> type_match env hd :: formal_type_list env tl in
-      let my_formal_type_list = formal_type_list new_env (List.map helper2 el) in
+      let forms = (List.map helper2 el) in
+      let my_formal_type_list = formal_type_list new_env forms in
       let new_form_map = FuncMap.add str my_formal_type_list new_env.func_tbl_formals in
       let new_fname_map = FuncMap.add str ret_type new_env.func_tbl in
       let new_env = reassign_symb_tbl_stk new_env.symb_tbl_stk new_fname_map new_form_map in
-      FunctionDef(str, List.map helper2 el, block), new_env
+      FunctionDef(str, forms, block), new_env
 
 let run_stmts env stmts =
   let helper henv hstmts = snd (scope_stmt henv hstmts) in
