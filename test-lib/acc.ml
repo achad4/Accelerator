@@ -63,6 +63,7 @@ let rec compile_detail = function
   | Cast.Not(b1, t) -> "! " ^ (compile_detail b1)
   | Cast.Assign(id, e, t) -> string_of_ctype t ^ " " ^ id ^ " = " ^ 
                              (compile_detail e)
+  | Cast.Update(id, e, t) -> id ^ " = " ^ (compile_detail e)
   | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ 
                            (compile_detail e2) 
   | Cast.Expo(e1, e2, t) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ 

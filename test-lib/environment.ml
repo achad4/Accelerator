@@ -189,14 +189,15 @@ let rec scope_expr_detail env = function
     let old_t = find_type_top s env in
 
    (*  No new assignment necessary *)
-    if (old_t != Na && old_t = t) then
-      ( print_endline "update";
-      Update(s, fst(e1)), env
-    )
-    else (
-      print_endline "assign";
+    if (old_t == Na || old_t != t) then
+      (
+            print_endline "assign";
     let new_env = assign_current_scope s t env in
       Assign(s, fst(e1)), new_env
+    )
+    else (print_endline "update";
+      Update(s, fst(e1)), env
+
     )
   | Ast.Vector(s, el) ->
 (*       let new_env = assign_current_scope s (type_match t) env in
@@ -343,10 +344,16 @@ let program program =
   let funcs = List.map func_helper1 funcs_rev in
   let funcs_env = List.map func_helper2 funcs_rev in *)
   let new_env1 = run_funcs init_env funcs_rev in 
-  let push_env = push_env_scope new_env1 in
-  let new_env2 = run_stmts push_env stmts_rev in
-  let pop_env = pop_env_scope new_env2 in
+  (* let push_env = push_env_scope new_env1 in *)
+  (* let new_env2 = run_stmts new_env1 stmts_rev in *)
+
+  let rec pass_envs env = function
+       | [] -> []
+       | [s] -> let s = scope_stmt env s in [s]
+       | hd :: tl ->  let s = scope_stmt env hd in
+                      (pass_envs (snd s) tl)@[s] in
+
   let helper1 env e = (scope_func env e) in
   let helper2 env e = (scope_stmt env e) in
-  (List.map (helper1 new_env1) funcs_rev), (List.map (helper2 pop_env) stmts_rev)
+  (List.map (helper1 new_env1) funcs_rev), pass_envs new_env1 (snd program)
 

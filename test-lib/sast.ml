@@ -45,6 +45,7 @@ type expr_detail =
   | FuncCall of string * expr_detail list * t
   | PrintCall of expr_detail * t
   | Assign of string * expr_detail * t
+  | Update of string * expr_detail * t
   | And of expr_detail * expr_detail * t
   | Or of expr_detail * expr_detail * t
   | Not of expr_detail * t
@@ -99,6 +100,10 @@ let rec expr = function
   | Environment.Assign(id, e), env ->
         let e1 = expr (e, env) in
         Assign(id, fst e1, snd e1), snd e1
+  | Environment.Update(id, e), env -> 
+    (* do we need to send it a new env if just updating? *)
+        let e1 = expr (e, env) in
+        Update(id, fst e1, snd e1), snd e1
   | Environment.IntLit(c), env -> IntLit(c), Int
   | Environment.FloatLit(f), env -> FloatLit(f), Float
   | Environment.BoolLit(b), env -> BoolLit(b), Bool
@@ -339,7 +344,7 @@ let rec stmt = function
           let helper s = stmt (s, env) in
           let l = List.map helper sl in
           let last_stmt = List.nth l (List.length l - 1) in
-          Sblock(l, type_of_stmt last_stmt)
+          Sblock(l, type_of_stmt last_stmt) 
   | Environment.If(e, s1, s2), env -> 
           let r = expr (e, env) in
           let stmt1 =  stmt (s1, env) in
