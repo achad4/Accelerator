@@ -52,8 +52,8 @@ type expr =
   | FuncCall of string * expr list 
   | Assign of string * expr
   | Update of string * expr
-  | MatrixAssign of string * expr
-  | And of expr * expr
+(*   | MatrixAssign of string * expr
+ *)  | And of expr * expr
   | Or of expr * expr
   | Not of expr
   | FormalDef of string * expr * t
@@ -200,16 +200,16 @@ let rec scope_expr_detail env = function
     if (old_t == Na) then
       (
       let new_env = assign_current_scope s t env in
-      if (t = Matrix) then
+(*       if (t = Matrix) then
         (
             print_endline "MatrixAssign environment";
             MatrixAssign(s,fst(e1)), new_env
-        )
-    else
-        (
-            Assign(s,fst(e1)), new_env
-        )
-    )
+        ) *)
+(*     else
+(*  *)        (
+ *)            Assign(s,fst(e1)), new_env
+(*         )
+ *)    )
     else if (old_t = t) then (
       Update(s, fst(e1)), env
     )
@@ -237,14 +237,7 @@ let rec scope_expr_detail env = function
       let e1, v1 = scope_expr_detail env expr1 in
       let e2, v2 = scope_expr_detail v1 expr2 in
       let t = type_match env e1 in
-      if (t = Matrix) then
-      (
-        MatrixAdd(e1, e2), v2
-      )
-      else
-      (
         Add(e1, e2), v2
-      )
   | Ast.Sub(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1 in
       let e2, v2 = scope_expr_detail v1 expr2 in
@@ -253,14 +246,7 @@ let rec scope_expr_detail env = function
       let e1, v1 = scope_expr_detail env expr1 in
       let e2, v2 = scope_expr_detail v1 expr2 in
       let t = type_match env e1 in
-      if (t = Matrix) then
-      (
-        MatrixMult(e1, e2), v2
-      )
-      else
-      (
-        Mult(e1, e2), v2
-      )
+      Mult(e1, e2), v2
   | Ast.Div(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1 in
       let e2, v2 = scope_expr_detail v1 expr2 in
@@ -360,6 +346,7 @@ let run_funcs env funcs =
 
 let program program =
   let init_print = FuncMap.add "print" (type_match init_env Na) init_env.func_tbl in
+  let init_print = FuncMap.add "print_matrix" (type_match init_env Na) init_env.func_tbl in
   let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk init_print init_env.func_tbl_formals in
 
   let funcs_rev = List.rev (fst program) in

@@ -54,10 +54,11 @@ type cexpr_detail =
    | Mod of cexpr_detail * cexpr_detail * ct
    | FuncCall of string * cexpr_detail list * ct
    | PrintCall of cexpr_detail * ct
+   | PrintMatrixCall of cexpr_detail * ct
    | Assign of string * cexpr_detail * ct
    | Update of string * cexpr_detail * ct
-   | MatrixAssign of string * cexpr_detail * ct
-   | And of cexpr_detail * cexpr_detail * ct
+(*    | MatrixAssign of string * cexpr_detail * ct
+ *)   | And of cexpr_detail * cexpr_detail * ct
    | Or of cexpr_detail * cexpr_detail * ct
    | Not of cexpr_detail * ct
    | FormalDef of string * cexpr_detail * ct
@@ -108,7 +109,7 @@ type program =
 
 let rec string_of_matrix_assign = function
   | Matrix(s, el, e, e1, ct) -> s
-  | MatrixAssign(s, e, ct) -> string_of_matrix_assign e
+  | Assign(s, e, ct) -> string_of_matrix_assign e
   | Id(s, ct) -> s
   | _ -> failwith "matrix required"
 
@@ -122,7 +123,7 @@ let rec string_of_ctype = function
   | Void -> "void"
   | IdType -> "IdType"
   | Vector -> "Vector"
-  | Matrix -> "Matrix"
+  | Matrix -> "vector<vector<int> >"
 
 let rec type_match = function
   | Environment.String -> String
@@ -146,8 +147,9 @@ let rec cexpr_detail = function
         let cexp1 = cexpr_detail e1 in
         VectAcc(s, cexp1, type_match t)
  | Sast.NaLit(t) -> Na("Void", type_match t)
- | Sast.Matrix(s, v, nr, nc, t) -> let ct = type_match t in
-        Matrix(s, List.map cexpr_detail v, cexpr_detail nr, cexpr_detail nc, ct)
+ | Sast.Matrix(s, v, nr, nc, t) -> 
+                                let ct = type_match t in
+                                Matrix(s, List.map cexpr_detail v, cexpr_detail nr, cexpr_detail nc, ct)
  | Sast.MatrixAcc(s, e1, e2, t) ->
         let cexp1 = cexpr_detail e1 in
          let cexp2 = cexpr_detail e2 in
@@ -165,21 +167,22 @@ let rec cexpr_detail = function
  | Sast.FSub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Float)
  | Sast.FMult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, Float)
  | Sast.FDiv(e1, e2, t) -> Div(cexpr_detail e1, cexpr_detail e2, Float) *)
- | Sast.MatrixAdd(e1, e2, t) -> MatrixAdd(cexpr_detail e1, cexpr_detail e2, Matrix)
+ | Sast.MatrixAdd(e1, e2, t) ->  MatrixAdd(cexpr_detail e1, cexpr_detail e2, Matrix)
  | Sast.MatrixMult(e1, e2, t) -> MatrixMult(cexpr_detail e1, cexpr_detail e2, Matrix)
  | Sast.Expo(e1, e2, t) -> Expo(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.Mod(e1, e2, t) -> Mod(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.FuncCall(id, el, t) -> let ct = type_match t in
-                               FuncCall(id, 
-                               List.map cexpr_detail el, ct)
+                               FuncCall(id, List.map cexpr_detail el, ct)
  | Sast.PrintCall(e, t) -> let ct = type_match t in
                                 PrintCall(cexpr_detail e, ct)
+ | Sast.PrintMatrixCall(e, t) -> let ct = type_match t in
+                                PrintMatrixCall(cexpr_detail e, ct)
  | Sast.Assign(id, e, t) -> let ct = type_match t in
                              Assign(id, cexpr_detail e, ct)
  | Sast.Update(id, e, t) -> let ct = type_match t in
                               Update(id, cexpr_detail e, ct)
- | Sast.MatrixAssign(id, e, t) -> let ct = type_match t in
-                                  MatrixAssign(id, cexpr_detail e, ct)
+(*  | Sast.MatrixAssign(id, e, t) -> let ct = type_match t in
+                                  MatrixAssign(id, cexpr_detail e, ct) *)
  | Sast.And(e1, e, t) -> let ct = type_match t in 
                           And(cexpr_detail e1, cexpr_detail e, ct)
  | Sast.Or(e1, e2, t) ->  let ct = type_match t in
@@ -201,14 +204,15 @@ let rec cexpr = function
   | Sast.SFSub(e1, e2, t) -> Csub(cexpr e1, cexpr e2, type_match t)
   | Sast.SFMult(e1, e2, t) -> Cmult(cexpr e1, cexpr e2, type_match t)
   | Sast.SFDiv(e1, e2, t) -> Cdiv(cexpr e1, cexpr e2, type_match t)
-  | Sast.SMatrixAdd(e1, e2, t) -> CMatrixAdd(cexpr e1, cexpr e2, type_match t)
-  | Sast.SMatrixMult(e1, e2, t) -> CMatrixMult(cexpr e1, cexpr e2, type_match t)
-  | Sast.Sexpo(e1, e2, t) -> Cexpo(cexpr e1, cexpr e2, type_match t)
+(*   | Sast.SMatrixAdd(e1, e2, t) -> CMatrixAdd(cexpr e1, cexpr e2, type_match t)
+(*  *)  | Sast.SMatrixMult(e1, e2, t) -> CMatrixMult(cexpr e1, cexpr e2, type_match t)
+ *)  | Sast.Sexpo(e1, e2, t) -> Cexpo(cexpr e1, cexpr e2, type_match t)
   | Sast.Smod(e1, e2, t) -> Cmod(cexpr e1, cexpr e2, type_match t)
   | Sast.SfuncCall(el, t) -> CfuncCall((List.map cexpr el), type_match t)
   | Sast.Sand(e1, e2, t) -> Cand(cexpr e1, cexpr e2, type_match t)
   | Sast.Sor(e1, e2, t) -> Cor(cexpr e1, cexpr e2, type_match t)
   | Sast.Snot(e, t) -> Cnot(cexpr e, type_match t)
+
 
 let rec stmt = function
   | Sast.Sstmt(e, t) -> let r = cexpr e in
