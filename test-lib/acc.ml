@@ -33,8 +33,9 @@ let rec compile_detail = function
   | Cast.VectAcc(e1, e2, t) ->
           e1 ^ "[" ^ compile_detail e2 ^ "-1]"
   | Cast.Matrix(s, v, nr, nc, t) ->
-          let helper e = compile_detail e in
+        let helper e = compile_detail e in
           let holder = s ^ "Holder" in
+          let count = s ^ "count" in
           let nr_str = compile_detail nr in
           let nc_str = compile_detail nc in 
           let matrix = s in 
@@ -45,11 +46,11 @@ let rec compile_detail = function
           " (" ^ holder ^ ", " ^ holder ^ " + " ^
           nc_str ^ " / sizeof(" ^ ty ^ "));\n" ^
           "vector<vector<" ^ ty ^ "> > " ^ matrix ^ " (" ^ nr_str ^ ");\n" ^
-          "int count=0;\n" ^
+          "int " ^ count ^ "=0;\n" ^
           "for(int i=0; i<" ^ nr_str ^ "; i++) { \n" ^
           matrix ^ "[i].resize(" ^ nc_str ^ ");\n" ^
           "for(int j=0; j<" ^ nc_str ^ "; j++) { \n" ^
-          matrix ^ "[i][j] = " ^ holder ^ "[count++];\n}\n}"
+          matrix ^ "[i][j] = " ^ holder ^ "[" ^ count ^ "++];\n}\n}"
   | Cast.MatrixAcc(m, r, c, t) ->
           m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
@@ -61,9 +62,19 @@ let rec compile_detail = function
   | Cast.Or(b1, b2, t) -> (compile_detail b1) ^ " || " ^ 
                           (compile_detail b2)
   | Cast.Not(b1, t) -> "! " ^ (compile_detail b1)
-  | Cast.Assign(id, e, t) -> string_of_ctype t ^ " " ^ id ^ " = " ^ 
-                             (compile_detail e)
   | Cast.Update(id, e, t) -> id ^ " = " ^ (compile_detail e)
+  | Cast.Assign(id, e, t) -> 
+          let ty = (string_of_ctype t) in
+          ty ^ " " ^ id ^ " = " ^ (compile_detail e)
+  | Cast.MatrixAssign(id, e, t) ->
+         let ty = (Cast.string_of_ctype t) in
+          "\n\n\n\n MATRIX ASSIGN \n\n\n " ^
+         "int rows = temp.size();\n" ^
+          "vector<vector<" ^ty^ "> " ^ id ^ ";\n" ^
+          "for(int i = 0; i < rows; i++){\n" ^
+          "\t" ^ "vector<" ^ty^ "> row (temp[i]);\n" ^
+          "\t" ^ id ^ ".push_back(row);\n" ^
+          "};"  
   | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ 
                            (compile_detail e2) 
   | Cast.Expo(e1, e2, t) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ 
@@ -93,7 +104,15 @@ let rec compile_detail = function
   | Cast.FMult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ 
                              (compile_detail e2)
   | Cast.FDiv(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
-                            (compile_detail e2) 
+                            (compile_detail e2)
+  | Cast.MatrixAdd(e1, e2, t) ->
+          let mid1 = string_of_matrix_assign e1 in
+          let mid2 = string_of_matrix_assign e2 in
+          "vector<vector<int> > result = matrix_add("^mid1^", "^ mid2 ^ ");"
+          ^
+          "print_matrix(result)"
+
+
   | Cast.FormalDef(id, e, t) -> Cast.string_of_ctype t ^ " " ^ id ^ "=" ^ (compile_detail e)
 
   in
@@ -107,10 +126,12 @@ let rec compile_expr = function
   | Cdiv(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cmult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
   | Csub(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
-	| Cadd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | Cadd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | CFAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2  
   | CFSub(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | CFMult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
+  | CMatrixAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 ^ "cmatrixadd"
+  | CMatrixAcc(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
   | Ceq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cneq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | CFDiv(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
@@ -171,6 +192,25 @@ let compile cast =
   "#include<vector>\n" ^
   "#include<string>\n" ^
   "#include<string.h>\n" ^
-  "using namespace std;\n" in
+  "using namespace std;\n" ^
+  "vector<vector<int> > matrix_add(vector<vector<int> > a, vector<vector<int> > b){
+      vector<vector<int> > c;
+      for(int i = 0; i < a.size(); i++){
+          vector<int> row;
+          for(int j = 0; j < a[0].size(); j++){
+             row.push_back(a[i][j] + b[i][j]);
+          }
+          c.push_back(row);
+          }
+            return c;
+    }
+    void print_matrix(vector<vector<int> > a){
+      for(int i = 0; i<a.size(); i++){
+        cout<<endl;
+        for(int j = 0; j<a[0].size(); j++){
+          cout << a[i][j] << \" \";
+        }
+      }
+    }\n" in
 
-print_endline ( c_begin ^ (compile cast))
+  print_endline ( c_begin ^ (compile cast))

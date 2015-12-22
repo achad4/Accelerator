@@ -7,10 +7,6 @@ type op =
   | Div
   | Expo
   | Mod
-  | FAdd
-  | FSub
-  | FMult
-  | FDiv
   | Assign
   | And
   | Or
@@ -28,18 +24,16 @@ type expr_detail =
   | VectAcc of string * expr_detail * t
   | Matrix of string * expr_detail list * expr_detail * expr_detail * t
   | MatrixAcc of string * expr_detail * expr_detail * t
+  | MatrixAssign of string * expr_detail * t
   | Eq of expr_detail * expr_detail * t
   | Neq of expr_detail * expr_detail * t
   | StrEq of expr_detail * expr_detail * t
   | StrNeq of expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
+  | MatrixAdd of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
   | Div of expr_detail * expr_detail * t
-  | FAdd of expr_detail * expr_detail * t
-  | FSub of expr_detail * expr_detail * t
-  | FMult of expr_detail * expr_detail * t
-  | FDiv of expr_detail * expr_detail * t
   | Expo of expr_detail * expr_detail * t
   | Mod of expr_detail * expr_detail * t
   | FuncCall of string * expr_detail list * t
@@ -63,6 +57,7 @@ type expression =
   | SFSub of expression * expression * t
   | SFMult of expression * expression * t
   | SFDiv of expression * expression * t
+  | SMatrixAdd of expression * expression * t
   | Sdiv of expression * expression * t
   | Sexpo of expression * expression * t
   | Smod of expression * expression * t
@@ -105,6 +100,9 @@ let rec expr = function
     (* do we need to send it a new env if just updating? *)
         let e1 = expr (e, env) in
         Update(id, fst e1, snd e1), snd e1
+  | Environment.MatrixAssign(id,e), env ->
+        let e1 = expr(e, env) in
+        MatrixAssign(id, fst e1, snd e1), snd e1
   | Environment.IntLit(c), env -> IntLit(c), Int
   | Environment.FloatLit(f), env -> FloatLit(f), Float
   | Environment.BoolLit(b), env -> BoolLit(b), Bool
@@ -225,8 +223,26 @@ let rec expr = function
 			(
 				Add((fst e1), (fst e2), t1), t1
 			)
-		else
-			failwith "Type incompatibility"
+		else if ( t1 == t2 && t1 == Matrix) then
+            (
+
+                MatrixAdd((fst e1), (fst e2), t1), t1
+            )
+        else
+            failwith "Type incompatibility"
+	| Environment.MatrixAdd( e1, e2), env ->
+		let e1 = expr (e1, env)
+		and e2 = expr (e2, env) in
+
+		let _, t1 = e1
+		and _, t2 = e2 in
+
+		if (t1 == t2 && (t1 == Matrix)) then
+            (
+                MatrixAdd((fst e1), (fst e2), t1), t1
+            )
+        else
+            failwith "Type incompatibility"
   | Environment.Sub( e1, e2 ), env ->
           let e1 = expr (e1, env)
           and e2 = expr (e2, env) in

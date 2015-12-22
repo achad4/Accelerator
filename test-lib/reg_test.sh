@@ -52,6 +52,7 @@ runTest "eqNeqTest"
 runTest "whileTest"
 runTest "gcdTest"
 runTest "scopeTest"
+runTest "matrixAdd"
 
 echo ====================================================
 echo Results
