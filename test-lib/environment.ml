@@ -361,6 +361,6 @@ let program program =
 
   let helper1 env e = (scope_func env e) in
 
-  (List.map (helper1 new_env1) funcs_rev), pass_envs init_env (stmts_rev)
+  (List.map (helper1 init_env) funcs_rev), pass_envs init_env (stmts_rev)
 
 
