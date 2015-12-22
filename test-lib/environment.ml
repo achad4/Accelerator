@@ -171,12 +171,19 @@ let rec scope_expr_detail env = function
   | Ast.BoolLit(b) -> BoolLit(b), env
   | Ast.FloatLit(f) -> FloatLit(f), env
   | Ast.StringLit(s) -> StringLit(s) , env
+  | Ast.Matrix(s, el, e1, e2) ->
+      print_endline "matrix";
+(*    let mtype = type_match env (fst (scope_expr_detail env head)) in
+ *)   let new_env = assign_current_scope s Matrix env in
+      let helper e = fst (scope_expr_detail env e) in
+      Matrix(s, List.map helper el, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), new_env
   | Ast.Assign(s,e) ->
     let e1 = scope_expr_detail env e in
     let t = type_match env (fst e1) in
     let new_env = assign_current_scope s t env in
     if (t = Matrix) then
         (
+            print_endline "matrix assign";
             MatrixAssign(s,fst(e1)), new_env
         )
     else
@@ -191,11 +198,6 @@ let rec scope_expr_detail env = function
       let helper e = fst (scope_expr_detail env e) in
       Vector(s, List.map helper el), new_env
   | Ast.VectAcc(s, expr) -> VectAcc(s, fst(scope_expr_detail env expr)), env
-  | Ast.Matrix(s, el, e1, e2) ->
-(*       let mtype = type_match env (fst (scope_expr_detail env head)) in
- *)      let new_env = assign_current_scope s Matrix env in
-      let helper e = fst (scope_expr_detail env e) in
-      Matrix(s, List.map helper el, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), new_env
   | Ast.MatrixAcc(s, e1, e2) -> 
       MatrixAcc(s, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), env
   | Ast.Eq(expr1,expr2) ->
