@@ -102,6 +102,14 @@ type func_decl =
 type program = 
   func_decl list
 
+let string_of_matrix_assign = function
+  | Matrix(s, el, e, e1, ct) -> s
+  | MatrixAssign(s, e, ct) -> s
+  | Id(s, ct) -> s
+  | _ -> failwith "matrix required"
+
+
+
 let rec string_of_ctype = function
   | String -> "string"
   | Float -> "float"
@@ -135,7 +143,6 @@ let rec cexpr_detail = function
         VectAcc(s, cexp1, type_match t)
  | Sast.NaLit(t) -> Na("Void", type_match t)
  | Sast.Matrix(s, v, nr, nc, t) -> let ct = type_match t in
-        print_endline "cast Matrix hit";
         Matrix(s, List.map cexpr_detail v, cexpr_detail nr, cexpr_detail nc, ct)
  | Sast.MatrixAcc(s, e1, e2, t) ->
         let cexp1 = cexpr_detail e1 in
@@ -165,7 +172,7 @@ let rec cexpr_detail = function
  | Sast.Assign(id, e, t) -> let ct = type_match t in
                              Assign(id, cexpr_detail e, ct)
  | Sast.MatrixAssign(id, e, t) -> let ct = type_match t in
-                             MatrixAssign(id, cexpr_detail e, ct)
+                                  MatrixAssign(id, cexpr_detail e, ct)
  | Sast.And(e1, e, t) -> let ct = type_match t in 
                           And(cexpr_detail e1, cexpr_detail e, ct)
  | Sast.Or(e1, e2, t) ->  let ct = type_match t in
