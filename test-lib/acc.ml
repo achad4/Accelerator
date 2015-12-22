@@ -62,8 +62,23 @@ let rec compile_detail = function
   | Cast.Or(b1, b2, t) -> (compile_detail b1) ^ " || " ^ 
                           (compile_detail b2)
   | Cast.Not(b1, t) -> "! " ^ (compile_detail b1)
-  | Cast.Assign(id, e, t) -> string_of_ctype t ^ " " ^ id ^ " = " ^ 
-                             (compile_detail e)
+  | Cast.Assign(id, e, t) -> 
+          let ty = (string_of_ctype t) in
+          if (ty = "Matrix") then
+              raise (UnassignedVarException "matrix detected")
+          else
+              ty ^ " " ^ id ^ " = " ^ (compile_detail e)
+  | Cast.MatrixAssign(id, e, t) ->
+          let ty = (Cast.string_of_ctype t) in
+          (* make sure we save our matrix output to temp *) 
+          (compile_detail e) ^
+          (* get how big temp is right now *)
+          "int rows = temp.size();\n" ^
+          "vector<vector<" ^ty^ "> " ^ id ^ ";\n" ^
+          "for(int i = 0; i < rows; i++){\n" ^
+          "\t" ^ "vector<" ^ty^ "> row (temp[i]);\n" ^
+          "\t" ^ id ^ ".push_back(row);\n" ^
+          "}"    
   | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ 
                            (compile_detail e2) 
   | Cast.Expo(e1, e2, t) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ 
@@ -84,8 +99,14 @@ let rec compile_detail = function
                             (compile_detail e2)
   | Cast.Sub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ 
                            (compile_detail e2) 
-  | Cast.Add(e1, e2, t) -> (compile_detail e1) ^ " + " ^
+  | Cast.Add(e1, e2, t) -> 
+          if (t != Matrix) then
+              (
+                  (compile_detail e1) ^ " + " ^
                            (compile_detail e2)
+              )else(
+                  "MATRIX MATRIX MATRIX"
+              )
   | Cast.FAdd(e1, e2, t) -> (compile_detail e1) ^ " + " ^ 
                             (compile_detail e2)
   | Cast.FSub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ 
@@ -97,24 +118,30 @@ let rec compile_detail = function
   | Cast.MatrixAdd(e1, e2, t) ->
           let mid1 = compile_detail e1 in
           let mid2 = compile_detail e2 in
-          let 1row = mid1 ^ "row" in
-          let 2row = mid2 ^ "row" in
-          let 1col = mid1 ^ "col" in
-          let 2col = mid2 ^ "col" in
+          let ty = (Cast.string_of_ctype t) in
+          let row1 = mid1 ^ "row" in
+          let row2 = mid2 ^ "row" in
+          let col1 = mid1 ^ "col" in
+          let col2 = mid2 ^ "col" in
          (* e1 and e2 should be strings representing our matrix ids *)
-          "int " ^ 1row ^ " = " ^ mid1 ^ ".size();\n" ^
-          "int " ^ 2row ^ " = " ^ mid2 ^ ".size();\n" ^
-          "if (" ^ 1row ^ " != " ^ 2row ^ "){\n" ^
+          "int " ^ row1 ^ " = " ^ mid1 ^ ".size();\n" ^
+          "int " ^ row2 ^ " = " ^ mid2 ^ ".size();\n" ^
+          "if (" ^ row1 ^ " != " ^ row2 ^ "){\n" ^
           "\t cout << \"matrix size mismatch\";\n\t count << endl;\n" ^
-          "int " ^ 1col ^ " = " ^ mid1 ^ "[0].size();\n" ^
-          "int " ^ 2col ^ " = " ^ mid1 ^ "[0].size();\n" ^
-          "if (" ^ 1col ^ " != " ^ 2col ^ "){\n" ^
+          "int " ^ col1 ^ " = " ^ mid1 ^ "[0].size();\n" ^
+          "int " ^ col2 ^ " = " ^ mid1 ^ "[0].size();\n" ^
+          "if (" ^ col1 ^ " != " ^ col2 ^ "){\n" ^
           "\t cout << \"matrix size mismatch\";\n\t count << endl;\n" ^
           (* checked num rows and num cols, now create a result matrix *)
+          "vector<vector<" ^ ty ^ "> > temp;\n" ^
+          "for(int i = 0; i < " ^ row1 ^ "; i++){\n" ^
+          "\t"^ "vector<int> row;\n" ^
+          "\t"^ "for(int j = 0; j < " ^ col1 ^ "; i++){\n" ^
+          "\t\t" ^ "row.push_back("^mid1^"[i][j] + "^mid2^"[i][j];\n" ^
+          "\t}\n" ^
+          "\t" ^ "temp.push_back(row);\n" ^
+          "}"
 
-
-
-         mid1 ^ " + " ^ mid2 
   | Cast.FormalDef(id, e, t) -> Cast.string_of_ctype t ^ " " ^ id ^ "=" ^ (compile_detail e)
 
   in
@@ -132,7 +159,7 @@ let rec compile_expr = function
   | CFAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2  
   | CFSub(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | CFMult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
-  | CMatrixAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
+  | CMatrixAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 ^ "cmatrixadd"
   | CMatrixAcc(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
   | Ceq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cneq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 

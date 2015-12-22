@@ -28,6 +28,7 @@ type expr_detail =
   | VectAcc of string * expr_detail * t
   | Matrix of string * expr_detail list * expr_detail * expr_detail * t
   | MatrixAcc of string * expr_detail * expr_detail * t
+  | MatrixAssign of string * expr_detail * t
   | Eq of expr_detail * expr_detail * t
   | Neq of expr_detail * expr_detail * t
   | StrEq of expr_detail * expr_detail * t
@@ -99,6 +100,9 @@ let rec expr = function
   | Environment.Assign(id, e), env ->
         let e1 = expr (e, env) in
         Assign(id, fst e1, snd e1), snd e1
+  | Environment.MatrixAssign(id,e), env ->
+        let e1 = expr(e, env) in
+        MatrixAssign(id, fst e1, snd e1), snd e1
   | Environment.IntLit(c), env -> IntLit(c), Int
   | Environment.FloatLit(f), env -> FloatLit(f), Float
   | Environment.BoolLit(b), env -> BoolLit(b), Bool

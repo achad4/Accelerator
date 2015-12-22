@@ -49,6 +49,7 @@ type expr =
   | Mod of expr * expr
   | FuncCall of string * expr list 
   | Assign of string * expr
+  | MatrixAssign of string * expr
   | And of expr * expr
   | Or of expr * expr
   | Not of expr
@@ -173,7 +174,7 @@ let rec scope_expr_detail env = function
     let e1 = scope_expr_detail env e in
     let t = type_match env (fst e1) in
     let new_env = assign_current_scope s t env in
-    Assign(s, fst(e1)), new_env
+        Assign(s,fst(e1)), new_env
   | Ast.Vector(s, el) ->
 (*       let new_env = assign_current_scope s (type_match t) env in
  *)   

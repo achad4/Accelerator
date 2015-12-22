@@ -54,6 +54,7 @@ type cexpr_detail =
    | FuncCall of string * cexpr_detail list * ct
    | PrintCall of cexpr_detail * ct
    | Assign of string * cexpr_detail * ct
+   | MatrixAssign of string * cexpr_detail * ct
    | And of cexpr_detail * cexpr_detail * ct
    | Or of cexpr_detail * cexpr_detail * ct
    | Not of cexpr_detail * ct
@@ -144,10 +145,10 @@ let rec cexpr_detail = function
  | Sast.Eq(e1, e2, t) -> Eq((cexpr_detail e1), (cexpr_detail e2), type_match t)
  | Sast.StrEq(e1, e2, t) -> StrEq((cexpr_detail e1), (cexpr_detail e2), type_match t)
  | Sast.StrNeq(e1, e2, t) -> StrNeq((cexpr_detail e1), (cexpr_detail e2), type_match t)
- | Sast.Add(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Int)
- | Sast.Sub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Int)
- | Sast.Mult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, Int)
- | Sast.Div(e1, e2, t) -> Div(cexpr_detail e1, cexpr_detail e2, Int)
+ | Sast.Add(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), type_match t)
+ | Sast.Sub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, type_match t)
+ | Sast.Mult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, type_match t)
+ | Sast.Div(e1, e2, t) -> Div(cexpr_detail e1, cexpr_detail e2, type_match t)
  | Sast.FAdd(e1, e2, t) -> Add((cexpr_detail e1), (cexpr_detail e2), Float)
  | Sast.FSub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Float)
  | Sast.FMult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, Float)
@@ -162,6 +163,8 @@ let rec cexpr_detail = function
                                 PrintCall(cexpr_detail e, ct)
  | Sast.Assign(id, e, t) -> let ct = type_match t in
                              Assign(id, cexpr_detail e, ct)
+ | Sast.MatrixAssign(id, e, t) -> let ct = type_match t in
+                             MatrixAssign(id, cexpr_detail e, ct)
  | Sast.And(e1, e, t) -> let ct = type_match t in 
                           And(cexpr_detail e1, cexpr_detail e, ct)
  | Sast.Or(e1, e2, t) ->  let ct = type_match t in
