@@ -108,29 +108,10 @@ let rec compile_detail = function
   | Cast.MatrixAdd(e1, e2, t) ->
           let mid1 = string_of_matrix_assign e1 in
           let mid2 = string_of_matrix_assign e2 in
-          let ty = (Cast.string_of_ctype t) in
-          let row1 = mid1 ^ "row" in
-          let row2 = mid2 ^ "row" in
-          let col1 = mid1 ^ "col" in
-          let col2 = mid2 ^ "col" in
-         (* e1 and e2 should be strings representing our matrix ids *)
-          "int " ^ row1 ^ " = " ^ mid1 ^ ".size();\n" ^
-          "int " ^ row2 ^ " = " ^ mid2 ^ ".size();\n" ^
-          "if (" ^ row1 ^ " != " ^ row2 ^ "){\n" ^
-          "\t cout << \"matrix size mismatch\";\n\t count << endl;\n" ^
-          "int " ^ col1 ^ " = " ^ mid1 ^ "[0].size();\n" ^
-          "int " ^ col2 ^ " = " ^ mid1 ^ "[0].size();\n" ^
-          "if (" ^ col1 ^ " != " ^ col2 ^ "){\n" ^
-          "\t cout << \"matrix size mismatch\";\n\t count << endl;\n" ^
-          (* checked num rows and num cols, now create a result matrix *)
-          "vector<vector<" ^ ty ^ "> > temp;\n" ^
-          "for(int i = 0; i < " ^ row1 ^ "; i++){\n" ^
-          "\t"^ "vector<int> row;\n" ^
-          "\t"^ "for(int j = 0; j < " ^ col1 ^ "; i++){\n" ^
-          "\t\t" ^ "row.push_back("^mid1^"[i][j] + "^mid2^"[i][j];\n" ^
-          "\t}\n" ^
-          "\t" ^ "temp.push_back(row);\n" ^
-          "}"
+          "vector<vector<int> > result = matrix_add("^mid1^", "^ mid2 ^ ");"
+          ^
+          "print_matrix(result)"
+
 
   | Cast.FormalDef(id, e, t) -> Cast.string_of_ctype t ^ " " ^ id ^ "=" ^ (compile_detail e)
 
@@ -211,6 +192,25 @@ let compile cast =
   "#include<vector>\n" ^
   "#include<string>\n" ^
   "#include<string.h>\n" ^
-  "using namespace std;\n" in
+  "using namespace std;\n" ^
+  "vector<vector<int> > matrix_add(vector<vector<int> > a, vector<vector<int> > b){
+      vector<vector<int> > c;
+      for(int i = 0; i < a.size(); i++){
+          vector<int> row;
+          for(int j = 0; j < a[0].size(); j++){
+             row.push_back(a[i][j] + b[i][j]);
+          }
+          c.push_back(row);
+          }
+            return c;
+    }
+    void print_matrix(vector<vector<int> > a){
+      for(int i = 0; i<a.size(); i++){
+        cout<<endl;
+        for(int j = 0; j<a[0].size(); j++){
+          cout << a[i][j] << \" \";
+        }
+      }
+    }\n" in
 
-print_endline ( c_begin ^ (compile cast))
+  print_endline ( c_begin ^ (compile cast))

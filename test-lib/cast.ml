@@ -102,9 +102,9 @@ type func_decl =
 type program = 
   func_decl list
 
-let string_of_matrix_assign = function
+let rec string_of_matrix_assign = function
   | Matrix(s, el, e, e1, ct) -> s
-  | MatrixAssign(s, e, ct) -> s
+  | MatrixAssign(s, e, ct) -> string_of_matrix_assign e
   | Id(s, ct) -> s
   | _ -> failwith "matrix required"
 
