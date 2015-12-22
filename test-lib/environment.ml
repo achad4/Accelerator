@@ -311,8 +311,7 @@ let program program =
   let new_env1 = run_funcs init_env funcs_rev in
 
   (*don't want things in function's scopes to be able to be accessed outside*)
-  let init_print = FuncMap.add "print" (type_match init_env Na) init_env.func_tbl in
-  let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk init_print init_env.func_tbl_formals in 
+  let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk new_env1.func_tbl new_env1.func_tbl_formals in 
   let new_env2 = run_stmts init_env stmts_rev in
 
   let helper1 env e = (scope_func env e) in
