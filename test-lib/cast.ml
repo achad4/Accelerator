@@ -196,7 +196,7 @@ let rec stmt = function
                         Cstmt(r, type_match t)
   | Sast.Sblock(sl, t) -> let stmt_rev = sl in
                         let l = List.map stmt stmt_rev in
-                        Cblock(l, type_match t)
+                        Cblock(List.rev l, type_match t)
 (*   | Sast.SReturnBlock(sl, s, t) -> 
                           let l = List.map stmt sl in
                           CReturnBlock(l, stmt s, type_match t) *)
