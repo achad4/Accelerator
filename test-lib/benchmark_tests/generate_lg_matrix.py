@@ -1,6 +1,7 @@
 import random
 import time
 import sys
+import numpy as np
 from subprocess import call
 
 def random_vector(size, max_val):
@@ -8,16 +9,6 @@ def random_vector(size, max_val):
 	for i in range(0,size):
 		a.append(random.randrange(0,max_val))
 	return(a)
-
-def vect_to_matrix(r,c,v):
-	m = []
-	count = 0
-	for i in range(0,r):
-		row = []
-		for j in range(0,c):
-			row.append(++count)
-		m.append(row)
-	return(m)
 
 def generate_matrix_string(id, rvec, r, c):
 	mat = id + " <- matrix(c("
@@ -28,18 +19,20 @@ def generate_matrix_string(id, rvec, r, c):
 			mat += str(rvec[len(rvec)-1]) + "), nrow=" + str(r) + ",ncol=" + str(c) + ")\n"
 	return(mat)
 
-def elapsed_matrix_op_time(m1, r1, c1, m2, r2, c2, max_val):
+def elapsed_matrix_op_time(r1, c1, r2, c2, max_val):
 	py_start = time.clock()
-	res_v = random_vector(r1 * c2, max_val)
-	res_m = vect_to_matrix(r1, c1, res_v)
-
-	for i in range(len(m1)):
-		for j in range(len(m2[0])):
-			for k in range(len(m2)):
-				res_m[i][j] += m1[i][k] * m2[k][j]
+	B = np.random.randn(r1,c1)
+	C = np.random.randn(r2,c2)
+	 
+	A = np.dot(B.T, np.linalg.inv(C))
+	B = np.mat(B)
+	C = np.mat(C)
+	 
+	A = B.T*C.I
 
 	py_fin = time.clock()
 	py_elpased = py_fin - py_start
+
 	print("Python run time: " + str(py_elpased) + " seconds")
 
 def test_matrices(id1, r1, c1, id2, r2, c2, max_val):
@@ -53,32 +46,32 @@ def test_matrices(id1, r1, c1, id2, r2, c2, max_val):
 	rvec1 = random_vector(r1*c1, max_val)
 	rvec2 = random_vector(r2*c2, max_val)
 
-	m1 = vect_to_matrix(r1,c1,rvec1)
-	m2 = vect_to_matrix(r2,c2,rvec2)
+	mstring1 = generate_matrix_string(id1, rvec1, r1, c1)
+	mstring2 = generate_matrix_string(id2, rvec2, r2, c2)
 
-	mstring1 = generate_matrix_string("a", rvec1, r1, c1)
-	mstring2 = generate_matrix_string("b", rvec2, r2, c2)
-
+	f_in.write("f <- function(){\n")
 	f_in.write(mstring1)
 	f_in.write(mstring2)
 	f_in.write("c <- a + b\n")
+	f_in.write("}\n")
+	f_in.write("print(f())\n")
 	f_in.close()
 
 	source = open("acceleratorSource.acc", "r")
 
 	call("cd .. && make clean && make", shell=True)
 	call("chmod +x acceleratorTest", shell=True)
-	call("../acc", stdin=source, stdout=f_out, shell=True)
-	call("g++ -o acceleratorTest acceleratorTest.cpp",shell=True)
 
 	acc_start = time.clock()
+	call("../acc", stdin=source, stdout=f_out, shell=True)
+	call("g++ -o acceleratorTest acceleratorTest.cpp",shell=True)
 	call("./acceleratorTest", stdout=output, shell=True)
 	acc_end = time.clock()
 	acc_elapsed = acc_end - acc_start
 
 	print("Accelerator run time: " + str(acc_elapsed) + " seconds")
 
-	elapsed_matrix_op_time(m1, r1, c1, m2, r2, c2, max_val)
+	elapsed_matrix_op_time(r1, c1, r2, c2, max_val)
 
 	source.close()
 	f_out.close()
