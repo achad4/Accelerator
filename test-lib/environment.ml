@@ -178,7 +178,7 @@ let assign_current_scope var vtype env =
 
 let rec scope_expr_detail env = function
   | Ast.Na -> Na, env
-  | Ast.Id(s) -> Id(s), env
+  | Ast.Id(s) -> print_endline s; Id(s), env
   | Ast.IntLit(i) -> IntLit(i), env
   | Ast.BoolLit(b) -> BoolLit(b), env
   | Ast.FloatLit(f) -> FloatLit(f), env
@@ -190,8 +190,8 @@ let rec scope_expr_detail env = function
 
    (*  No new assignment necessary *)
     if (old_t == Na) then
-      ( print_endline "not yet assigned"; print_endline s;
-    let new_env = assign_current_scope s t env in
+      ( print_endline "not yet assigned";
+      let new_env = assign_current_scope s t env in
       Assign(s, fst(e1)), new_env
     )
     else if (old_t = t) then (
@@ -279,11 +279,14 @@ let rec scope_stmt env = function
                       [s]@(pass_envs new_env tl) in
 
         let helper henv hstmts = snd (scope_stmt henv hstmts) in
-        let block_env = List.fold_left helper env (List.rev blk) in
+        let block_env = List.fold_left helper env ((* List.rev *) blk) in
       
       Block(pass_envs env blk), block_env 
   | Ast.If(expr,stmt1,stmt2) -> let i, v = scope_expr_detail env expr in
-      If(i, fst (scope_stmt env stmt1), fst (scope_stmt env stmt2)), env
+                                print_endline "IF";
+                                let block1, new_env1 = scope_stmt env stmt1 in
+                                let block2, new_env2 = scope_stmt new_env1 stmt2 in
+                                If(i, block1, block2), new_env2
   | Ast.For(str,expr2,expr3,stmt) ->
       let new_env = assign_current_scope str Int env in
       let e2, v2 = scope_expr_detail new_env expr2
