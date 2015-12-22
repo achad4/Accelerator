@@ -1,0 +1,9 @@
+if(true){
+a <- 5
+print(a)
+}
+else{
+b <- 6
+print(b)
+print(a)
+}

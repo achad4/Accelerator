@@ -51,6 +51,7 @@ runTest "funcTest"
 runTest "eqNeqTest"
 runTest "whileTest"
 runTest "gcdTest"
+runTest "scopeTest"
 
 echo ====================================================
 echo Results
