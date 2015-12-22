@@ -1,6 +1,6 @@
 f <- function(){
 a <- matrix(c(1,1,1,2,2,2,3,3,3), nrow=3,ncol=3)
 b <- matrix(c(1,1,1,2,2,2,3,3,3), nrow=3,ncol=3)
-a + b
+a * b
 }
 print(f())

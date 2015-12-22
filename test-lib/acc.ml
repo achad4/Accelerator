@@ -54,9 +54,11 @@ let rec compile_detail = function
   | Cast.MatrixAcc(m, r, c, t) ->
           m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
-        id ^ "(" ^ (String.concat ", " (List.map helper el)) ^ ")"
-  | Cast.PrintCall(e, t) -> "cout << " ^ (compile_detail e) ^ ";\n" ^ 
+                                id ^ "(" ^ (String.concat ", " (List.map helper el)) ^ ")"
+  | Cast.PrintCall(e, t) ->"cout << " ^ (compile_detail e) ^ ";\n" ^ 
                             "cout << endl"
+  | Cast.PrintMatrixCall(e, t) -> "print_matrix("^ (compile_detail e) ^")"
+ 
   | Cast.And(b1, b2, t) -> (compile_detail b1) ^ " && " ^ 
                            (compile_detail b2)
   | Cast.Or(b1, b2, t) -> (compile_detail b1) ^ " || " ^ 
@@ -64,17 +66,22 @@ let rec compile_detail = function
   | Cast.Not(b1, t) -> "! " ^ (compile_detail b1)
   | Cast.Update(id, e, t) -> id ^ " = " ^ (compile_detail e)
   | Cast.Assign(id, e, t) -> 
-          let ty = (string_of_ctype t) in
-          ty ^ " " ^ id ^ " = " ^ (compile_detail e)
-  | Cast.MatrixAssign(id, e, t) ->
+          if(t = Matrix) then (
+              "vector<vector<int> > " ^id^ " = " ^ (compile_detail e)
+          ) else(
+            let ty = (string_of_ctype t) in
+            ty ^ " " ^ id ^ " = " ^ (compile_detail e)
+          )
+         
+(*   | Cast.MatrixAssign(id, e, t) ->
+          print_endline "MatrixAssign acc";
          let ty = (Cast.string_of_ctype t) in
-          "\n\n\n\n MATRIX ASSIGN \n\n\n " ^
          "int rows = temp.size();\n" ^
           "vector<vector<" ^ty^ "> " ^ id ^ ";\n" ^
           "for(int i = 0; i < rows; i++){\n" ^
           "\t" ^ "vector<" ^ty^ "> row (temp[i]);\n" ^
           "\t" ^ id ^ ".push_back(row);\n" ^
-          "};"  
+          "};"   *)
   | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ 
                            (compile_detail e2) 
   | Cast.Expo(e1, e2, t) -> "pow(" ^ (compile_detail e1) ^ ",  " ^ 
@@ -91,26 +98,41 @@ let rec compile_detail = function
                            (compile_detail e2) ^ ") != 0)"
   | Cast.Div(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
                            (compile_detail e2)
-  | Cast.Mult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ 
-                            (compile_detail e2)
+  | Cast.Mult(e1, e2, t) -> if(t = Matrix) then (
+                               let mid1 = string_of_matrix_assign e1 in
+                              let mid2 = string_of_matrix_assign e2 in
+                              "matrix_mult("^mid1^", "^ mid2 ^ ")"
+                            )else(
+                                (compile_detail e1) ^ " + " ^
+                                (compile_detail e2)
+                              )
   | Cast.Sub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ 
                            (compile_detail e2) 
-  | Cast.Add(e1, e2, t) -> (compile_detail e1) ^ " + " ^
-                           (compile_detail e2)
-  | Cast.FAdd(e1, e2, t) -> (compile_detail e1) ^ " + " ^ 
+  | Cast.Add(e1, e2, t) -> if(t = Matrix) then (
+                               let mid1 = string_of_matrix_assign e1 in
+                              let mid2 = string_of_matrix_assign e2 in
+                              "matrix_add("^mid1^", "^ mid2 ^ ")"
+                            )else(
+                                (compile_detail e1) ^ " + " ^
+                                (compile_detail e2)
+                              )
+  (* | Cast.FAdd(e1, e2, t) -> (compile_detail e1) ^ " + " ^ 
                             (compile_detail e2)
   | Cast.FSub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ 
                             (compile_detail e2)
   | Cast.FMult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ 
                              (compile_detail e2)
   | Cast.FDiv(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
-                            (compile_detail e2)
-  | Cast.MatrixAdd(e1, e2, t) ->
+                            (compile_detail e2) *)
+ (*  | Cast.MatrixAdd(e1, e2, t) ->
           let mid1 = string_of_matrix_assign e1 in
           let mid2 = string_of_matrix_assign e2 in
-          "vector<vector<int> > result = matrix_add("^mid1^", "^ mid2 ^ ");"
-          ^
-          "print_matrix(result)"
+          "vector<vector<int> > result = matrix_add("^mid1^", "^ mid2 ^ ");" *)
+
+(*   | Cast.MatrixMult(e1, e2, t) ->
+          let mid1 = string_of_matrix_assign e1 in
+          let mid2 = string_of_matrix_assign e2 in
+          "vector<vector<int> > result = matrix_mult("^mid1^", "^ mid2 ^ ");" *)
 
 
   | Cast.FormalDef(id, e, t) -> Cast.string_of_ctype t ^ " " ^ id ^ "=" ^ (compile_detail e)
@@ -120,7 +142,8 @@ let rec compile_detail = function
 let rec compile_expr = function
 	| Cexpr(e, t) -> compile_detail e 
 	| CfuncCall(el, t) -> String.concat "" (List.map compile_expr el)
-	| Cassign(e, t) -> (string_of_ctype t) ^ compile_expr e
+(* 	| Cassign(e, t) -> (string_of_ctype t) ^ compile_expr e
+ *)
   | Cmod(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cexpo(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
   | Cdiv(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
@@ -130,7 +153,8 @@ let rec compile_expr = function
   | CFAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2  
   | CFSub(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | CFMult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
-  | CMatrixAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 ^ "cmatrixadd"
+(*   | CMatrixAdd(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
+  | CMatrixMult(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 *)
   | CMatrixAcc(e1, e2, t) -> compile_expr e1 ^ compile_expr e2
   | Ceq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
   | Cneq(e1, e2, t) -> compile_expr e1 ^ compile_expr e2 
@@ -170,8 +194,14 @@ let compile_func_detail f =
 
 let compile_func = function 
     | CFunctionDef(f, t) -> 
-        string_of_ctype t ^ " " ^
-        compile_func_detail f in
+        if(t = Matrix) then (
+            string_of_ctype t ^ " " ^
+            compile_func_detail f
+        )else(
+            string_of_ctype t ^ " " ^
+            compile_func_detail f
+        ) in
+        
 
 
 (*         let string_list_stmt l = List.map compile_stmt l in
@@ -205,6 +235,26 @@ let compile cast =
        }
        return c;
    }
+
+   vector<vector<int> > matrix_mult(vector<vector<int> > a, vector<vector<int> > b){
+   vector<vector<int> > c;
+   int i,j,k;
+   #pragma omp parallel shared(a,b,c) private(i,j,k)
+   {
+   #pragma omp for  schedule(static)
+      for (i=0; i<a.size(); i=i+1){
+                vector<int> row;
+                for (j=0; j<b[0].size(); j=j+1){
+                    row.push_back(0);
+                    for (k=0; k<b.size(); k=k+1){
+                        row[j] += ((a[i][k])*(b[k][j]));
+                    }
+                }
+                c.push_back(row);
+            }
+        }
+        return c;
+    }
 
    template<typename t>
    void print_matrix(vector<vector<t> > a){

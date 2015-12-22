@@ -24,13 +24,14 @@ type expr_detail =
   | VectAcc of string * expr_detail * t
   | Matrix of string * expr_detail list * expr_detail * expr_detail * t
   | MatrixAcc of string * expr_detail * expr_detail * t
-  | MatrixAssign of string * expr_detail * t
-  | Eq of expr_detail * expr_detail * t
+(*   | MatrixAssign of string * expr_detail * t
+ *)  | Eq of expr_detail * expr_detail * t
   | Neq of expr_detail * expr_detail * t
   | StrEq of expr_detail * expr_detail * t
   | StrNeq of expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
   | MatrixAdd of expr_detail * expr_detail * t
+  | MatrixMult of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
   | Div of expr_detail * expr_detail * t
@@ -38,6 +39,7 @@ type expr_detail =
   | Mod of expr_detail * expr_detail * t
   | FuncCall of string * expr_detail list * t
   | PrintCall of expr_detail * t
+  | PrintMatrixCall of expr_detail * t
   | Assign of string * expr_detail * t
   | Update of string * expr_detail * t
   | And of expr_detail * expr_detail * t
@@ -58,11 +60,11 @@ type expression =
   | SFMult of expression * expression * t
   | SFDiv of expression * expression * t
   | SMatrixAdd of expression * expression * t
+  | SMatrixMult of expression * expression * t
   | Sdiv of expression * expression * t
   | Sexpo of expression * expression * t
   | Smod of expression * expression * t
   | SfuncCall of expression list * t
-  | Sassign of expression * t
   | Sand of expression * expression * t
   | Sor of expression * expression * t
   | Snot of expression * t
@@ -100,9 +102,10 @@ let rec expr = function
     (* do we need to send it a new env if just updating? *)
         let e1 = expr (e, env) in
         Update(id, fst e1, snd e1), snd e1
-  | Environment.MatrixAssign(id,e), env ->
+ (*  | Environment.MatrixAssign(id,e), env ->
+        print_endline "MatrixAssign sast";
         let e1 = expr(e, env) in
-        MatrixAssign(id, fst e1, snd e1), snd e1
+        MatrixAssign(id, fst e1, snd e1), snd e1 *)
   | Environment.IntLit(c), env -> IntLit(c), Int
   | Environment.FloatLit(f), env -> FloatLit(f), Float
   | Environment.BoolLit(b), env -> BoolLit(b), Bool
@@ -135,20 +138,22 @@ let rec expr = function
           failwith "nrow and ncol must be integers"
         else
           (
+
             Matrix(s, (List.map helper v), helper nr , helper nc, vtype), vtype
           )  
-  | Environment.MatrixAcc(s, e1, e2), env ->
+  | Environment.MatrixAcc(s, e1, e2, t), env ->
         let ed1 = expr (e1, env) in
         let ed2 = expr (e2, env) in
         let t1 = snd ed1 in
         let t2 = snd ed2 in
         if (t1 = Int && t2 = Int) then
         (
-          let m_type = Environment.find_type s env in 
+(*           let m_type = Environment.find_type s env in 
+ *)
           MatrixAcc(s,
                           fst ed1,
                           fst ed2,
-                          m_type), m_type
+                          t), t
         )
         else
             failwith "Type incompatibility"
@@ -161,10 +166,14 @@ let rec expr = function
             failwith "print only takes one argument"
           else (
             let print_arg, print_arg_type = expr (List.hd el, env) in
-            PrintCall(print_arg, print_arg_type), Na
+            if(print_arg_type = Matrix) then (
+              PrintMatrixCall(print_arg, print_arg_type), Na
+            ) else(
+              PrintCall(print_arg, print_arg_type), Na
+            )
           )
-        )
-      else 
+        ) 
+        else 
         (*iterate over list of expressions and pull out the expression_detail from each one*)
         let helper1 e = fst (expr (e, env)) in
         let helper2 e = snd (expr (e, env)) in
@@ -218,7 +227,6 @@ let rec expr = function
 
 		let _, t1 = e1
 		and _, t2 = e2 in
-
 		if (t1 == t2 && (t1 == Int || t1 == Float)) then
 			(
 				Add((fst e1), (fst e2), t1), t1
@@ -226,23 +234,36 @@ let rec expr = function
 		else if ( t1 == t2 && t1 == Matrix) then
             (
 
-                MatrixAdd((fst e1), (fst e2), t1), t1
+                Add((fst e1), (fst e2), t1), Matrix
             )
         else
             failwith "Type incompatibility"
-	| Environment.MatrixAdd( e1, e2), env ->
-		let e1 = expr (e1, env)
-		and e2 = expr (e2, env) in
+	(* | Environment.MatrixAdd( e1, e2), env ->
+    		let e1 = expr (e1, env)
+    		and e2 = expr (e2, env) in
 
-		let _, t1 = e1
-		and _, t2 = e2 in
+    		let _, t1 = e1
+    		and _, t2 = e2 in
 
-		if (t1 == t2 && (t1 == Matrix)) then
+    		if (t1 == t2 && (t1 == Matrix)) then
             (
                 MatrixAdd((fst e1), (fst e2), t1), t1
             )
         else
-            failwith "Type incompatibility"
+            failwith "Type incompatibility" *)
+(*   | Environment.MatrixMult( e1, e2), env ->
+        let e1 = expr (e1, env)
+        and e2 = expr (e2, env) in
+
+        let _, t1 = e1
+        and _, t2 = e2 in
+
+        if (t1 == t2 && (t1 == Matrix)) then
+            (
+                MatrixMult((fst e1), (fst e2), t1), t1
+            )
+        else
+            failwith "Type incompatibility" *)
   | Environment.Sub( e1, e2 ), env ->
           let e1 = expr (e1, env)
           and e2 = expr (e2, env) in
@@ -264,13 +285,18 @@ let rec expr = function
 
           let _, t1 = e1
           and _, t2 = e2 in
-          
-	if (t1 == t2 && (t1 == Int || t1 == Float)) then
-              (
-              Mult((fst e1),(fst e2), t1), t1
-              )
+
+          if (t1 == t2 && (t1 == Int || t1 == Float)) then
+            (
+              Mult((fst e1), (fst e2), t1), t1
+            )
+          else if ( t1 == t2 && t1 == Matrix) then
+            (
+
+                Mult((fst e1), (fst e2), t1), Matrix
+            )
           else
-              failwith "Type incompatability"
+              failwith "Type incompatibility"
 
   | Environment.Div( e1, e2 ), env ->
           let e1 = expr (e1, env)

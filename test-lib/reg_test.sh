@@ -53,6 +53,7 @@ runTest "whileTest"
 runTest "gcdTest"
 runTest "scopeTest"
 runTest "matrixAdd"
+runTest "matrixMultTest"
 
 echo ====================================================
 echo Results
