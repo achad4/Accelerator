@@ -1,5 +1,6 @@
 import random
 import time
+import sys
 from subprocess import call
 
 def random_vector(size, max_val):
@@ -43,6 +44,7 @@ def elapsed_matrix_op_time(m1, r1, c1, m2, r2, c2, max_val):
 
 def test_matrices(id1, r1, c1, id2, r2, c2, max_val):
 	
+	print "Testing multiplication of (n x n) and (n x n) matrices where n=" + str(r1)
 	f_in = open("acceleratorSource.acc", "w")
 	f_out = open("acceleratorTest.cpp", "w")
 	exc = open("acceleratorTest", "w")
@@ -83,5 +85,10 @@ def test_matrices(id1, r1, c1, id2, r2, c2, max_val):
 	exc.close()
 	output.close()
 
-test_matrices("a", 100, 100, "b", 100, 100, 100)
+
+if len(sys.argv) != 2:
+	print '\nMissing argument n (# of rows / cols for each matrix operand)\n'
+	sys.exit()
+
+test_matrices("a", int(sys.argv[1]), int(sys.argv[1]), "b", int(sys.argv[1]), int(sys.argv[1]), 100)
 
