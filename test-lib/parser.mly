@@ -45,7 +45,7 @@ stmt_list:
 stmt:
   | expr DLIN                                                { Expr($1) }
 /*  | LBRACE DLIN stmt_list stmt RBRACE DLIN                   { ReturnBlock(List.rev $3, $4) } */
-  | IF LPAREN bool_expr RPAREN block ELSE block      { If($3, $5, $7) }
+  | IF LPAREN bool_expr RPAREN DLIN block ELSE DLIN block      { If($3, $6, $9) }
   | FOR LPAREN ID IN expr RANGE expr RPAREN block             { For($3, $5, $7, $9) }
   | WHILE LPAREN compare_expr RPAREN block                  { While ($3, $5) }
 

@@ -96,11 +96,9 @@ let rec type_of_stmt = function
 
 
 let rec expr = function
-  | Environment.Id (s), env -> print_endline "id here"; Id(s), Environment.find_type s env
+  | Environment.Id (s), env -> Id(s), Environment.find_type s env
   | Environment.Assign(id, e), env ->
-        print_endline "assigning sast"; print_endline id;
         let e1 = expr (e, env) in
-        (* let new_env = assign_current_scope id (snd e1) env in *)
         Assign(id, fst e1, snd e1), snd e1
   | Environment.Update(id, e), env -> 
     (* do we need to send it a new env if just updating? *)
@@ -343,16 +341,8 @@ let rec stmt = function
         let r = expr (e, env) in
 	      Sstmt(Sexpr(fst r, snd r), (snd r))
   | Environment.Block( sl ), env -> 
-          (* let helper s = stmt (s, env) in *)
-         (*  let l = List.map helper sl in *)
-          print_endline "block";
-          let rec pass_envs env = function
-                 | hd :: tl ->  let s = stmt (hd, env) in
-                                let passed = pass_envs env (tl) in
-                                (passed)@[s]
-                 | [] -> [] in
-
-          let l = pass_envs env sl in
+          let helper s = stmt (s, env) in
+          let l = List.map helper sl in
           let last_stmt = List.nth l (List.length l - 1) in
           Sblock(l, type_of_stmt last_stmt) 
   | Environment.If(e, s1, s2), env -> 

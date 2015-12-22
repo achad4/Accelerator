@@ -85,12 +85,12 @@ let init_env = {
 let find_type id env =
   let rec search_scope_lvl lvl =
   match lvl with
+    | [] -> raise (UnassignedVarException id)
     | top :: rest ->
       if VarMap.mem id top then
         VarMap.find id top
       else
         search_scope_lvl rest
-    | [] -> raise (UnassignedVarException id)
   in search_scope_lvl env.symb_tbl_stk 
 
 let rec type_match env = function
@@ -115,12 +115,12 @@ let rec type_match env = function
 let find_type_top id env =
   let rec search_scope_lvl lvl =
   match lvl with
+    | [] -> raise (UnassignedVarException id)
     | top :: rest ->
       if VarMap.mem id top then
         VarMap.find id top
       else
         type_match env Na
-    | [] -> raise (UnassignedVarException id)
   in search_scope_lvl env.symb_tbl_stk 
 
 let rec type_of_stmt env = function
@@ -184,23 +184,20 @@ let rec scope_expr_detail env = function
   | Ast.FloatLit(f) -> FloatLit(f), env
   | Ast.StringLit(s) -> StringLit(s) , env
   | Ast.Assign(s,e) ->
-    print_endline "assigning"; print_endline s;
     let e1 = scope_expr_detail env e in
     let t = type_match env (fst e1) in
     let old_t = find_type_top s env in
-    print_endline "hey";
+
    (*  No new assignment necessary *)
     if (old_t == Na) then
-      ( print_endline "adding to current scope";
+      (
     let new_env = assign_current_scope s t env in
       Assign(s, fst(e1)), new_env
     )
-    else if (old_t = t) then (
-      print_endline "updating";
+    else if (old_t = t) then
       Update(s, fst(e1)), env
-    )
     else
-      failwith "Cannot cast types"
+    failwith "Cannot cast types"
   | Ast.Vector(s, el) ->
       let head = List.hd el in
       let e1 = scope_expr_detail env head in
@@ -275,20 +272,14 @@ let rec scope_stmt env = function
   | Ast.Block(blk) -> 
       let rec pass_envs env = function
        | [] -> []
+       | [s] -> let (s, new_env) = scope_stmt env s in [s]
        | hd :: tl ->  let (s, new_env) = scope_stmt env hd in
                       [s]@(pass_envs new_env tl) in
 
-         let helper henv hstmts = snd (scope_stmt henv hstmts) in
-        let block_env = List.fold_left helper env (blk) in
-     
-        (* let run_stmts env stmts =
-          let helper henv hstmts = snd (scope_stmt henv hstmts) in
-        List.fold_left helper env stmts in *)
-
-      (*   let block_env = run_stmts env blk in *)
-
-      Block(pass_envs block_env blk), block_env 
-
+        let helper henv hstmts = snd (scope_stmt henv hstmts) in
+        let block_env = List.fold_left helper env (List.rev blk) in
+      
+      Block(pass_envs env blk), block_env 
   | Ast.If(expr,stmt1,stmt2) -> let i, v = scope_expr_detail env expr in
       If(i, fst (scope_stmt env stmt1), fst (scope_stmt env stmt2)), env
   | Ast.For(str,expr2,expr3,stmt) ->
@@ -329,7 +320,6 @@ let scope_func env = function
       let new_env = reassign_symb_tbl_stk new_env.symb_tbl_stk new_fname_map new_form_map in
       FunctionDef(str, forms, block), new_env
 
-
 let run_stmts env stmts =
   let helper henv hstmts = snd (scope_stmt henv hstmts) in
   List.fold_left helper env stmts
@@ -337,6 +327,7 @@ let run_stmts env stmts =
 let run_funcs env funcs =
   let helper henv hfuncs = snd (scope_func henv hfuncs) in
   List.fold_left helper env funcs
+
 
 let program program =
   let init_print = FuncMap.add "print" (type_match init_env Na) init_env.func_tbl in
@@ -362,7 +353,7 @@ let program program =
 
   let rec pass_envs env = function
        | [] -> []
-(*        | [s] -> let s = scope_stmt env s in [s] *)
+       | [s] -> let s = scope_stmt env s in [s]
        | hd :: tl ->  let s = scope_stmt env hd in
                       (pass_envs (snd s) tl)@[s] in
 
