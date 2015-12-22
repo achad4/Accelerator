@@ -1,0 +1,8 @@
+a <- matrix(c(1,1,1,2,2,2,3,3,3), nrow=3,ncol=3)
+b <- matrix(c(1,1,1,2,2,2,3,3,3), nrow=3,ncol=3)
+c <- a + b
+for(i in 0:2){
+    for(j in 0:2){
+        print(c[i][j])
+    }
+}
