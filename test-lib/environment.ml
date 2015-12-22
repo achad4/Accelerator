@@ -42,8 +42,8 @@ type expr =
   | Eq of expr * expr
   | Neq of expr * expr
   | Add of expr * expr
-  | MatrixAdd of expr * expr
-  | MatrixMult of expr * expr
+(*   | MatrixAdd of expr * expr
+  | MatrixMult of expr * expr *)
   | Sub of expr * expr
   | Mult of expr * expr
   | Div of expr * expr
@@ -52,8 +52,7 @@ type expr =
   | FuncCall of string * expr list 
   | Assign of string * expr
   | Update of string * expr
-(*   | MatrixAssign of string * expr
- *)  | And of expr * expr
+  | And of expr * expr
   | Or of expr * expr
   | Not of expr
   | FormalDef of string * expr * t

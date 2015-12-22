@@ -48,8 +48,8 @@ type cexpr_detail =
    | FSub of cexpr_detail * cexpr_detail * ct
    | FMult of cexpr_detail * cexpr_detail * ct
    | FDiv of cexpr_detail * cexpr_detail * ct
-   | MatrixAdd of cexpr_detail * cexpr_detail * ct
-   | MatrixMult of cexpr_detail * cexpr_detail * ct
+(*    | MatrixAdd of cexpr_detail * cexpr_detail * ct
+   | MatrixMult of cexpr_detail * cexpr_detail * ct *)
    | Expo of cexpr_detail * cexpr_detail * ct
    | Mod of cexpr_detail * cexpr_detail * ct
    | FuncCall of string * cexpr_detail list * ct
@@ -167,8 +167,8 @@ let rec cexpr_detail = function
  | Sast.FSub(e1, e2, t) -> Sub(cexpr_detail e1, cexpr_detail e2, Float)
  | Sast.FMult(e1, e2, t) -> Mult(cexpr_detail e1, cexpr_detail e2, Float)
  | Sast.FDiv(e1, e2, t) -> Div(cexpr_detail e1, cexpr_detail e2, Float) *)
- | Sast.MatrixAdd(e1, e2, t) ->  MatrixAdd(cexpr_detail e1, cexpr_detail e2, Matrix)
- | Sast.MatrixMult(e1, e2, t) -> MatrixMult(cexpr_detail e1, cexpr_detail e2, Matrix)
+(*  | Sast.MatrixAdd(e1, e2, t) ->  MatrixAdd(cexpr_detail e1, cexpr_detail e2, Matrix)
+ | Sast.MatrixMult(e1, e2, t) -> MatrixMult(cexpr_detail e1, cexpr_detail e2, Matrix) *)
  | Sast.Expo(e1, e2, t) -> Expo(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.Mod(e1, e2, t) -> Mod(cexpr_detail e1, cexpr_detail e2, Int)
  | Sast.FuncCall(id, el, t) -> let ct = type_match t in

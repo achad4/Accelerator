@@ -249,7 +249,7 @@ let rec expr = function
             )
         else
             failwith "Type incompatibility" *)
-  | Environment.MatrixMult( e1, e2), env ->
+(*   | Environment.MatrixMult( e1, e2), env ->
         let e1 = expr (e1, env)
         and e2 = expr (e2, env) in
 
@@ -261,7 +261,7 @@ let rec expr = function
                 MatrixMult((fst e1), (fst e2), t1), t1
             )
         else
-            failwith "Type incompatibility"
+            failwith "Type incompatibility" *)
   | Environment.Sub( e1, e2 ), env ->
           let e1 = expr (e1, env)
           and e2 = expr (e2, env) in
@@ -291,7 +291,7 @@ let rec expr = function
           else if ( t1 == t2 && t1 == Matrix) then
             (
 
-                MatrixMult((fst e1), (fst e2), t1), t1
+                Mult((fst e1), (fst e2), t1), Matrix
             )
           else
               failwith "Type incompatibility"

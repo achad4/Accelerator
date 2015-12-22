@@ -98,8 +98,14 @@ let rec compile_detail = function
                            (compile_detail e2) ^ ") != 0)"
   | Cast.Div(e1, e2, t) -> (compile_detail e1) ^ " / " ^ 
                            (compile_detail e2)
-  | Cast.Mult(e1, e2, t) -> (compile_detail e1) ^ " * " ^ 
-                            (compile_detail e2)
+  | Cast.Mult(e1, e2, t) -> if(t = Matrix) then (
+                               let mid1 = string_of_matrix_assign e1 in
+                              let mid2 = string_of_matrix_assign e2 in
+                              "matrix_mult("^mid1^", "^ mid2 ^ ")"
+                            )else(
+                                (compile_detail e1) ^ " + " ^
+                                (compile_detail e2)
+                              )
   | Cast.Sub(e1, e2, t) -> (compile_detail e1) ^ " - " ^ 
                            (compile_detail e2) 
   | Cast.Add(e1, e2, t) -> if(t = Matrix) then (
