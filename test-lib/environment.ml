@@ -43,6 +43,7 @@ type expr =
   | Neq of expr * expr
   | Add of expr * expr
   | MatrixAdd of expr * expr
+  | MatrixMult of expr * expr
   | Sub of expr * expr
   | Mult of expr * expr
   | Div of expr * expr
@@ -201,6 +202,7 @@ let rec scope_expr_detail env = function
       let new_env = assign_current_scope s t env in
       if (t = Matrix) then
         (
+            print_endline "MatrixAssign environment";
             MatrixAssign(s,fst(e1)), new_env
         )
     else
@@ -218,22 +220,6 @@ let rec scope_expr_detail env = function
       let e1 = scope_expr_detail env head in
       let t = type_match env (fst e1) in
       let new_env = assign_current_scope s t env in
-(* =======
-    let new_env = assign_current_scope s t env in
-    if (t = Matrix) then
-        (
-            MatrixAssign(s,fst(e1)), new_env
-        )
-    else
-        (
-            Assign(s,fst(e1)), new_env
-        )
-  | Ast.Vector(s, el) ->
-(*       let new_env = assign_current_scope s (type_match t) env in
- *)   
-      (* let t = type_match env (fst e1) in *)
-      let new_env = assign_current_scope s Vector env in
->>>>>>> 52fc5c1e2c5a6c0a769bfe51a8d2f0f605ec1010 *)
       let helper e = fst (scope_expr_detail env e) in
       Vector(s, List.map helper el), new_env
   | Ast.VectAcc(s, expr) -> VectAcc(s, fst(scope_expr_detail env expr)), env
@@ -253,7 +239,6 @@ let rec scope_expr_detail env = function
       let t = type_match env e1 in
       if (t = Matrix) then
       (
-        print_endline "MatrixAssign";
         MatrixAdd(e1, e2), v2
       )
       else
@@ -267,7 +252,15 @@ let rec scope_expr_detail env = function
   | Ast.Mult(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1 in
       let e2, v2 = scope_expr_detail v1 expr2 in
-      Mult(e1, e2), env
+      let t = type_match env e1 in
+      if (t = Matrix) then
+      (
+        MatrixMult(e1, e2), v2
+      )
+      else
+      (
+        Mult(e1, e2), v2
+      )
   | Ast.Div(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1 in
       let e2, v2 = scope_expr_detail v1 expr2 in

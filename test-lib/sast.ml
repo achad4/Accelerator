@@ -31,6 +31,7 @@ type expr_detail =
   | StrNeq of expr_detail * expr_detail * t
   | Add of expr_detail * expr_detail * t
   | MatrixAdd of expr_detail * expr_detail * t
+  | MatrixMult of expr_detail * expr_detail * t
   | Sub of expr_detail * expr_detail  * t
   | Mult of expr_detail * expr_detail * t
   | Div of expr_detail * expr_detail * t
@@ -58,11 +59,11 @@ type expression =
   | SFMult of expression * expression * t
   | SFDiv of expression * expression * t
   | SMatrixAdd of expression * expression * t
+  | SMatrixMult of expression * expression * t
   | Sdiv of expression * expression * t
   | Sexpo of expression * expression * t
   | Smod of expression * expression * t
   | SfuncCall of expression list * t
-  | Sassign of expression * t
   | Sand of expression * expression * t
   | Sor of expression * expression * t
   | Snot of expression * t
@@ -101,6 +102,7 @@ let rec expr = function
         let e1 = expr (e, env) in
         Update(id, fst e1, snd e1), snd e1
   | Environment.MatrixAssign(id,e), env ->
+        print_endline "MatrixAssign sast";
         let e1 = expr(e, env) in
         MatrixAssign(id, fst e1, snd e1), snd e1
   | Environment.IntLit(c), env -> IntLit(c), Int
@@ -231,15 +233,28 @@ let rec expr = function
         else
             failwith "Type incompatibility"
 	| Environment.MatrixAdd( e1, e2), env ->
-		let e1 = expr (e1, env)
-		and e2 = expr (e2, env) in
+    		let e1 = expr (e1, env)
+    		and e2 = expr (e2, env) in
 
-		let _, t1 = e1
-		and _, t2 = e2 in
+    		let _, t1 = e1
+    		and _, t2 = e2 in
 
-		if (t1 == t2 && (t1 == Matrix)) then
+    		if (t1 == t2 && (t1 == Matrix)) then
             (
                 MatrixAdd((fst e1), (fst e2), t1), t1
+            )
+        else
+            failwith "Type incompatibility"
+  | Environment.MatrixMult( e1, e2), env ->
+        let e1 = expr (e1, env)
+        and e2 = expr (e2, env) in
+
+        let _, t1 = e1
+        and _, t2 = e2 in
+
+        if (t1 == t2 && (t1 == Matrix)) then
+            (
+                MatrixMult((fst e1), (fst e2), t1), t1
             )
         else
             failwith "Type incompatibility"
@@ -264,13 +279,18 @@ let rec expr = function
 
           let _, t1 = e1
           and _, t2 = e2 in
-          
-	if (t1 == t2 && (t1 == Int || t1 == Float)) then
-              (
-              Mult((fst e1),(fst e2), t1), t1
-              )
+
+          if (t1 == t2 && (t1 == Int || t1 == Float)) then
+            (
+              Mult((fst e1), (fst e2), t1), t1
+            )
+          else if ( t1 == t2 && t1 == Matrix) then
+            (
+
+                MatrixMult((fst e1), (fst e2), t1), t1
+            )
           else
-              failwith "Type incompatability"
+              failwith "Type incompatibility"
 
   | Environment.Div( e1, e2 ), env ->
           let e1 = expr (e1, env)
