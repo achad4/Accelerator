@@ -58,7 +58,7 @@ func_def:
 
 func_stmt:
   | stmt                                          { $1 }
-  | RETURN expr DLIN                              { Return($2) }
+  | RETURN LPAREN expr RPAREN DLIN                              { Return($3) }
 
 
 expr:

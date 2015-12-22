@@ -47,7 +47,7 @@ runTest "ifElseTest"
 runTest "forTest"
 runTest "matrixTest"
 runTest "stringTest"
-runTest "func1Test"
+runTest "funcTest"
 runTest "eqNeqTest"
 runTest "whileTest"
 

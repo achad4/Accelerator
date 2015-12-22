@@ -189,15 +189,13 @@ let rec scope_expr_detail env = function
     let old_t = find_type_top s env in
 
    (*  No new assignment necessary *)
-    if (old_t == Na || old_t != t) then
+    if (old_t == Na (* || old_t != t *)) then
       (
-            print_endline "assign"; print_endline s;
     let new_env = assign_current_scope s t env in
       Assign(s, fst(e1)), new_env
     )
-    else (print_endline "update";print_endline s;
+    else (
       Update(s, fst(e1)), env
-
     )
   | Ast.Vector(s, el) ->
       let head = List.hd el in
@@ -308,7 +306,6 @@ let scope_func env = function
       let new_env = init_formals env el in
       let block, new_env = scope_stmt new_env stmt in
       let ret_type = (type_of_stmt new_env block) in
-      print_endline "heyyy";
       let helper2 e = fst (scope_expr_detail new_env e) in
       
       (* Add function formals to env *)
