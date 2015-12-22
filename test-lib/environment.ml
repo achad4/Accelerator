@@ -25,7 +25,7 @@ type t =
   | Float
   | Bool
   | Vector
-  | Matrix
+  | Matrix 
   | Na
 
 type expr =
@@ -99,8 +99,8 @@ let rec type_match env = function
   | FloatLit(f) -> Float
   | BoolLit(b) -> Bool
   | Na -> Na
-  | Matrix(a,b,c,d) -> Matrix
-  | Vector(a,b) -> Vector
+  | Matrix(s,el,e1,e2) -> Matrix
+  | Vector(s,el) -> Vector
   | Id(id) -> find_type id env
   | FormalDef(id, e, t) -> type_match env e
   | FuncCall(s, el) ->
@@ -181,15 +181,15 @@ let rec scope_expr_detail env = function
  *)   
       let head = List.hd el in
       let e1 = scope_expr_detail env head in
-      let t = type_match env (fst e1) in
-      let new_env = assign_current_scope s t env in
+      (* let t = type_match env (fst e1) in *)
+      let new_env = assign_current_scope s Vector env in
       let helper e = fst (scope_expr_detail env e) in
       Vector(s, List.map helper el), new_env
   | Ast.VectAcc(s, expr) -> VectAcc(s, fst(scope_expr_detail env expr)), env
   | Ast.Matrix(s, el, e1, e2) ->
       let head = List.hd el in
-      let mtype = type_match env (fst (scope_expr_detail env head)) in
-      let new_env = assign_current_scope s mtype env in
+(*       let mtype = type_match env (fst (scope_expr_detail env head)) in
+ *)      let new_env = assign_current_scope s Matrix env in
       let helper e = fst (scope_expr_detail env e) in
       Matrix(s, List.map helper el, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), new_env
   | Ast.MatrixAcc(s, e1, e2) -> 
@@ -205,7 +205,15 @@ let rec scope_expr_detail env = function
   | Ast.Add(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1 in
       let e2, v2 = scope_expr_detail v1 expr2 in
-      Add(e1, e2), v2
+      let t = type_match env e1 in
+      if (t = Matrix) then
+      (
+        MatrixAdd(e1, e2), v2
+      )
+      else
+      (
+        Add(e1, e2), v2
+      )
   | Ast.Sub(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1 in
       let e2, v2 = scope_expr_detail v1 expr2 in

@@ -65,7 +65,19 @@ let rec compile_detail = function
   | Cast.Assign(id, e, t) -> 
           let ty = (string_of_ctype t) in
           if (ty = "Matrix") then
-              raise (UnassignedVarException "matrix detected")
+          (
+                let ty = (Cast.string_of_ctype t) in
+                (* make sure we save our matrix output to temp *) 
+                (compile_detail e) ^
+                (* get how big temp is right now *)
+                "int rows = temp.size();\n" ^
+                "vector<vector<" ^ty^ "> " ^ id ^ ";\n" ^
+                "for(int i = 0; i < rows; i++){\n" ^
+                "\t" ^ "vector<" ^ty^ "> row (temp[i]);\n" ^
+                "\t" ^ id ^ ".push_back(row);\n" ^
+                "}"    
+              (* raise (UnassignedVarException "matrix detected") *)
+            )
           else
               ty ^ " " ^ id ^ " = " ^ (compile_detail e)
   | Cast.MatrixAssign(id, e, t) ->
