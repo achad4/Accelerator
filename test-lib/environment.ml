@@ -270,7 +270,6 @@ let rec scope_stmt env = function
 
 let scope_func env = function
   | Ast.FunctionDef(str, el, stmt) ->
-      print_endline ("scope_func: " ^ str);
       (* let init_env = assign_current_scope str Na (push_env_scope env) in *)
       (* Initialize formal arguments *)
       let init_formals env1 forms =
@@ -301,6 +300,7 @@ let run_funcs env funcs =
   let helper henv hfuncs = snd (scope_func henv hfuncs) in
   List.fold_left helper env funcs
 
+
 let program program =
   let init_print = FuncMap.add "print" (type_match init_env Na) init_env.func_tbl in
   let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk init_print init_env.func_tbl_formals in
@@ -308,8 +308,12 @@ let program program =
   let funcs_rev = List.rev (fst program) in
   let stmts_rev = List.rev (snd program) in
 
-  let new_env1 = run_funcs init_env funcs_rev in 
-  let new_env2 = run_stmts new_env1 stmts_rev in
+  let new_env1 = run_funcs init_env funcs_rev in
+
+  (*don't want things in function's scopes to be able to be accessed outside*)
+  let init_print = FuncMap.add "print" (type_match init_env Na) init_env.func_tbl in
+  let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk init_print init_env.func_tbl_formals in 
+  let new_env2 = run_stmts init_env stmts_rev in
 
   let helper1 env e = (scope_func env e) in
   let helper2 env e = (scope_stmt env e) in
