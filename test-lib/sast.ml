@@ -138,22 +138,20 @@ let rec expr = function
           failwith "nrow and ncol must be integers"
         else
           (
-
-            Matrix(s, (List.map helper v), helper nr , helper nc, vtype), vtype
+            Matrix(s, (List.map helper v), helper nr , helper nc, vtype), Matrix
           )  
-  | Environment.MatrixAcc(s, e1, e2, t), env ->
+  | Environment.MatrixAcc(s, e1, e2), env ->
         let ed1 = expr (e1, env) in
         let ed2 = expr (e2, env) in
         let t1 = snd ed1 in
         let t2 = snd ed2 in
         if (t1 = Int && t2 = Int) then
         (
-(*           let m_type = Environment.find_type s env in 
- *)
+          let m_type = Environment.find_type s env in 
           MatrixAcc(s,
                           fst ed1,
                           fst ed2,
-                          t), t
+                          m_type), m_type
         )
         else
             failwith "Type incompatibility"
@@ -165,9 +163,11 @@ let rec expr = function
           if (print_length != 1) then
             failwith "print only takes one argument"
           else (
+
             let print_arg, print_arg_type = expr (List.hd el, env) in
+
             if(print_arg_type = Matrix) then (
-              PrintMatrixCall(print_arg, print_arg_type), Na
+               PrintMatrixCall(print_arg, print_arg_type), Na
             ) else(
               PrintCall(print_arg, print_arg_type), Na
             )

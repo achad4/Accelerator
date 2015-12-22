@@ -38,7 +38,7 @@ type expr =
   | Vector of string * expr list
   | VectAcc of string * expr
   | Matrix of string * expr list * expr * expr
-  | MatrixAcc of string * expr * expr * t
+  | MatrixAcc of string * expr * expr
   | Eq of expr * expr
   | Neq of expr * expr
   | Add of expr * expr
@@ -112,7 +112,7 @@ let rec type_match env = function
         FuncMap.find s env.func_tbl
       else
         failwith "Function does not exist"
-  | _ -> Na
+  | _ -> Matrix
 
 let find_type_top id env =
   let rec search_scope_lvl lvl =
@@ -186,9 +186,8 @@ let rec scope_expr_detail env = function
   | Ast.FloatLit(f) -> FloatLit(f), env
   | Ast.StringLit(s) -> StringLit(s) , env
   | Ast.Matrix(s, el, e1, e2) ->
-      let head = List.hd el in
-       let mtype = type_match env (fst (scope_expr_detail env head)) in
-       let new_env = assign_current_scope s mtype env in
+(*    let mtype = type_match env (fst (scope_expr_detail env head)) in
+ *)   let new_env = assign_current_scope s Matrix env in
       let helper e = fst (scope_expr_detail env e) in
       Matrix(s, List.map helper el, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), new_env
   | Ast.Assign(s,e) ->
@@ -224,8 +223,7 @@ let rec scope_expr_detail env = function
       Vector(s, List.map helper el), new_env
   | Ast.VectAcc(s, expr) -> VectAcc(s, fst(scope_expr_detail env expr)), env
   | Ast.MatrixAcc(s, e1, e2) -> 
-      let m_type = find_type s env in 
-      MatrixAcc(s, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2), m_type), env
+      MatrixAcc(s, fst(scope_expr_detail env e1), fst(scope_expr_detail env e2)), env
   | Ast.Eq(expr1,expr2) ->
       let e1, v1 = scope_expr_detail env expr1 in
       let e2, v2 = scope_expr_detail v1 expr2 in
@@ -347,8 +345,8 @@ let run_funcs env funcs =
 
 let program program =
   let init_print = FuncMap.add "print" (type_match init_env Na) init_env.func_tbl in
-  let init_print = FuncMap.add "print_matrix" (type_match init_env Na) init_env.func_tbl in
-  let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk init_print init_env.func_tbl_formals in
+(*   let init_print = FuncMap.add "print_matrix" (type_match init_env Na) init_env.func_tbl in
+ *)  let init_env = reassign_symb_tbl_stk init_env.symb_tbl_stk init_print init_env.func_tbl_formals in
 
   let funcs_rev = List.rev (fst program) in
   let stmts_rev = List.rev (snd program) in

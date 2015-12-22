@@ -55,7 +55,7 @@ let rec compile_detail = function
           m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
                                 id ^ "(" ^ (String.concat ", " (List.map helper el)) ^ ")"
-  | Cast.PrintCall(e, t) ->"cout << " ^ (compile_detail e) ^ ";\n" ^ 
+  | Cast.PrintCall(e, t) -> "cout << " ^ (compile_detail e) ^ ";\n" ^ 
                             "cout << endl"
   | Cast.PrintMatrixCall(e, t) -> "print_matrix("^ (compile_detail e) ^")"
  
@@ -223,11 +223,11 @@ let compile cast =
    "#include<string>\n" ^
    "#include<string.h>\n" ^
    "using namespace std;\n" ^
-   "template<typename t>
-   vector<vector<t> > matrix_add(vector<vector<t> > a, vector<vector<t> > b){
-       vector<vector<t> > c;
+   "
+   vector<vector<int> > matrix_add(vector<vector<int> > a, vector<vector<int> > b){
+       vector<vector<int> > c;
        for(int i = 0; i < a.size(); i++){
-           vector<t> row;
+           vector<int> row;
             for(int j = 0; j < a[0].size(); j++){
                 row.push_back(a[i][j] + b[i][j]);
             }
@@ -255,9 +255,7 @@ let compile cast =
         }
         return c;
     }
-
-   template<typename t>
-   void print_matrix(vector<vector<t> > a){
+   void print_matrix(vector<vector<int> > a){
        for(int i = 0; i<a.size(); i++){
            cout<<endl;
            for(int j = 0; j<a[0].size(); j++){
