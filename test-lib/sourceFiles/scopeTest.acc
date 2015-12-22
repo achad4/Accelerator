@@ -1,9 +1,8 @@
-if(true){
+if (false) {
 a <- 5
 print(a)
 }
-else{
-b <- 6
-print(b)
+else {
+a <- 6
 print(a)
 }

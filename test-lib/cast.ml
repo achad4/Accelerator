@@ -210,7 +210,6 @@ let rec stmt = function
 
 let rec add_return = function
   | Cblock(sl, t) ->      
-                          let sl = sl in
                           let last_stmt = List.nth sl (List.length sl - 1) in
                           let sl = List.tl (List.rev sl) in
                           let sl = List.rev sl in

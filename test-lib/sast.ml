@@ -87,7 +87,7 @@ type function_definition =
 
 let rec type_of_stmt = function
   | Sstmt(e,t) -> t
-  | Sblock(sl, t) -> let last_stmt = List.nth sl (List.length sl - 1) in
+  | Sblock(sl, t) -> let last_stmt = List.nth (List.rev sl) (List.length sl - 1) in
                      type_of_stmt last_stmt
   | Sif(e,s1,s2,t) -> t
   | Sfor(s1,e1,e2,s2,t) -> t
@@ -96,9 +96,8 @@ let rec type_of_stmt = function
 
 
 let rec expr = function
-  | Environment.Id (s), env -> print_endline "id here"; Id(s), Environment.find_type s env
+  | Environment.Id (s), env -> Id(s), Environment.find_type s env
   | Environment.Assign(id, e), env ->
-        print_endline "assigning sast"; print_endline id;
         let e1 = expr (e, env) in
         (* let new_env = assign_current_scope id (snd e1) env in *)
         Assign(id, fst e1, snd e1), snd e1
@@ -345,7 +344,6 @@ let rec stmt = function
   | Environment.Block( sl ), env -> 
           (* let helper s = stmt (s, env) in *)
          (*  let l = List.map helper sl in *)
-          print_endline "block";
           let rec pass_envs env = function
                  | hd :: tl ->  let s = stmt (hd, env) in
                                 let passed = pass_envs env (tl) in

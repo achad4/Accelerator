@@ -10,7 +10,7 @@ bar <- function(i=0) {
 }
 baz <- function() {
 	print("hello")
-	"world"
+	return("world")
 }
 a <- foo(4, 1.1)
 print(a)
