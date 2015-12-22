@@ -24,8 +24,7 @@ type expr_detail =
   | VectAcc of string * expr_detail * t
   | Matrix of string * expr_detail list * expr_detail * expr_detail * t
   | MatrixAcc of string * expr_detail * expr_detail * t
-(*   | MatrixAssign of string * expr_detail * t
- *)  | Eq of expr_detail * expr_detail * t
+  | Eq of expr_detail * expr_detail * t
   | Neq of expr_detail * expr_detail * t
   | StrEq of expr_detail * expr_detail * t
   | StrNeq of expr_detail * expr_detail * t
@@ -72,7 +71,6 @@ type expression =
 type statement = 
   | Sstmt of expression * t
   | Sblock of statement list * t
-(*   | SReturnBlock of statement list * statement * t *)
   | Sif of expression * statement * statement * t
   | Sfor of string * expression * expression * statement * t
   | Swhile of expr_detail * statement * t
@@ -147,7 +145,8 @@ let rec expr = function
         let t2 = snd ed2 in
         if (t1 = Int && t2 = Int) then
         (
-          let m_type = Environment.find_type s env in 
+          let m_type = Environment.find_type (s^"type") env in 
+
           MatrixAcc(s,
                           fst ed1,
                           fst ed2,
