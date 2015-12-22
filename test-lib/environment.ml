@@ -172,7 +172,7 @@ let rec scope_expr_detail env = function
   | Ast.FloatLit(f) -> FloatLit(f), env
   | Ast.StringLit(s) -> StringLit(s) , env
   | Ast.Matrix(s, el, e1, e2) ->
-      print_endline "matrix";
+      print_endline "Matrix";
 (*    let mtype = type_match env (fst (scope_expr_detail env head)) in
  *)   let new_env = assign_current_scope s Matrix env in
       let helper e = fst (scope_expr_detail env e) in
@@ -183,7 +183,7 @@ let rec scope_expr_detail env = function
     let new_env = assign_current_scope s t env in
     if (t = Matrix) then
         (
-            print_endline "matrix assign";
+            print_endline "MatrixAssign";
             MatrixAssign(s,fst(e1)), new_env
         )
     else
@@ -214,6 +214,7 @@ let rec scope_expr_detail env = function
       let t = type_match env e1 in
       if (t = Matrix) then
       (
+        print_endline "MatrixAssign";
         MatrixAdd(e1, e2), v2
       )
       else

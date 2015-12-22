@@ -33,8 +33,8 @@ let rec compile_detail = function
   | Cast.VectAcc(e1, e2, t) ->
           e1 ^ "[" ^ compile_detail e2 ^ "-1]"
   | Cast.Matrix(s, v, nr, nc, t) ->
-(*           "matrix c++"
- *)          let helper e = compile_detail e in
+           "matrix c++"
+        (* let helper e = compile_detail e in
           let holder = s ^ "Holder" in
           let count = s ^ "count" in
           let nr_str = compile_detail nr in
@@ -51,7 +51,7 @@ let rec compile_detail = function
           "for(int i=0; i<" ^ nr_str ^ "; i++) { \n" ^
           matrix ^ "[i].resize(" ^ nc_str ^ ");\n" ^
           "for(int j=0; j<" ^ nc_str ^ "; j++) { \n" ^
-          matrix ^ "[i][j] = " ^ holder ^ "[" ^ count ^ "++];\n}\n}"
+          matrix ^ "[i][j] = " ^ holder ^ "[" ^ count ^ "++];\n}\n}" *)
   | Cast.MatrixAcc(m, r, c, t) ->
           m ^ "[" ^ compile_detail r ^ "][" ^ compile_detail c ^ "]"
   | Cast.FuncCall(id, el, t) -> let helper e = compile_detail e in
@@ -67,15 +67,15 @@ let rec compile_detail = function
           let ty = (string_of_ctype t) in
           ty ^ " " ^ id ^ " = " ^ (compile_detail e)
   | Cast.MatrixAssign(id, e, t) ->
-(*             "matrix assign c++"
- *)           let ty = (Cast.string_of_ctype t) in
+           "matrix assign c++"
+(*          let ty = (Cast.string_of_ctype t) in
           "\n\n\n\n MATRIX ASSIGN \n\n\n " ^
-          "int rows = temp.size();\n" ^
+         "int rows = temp.size();\n" ^
           "vector<vector<" ^ty^ "> " ^ id ^ ";\n" ^
           "for(int i = 0; i < rows; i++){\n" ^
           "\t" ^ "vector<" ^ty^ "> row (temp[i]);\n" ^
           "\t" ^ id ^ ".push_back(row);\n" ^
-          "};"  
+          "};"   *)
               
   | Cast.Mod(e1, e2, t) -> (compile_detail e1) ^ " % " ^ 
                            (compile_detail e2) 
@@ -115,12 +115,9 @@ let rec compile_detail = function
           let row2 = mid2 ^ "row" in
           let col1 = mid1 ^ "col" in
           let col2 = mid2 ^ "col" in
-
-          mid1
-
          (* e1 and e2 should be strings representing our matrix ids *)
           
-         (*  "\n\n\n\n MATRIX ADD \n\n\n" ^
+          "\n\n\n\n MATRIX ADD \n\n\n" ^
           "int " ^ row1 ^ " = " ^ mid1 ^ ".size();\n" ^
           "int " ^ row2 ^ " = " ^ mid2 ^ ".size();\n" ^
           "if (" ^ row1 ^ " != " ^ row2 ^ "){\n" ^
@@ -137,7 +134,7 @@ let rec compile_detail = function
           "\t\t" ^ "row.push_back("^mid1^"[i][j] + "^mid2^"[i][j];\n" ^
           "\t}\n" ^
           "\t" ^ "temp.push_back(row);\n" ^
-          "}" *)
+          "}"
 
   | Cast.FormalDef(id, e, t) -> Cast.string_of_ctype t ^ " " ^ id ^ "=" ^ (compile_detail e)
 

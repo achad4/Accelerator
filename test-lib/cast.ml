@@ -135,6 +135,7 @@ let rec cexpr_detail = function
         VectAcc(s, cexp1, type_match t)
  | Sast.NaLit(t) -> Na("Void", type_match t)
  | Sast.Matrix(s, v, nr, nc, t) -> let ct = type_match t in
+        print_endline "cast Matrix hit";
         Matrix(s, List.map cexpr_detail v, cexpr_detail nr, cexpr_detail nc, ct)
  | Sast.MatrixAcc(s, e1, e2, t) ->
         let cexp1 = cexpr_detail e1 in
