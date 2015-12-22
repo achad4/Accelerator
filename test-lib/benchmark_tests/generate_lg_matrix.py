@@ -4,12 +4,14 @@ import sys
 import numpy as np
 from subprocess import call
 
+# Random vector for genreating matrices
 def random_vector(size, max_val):
 	a = []
 	for i in range(0,size):
 		a.append(random.randrange(0,max_val))
 	return(a)
 
+# Create input for accelerator's matrix assignment
 def generate_matrix_string(id, rvec, r, c):
 	mat = id + " <- matrix(c("
 	for i in range(0, r*c):
@@ -19,6 +21,7 @@ def generate_matrix_string(id, rvec, r, c):
 			mat += str(rvec[len(rvec)-1]) + "), nrow=" + str(r) + ",ncol=" + str(c) + ")\n"
 	return(mat)
 
+# Use NumPy to simulate a random matrix multiplication problem
 def elapsed_matrix_op_time(r1, c1, r2, c2, max_val):
 	py_start = time.clock()
 	B = np.random.randn(r1,c1)
@@ -33,11 +36,11 @@ def elapsed_matrix_op_time(r1, c1, r2, c2, max_val):
 	py_fin = time.clock()
 	py_elpased = py_fin - py_start
 
-	print("Python run time: " + str(py_elpased) + " seconds")
+	print("Python run time: " + str(py_elpased) + " seconds\n")
 
+# Testing Accelerator's speed
 def test_matrices(id1, r1, c1, id2, r2, c2, max_val):
 	
-	print "Testing multiplication of (n x n) and (n x n) matrices where n=" + str(r1)
 	f_in = open("acceleratorSource.acc", "w")
 	f_out = open("acceleratorTest.cpp", "w")
 	exc = open("acceleratorTest", "w")
@@ -69,7 +72,7 @@ def test_matrices(id1, r1, c1, id2, r2, c2, max_val):
 	acc_end = time.clock()
 	acc_elapsed = acc_end - acc_start
 
-	print("Accelerator run time: " + str(acc_elapsed) + " seconds")
+	print("\nAccelerator run time: " + str(acc_elapsed) + " seconds")
 
 	elapsed_matrix_op_time(r1, c1, r2, c2, max_val)
 
@@ -77,7 +80,6 @@ def test_matrices(id1, r1, c1, id2, r2, c2, max_val):
 	f_out.close()
 	exc.close()
 	output.close()
-
 
 if len(sys.argv) != 2:
 	print '\nMissing argument n (# of rows / cols for each matrix operand)\n'

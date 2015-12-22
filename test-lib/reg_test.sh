@@ -9,7 +9,19 @@ failures=0
 
 runTest() {
 	./acc < sourceFiles/$1.acc > compiledCpp/$1.cpp
-	# g++ -o executables/$1 compiledCpp/$1.cpp
+	g++ -o executables/$1 compiledCpp/$1.cpp
+	./executables/$1 > output/$1.txt
+	count+=1
+	if diff "output/"$1".txt" "expected/"$1"Expected.txt" > /dev/null; then
+		echo $1 passed
+	else
+	echo $1 failed
+	failures+=1
+	fi
+}
+
+runTestOpenMP() {
+	./acc < sourceFiles/$1.acc > compiledCpp/$1.cpp
 	clang-omp++ -o executables/$1 compiledCpp/$1.cpp -fopenmp
 	./executables/$1 > output/$1.txt
 	count+=1
@@ -25,6 +37,15 @@ if [ $# -eq 1 ]
   then
     runTest $1
     exit
+fi
+
+if [ $# -eq 2 ]
+	then
+	if [ $2 == "--openmp" ]
+		then
+			runTestOpenMP $1
+			exit
+	fi
 fi
 
 runTest "helloWorldTest"
